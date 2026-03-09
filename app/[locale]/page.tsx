@@ -20,7 +20,7 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
       <CaseStudies dict={dict.caseStudies} />
       <About dict={dict.about} />
       <Contact dict={dict.contact} />
-      <Legal dict={dict.legal} locale={locale} />
+      <Legal dict={dict.legal} locale={locale} navDict={dict.nav} />
       <Footer dict={dict.common} navDict={dict.nav} locale={locale} />
     </main>
   )
