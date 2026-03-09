@@ -9,18 +9,19 @@ import { Contact } from '@/components/contact'
 import { Legal } from '@/components/legal'
 import { Footer } from '@/components/footer'
 
-export default function Home({ params }: { params: { locale: Locale } }) {
-  const dict = getDictionary(params.locale)
+export default async function Home({ params }: { params: Promise<{ locale: Locale }> }) {
+  const { locale } = await params
+  const dict = getDictionary(locale)
   return (
     <main className="min-h-screen bg-background">
-      <Hero dict={dict.hero} locale={params.locale} langDict={dict.language} />
+      <Hero dict={dict.hero} locale={locale} langDict={dict.language} />
       <TrustSignals dict={dict.trust} />
       <Services dict={dict.services} />
       <CaseStudies dict={dict.caseStudies} />
       <About dict={dict.about} />
       <Contact dict={dict.contact} />
-      <Legal dict={dict.legal} locale={params.locale} />
-      <Footer dict={dict.common} navDict={dict.nav} locale={params.locale} />
+      <Legal dict={dict.legal} locale={locale} />
+      <Footer dict={dict.common} navDict={dict.nav} locale={locale} />
     </main>
   )
 }
