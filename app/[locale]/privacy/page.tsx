@@ -2,13 +2,14 @@ import { type Locale } from "@/lib/i18n/config"
 import { getDictionary } from "@/lib/i18n/dictionaries"
 import { LegalPageLayout } from "@/components/legal-page-layout"
 
-export default function PrivacyPage({ params }: { params: { locale: Locale } }) {
-  const dict = getDictionary(params.locale)
+export default async function PrivacyPage({ params }: { params: Promise<{ locale: Locale }> }) {
+  const { locale } = await params
+  const dict = getDictionary(locale)
   const p = dict.privacy
   const lastUpdatedText = `${dict.common.lastUpdated}: March 8, 2026`
   const copyright = `© ${new Date().getFullYear()} Archaeopteris LLC. ${dict.common.copyright}`
   return (
-    <LegalPageLayout title={p.title} lastUpdated={lastUpdatedText} backToHome={dict.common.backToHome} locale={params.locale} privacyLabel={dict.nav.privacyPolicy} termsLabel={dict.nav.termsOfService} disclaimerLabel={dict.nav.disclaimer} copyright={copyright}>
+    <LegalPageLayout title={p.title} lastUpdated={lastUpdatedText} backToHome={dict.common.backToHome} locale={locale} privacyLabel={dict.nav.privacyPolicy} termsLabel={dict.nav.termsOfService} disclaimerLabel={dict.nav.disclaimer} copyright={copyright}>
       <section className="mb-10">
         <h2 className="text-2xl font-semibold text-foreground mb-4">{p.intro}</h2>
         <p className="text-muted-foreground leading-relaxed mb-4">{p.introText}</p>
