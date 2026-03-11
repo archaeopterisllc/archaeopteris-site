@@ -5,13 +5,13 @@ import type { Locale } from "@/lib/i18n/config"
 interface LegalPageLayoutProps {
   title: string
   lastUpdated: string
-  backToHome: string
+  backToHome?: string
   children: React.ReactNode
   locale: Locale
-  privacyLabel: string
-  termsLabel: string
-  disclaimerLabel: string
-  copyright: string
+  privacyLabel?: string
+  termsLabel?: string
+  disclaimerLabel?: string
+  copyright?: string
 }
 
 export function LegalPageLayout({ title, lastUpdated, backToHome, children, locale, privacyLabel, termsLabel, disclaimerLabel, copyright }: LegalPageLayoutProps) {

@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n/config"
 import { LegalPageLayout } from "@/components/legal-page-layout"
 
 export const metadata = {
@@ -5,9 +6,9 @@ export const metadata = {
   description: "Terms of Service for Archaeopteris LLC - Rules and guidelines for using our services.",
 }
 
-export default function TermsPage() {
+export default function TermsPage({ params }: { params: { locale: Locale } }) {
   return (
-    <LegalPageLayout title="Terms of Service" lastUpdated="March 8, 2026">
+    <LegalPageLayout locale={params.locale} title="Terms of Service" lastUpdated="March 8, 2026">
       <section className="mb-10">
         <h2 className="text-2xl font-semibold text-foreground mb-4">1. Acceptance of Terms</h2>
         <p className="text-muted-foreground leading-relaxed mb-4">
