@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n/config"
 import { LegalPageLayout } from "@/components/legal-page-layout"
 
 export const metadata = {
@@ -5,9 +6,9 @@ export const metadata = {
   description: "Disclaimer for Archaeopteris LLC - Important notices regarding our services and information.",
 }
 
-export default function DisclaimerPage() {
+export default function DisclaimerPage({ params }: { params: { locale: Locale } }) {
   return (
-    <LegalPageLayout title="Disclaimer" lastUpdated="March 8, 2026">
+    <LegalPageLayout locale={params.locale} title="Disclaimer" lastUpdated="March 8, 2026">
       <section className="mb-10">
         <h2 className="text-2xl font-semibold text-foreground mb-4">1. General Information</h2>
         <p className="text-muted-foreground leading-relaxed mb-4">

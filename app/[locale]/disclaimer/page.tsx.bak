@@ -1,0 +1,26 @@
+import { getDictionary } from "@/lib/i18n/dictionaries"
+import { LegalPageLayout } from "@/components/legal-page-layout"
+import type { Locale } from "@/lib/i18n/config"
+
+export default async function DisclaimerPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}) {
+  const { locale } = await params
+  const dict = getDictionary(locale)
+  const d = dict.disclaimer
+  const copyright = `© ${new Date().getFullYear()} Archaeopteris LLC. ${dict.common.copyright}`
+  return (
+    <LegalPageLayout title={d.title} lastUpdated={d.effectiveDate} backToHome={dict.common.backToHome} locale={locale} privacyLabel={dict.nav.privacyPolicy} termsLabel={dict.nav.termsOfService} disclaimerLabel={dict.nav.disclaimer} copyright={copyright}>
+      <section className="mb-10 p-4 border border-yellow-500/30 bg-yellow-500/5 rounded-lg"><p className="text-muted-foreground font-medium">{d.warning}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{d.general}</h2><p className="text-muted-foreground leading-relaxed">{d.generalText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{d.trading}</h2><p className="font-medium text-muted-foreground mb-2">{d.tradingImportant}</p><p className="text-muted-foreground leading-relaxed mb-4">{d.tradingWarning}</p><ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4 mb-4"><li>{d.tradingItem1}</li><li>{d.tradingItem2}</li><li>{d.tradingItem3}</li><li>{d.tradingItem4}</li></ul><h3 className="text-xl font-semibold text-foreground mb-2">{d.riskTitle}</h3><p className="text-muted-foreground leading-relaxed mb-4">{d.riskText}</p><h3 className="text-xl font-semibold text-foreground mb-2">{d.complianceTitle}</h3><p className="text-muted-foreground leading-relaxed">{d.complianceText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{d.software}</h2><p className="text-muted-foreground leading-relaxed mb-4">{d.softwareText}</p><ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4"><li>{d.softwareItem1}</li><li>{d.softwareItem2}</li><li>{d.softwareItem3}</li></ul></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{d.thirdParty}</h2><p className="text-muted-foreground leading-relaxed">{d.thirdPartyText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{d.noGuarantees}</h2><p className="text-muted-foreground leading-relaxed">{d.noGuaranteesText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{d.limitation}</h2><p className="text-muted-foreground leading-relaxed">{d.limitationText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{d.contactTitle}</h2><p className="text-muted-foreground leading-relaxed">{d.contactText}<br /><strong className="text-foreground">Email:</strong> {dict.common.email}</p></section>
+    </LegalPageLayout>
+  )
+}

@@ -1,0 +1,30 @@
+import { getDictionary } from "@/lib/i18n/dictionaries"
+import { LegalPageLayout } from "@/components/legal-page-layout"
+import type { Locale } from "@/lib/i18n/config"
+
+export default async function TermsPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}) {
+  const { locale } = await params
+  const dict = getDictionary(locale)
+  const t = dict.terms
+  const copyright = `© ${new Date().getFullYear()} Archaeopteris LLC. ${dict.common.copyright}`
+  return (
+    <LegalPageLayout title={t.title} lastUpdated={t.effectiveDate} backToHome={dict.common.backToHome} locale={locale} privacyLabel={dict.nav.privacyPolicy} termsLabel={dict.nav.termsOfService} disclaimerLabel={dict.nav.disclaimer} copyright={copyright}>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.acceptance}</h2><p className="text-muted-foreground leading-relaxed">{t.acceptanceText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.services}</h2><p className="text-muted-foreground leading-relaxed mb-4">{t.servicesText}</p><p className="text-muted-foreground leading-relaxed mb-2"><strong className="text-foreground">{t.tradingDivision}:</strong> {t.tradingText}</p><p className="text-muted-foreground font-medium mb-4">{t.tradingDisclaimer}</p><p className="text-muted-foreground leading-relaxed"><strong className="text-foreground">{t.devDivision}:</strong> {t.devText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.payment}</h2><p className="text-muted-foreground leading-relaxed">{t.paymentText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.clientResponsibilities}</h2><p className="text-muted-foreground leading-relaxed">{t.clientText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.ip}</h2><p className="text-muted-foreground leading-relaxed">{t.ipText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.confidentiality}</h2><p className="text-muted-foreground leading-relaxed">{t.confidentialityText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.warranty}</h2><p className="text-muted-foreground leading-relaxed">{t.warrantyText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.liability}</h2><p className="text-muted-foreground leading-relaxed">{t.liabilityText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.indemnification}</h2><p className="text-muted-foreground leading-relaxed">{t.indemnificationText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.termination}</h2><p className="text-muted-foreground leading-relaxed">{t.terminationText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.governing}</h2><p className="text-muted-foreground leading-relaxed">{t.governingText}</p></section>
+      <section className="mb-10"><h2 className="text-2xl font-semibold text-foreground mb-4">{t.contactTitle}</h2><p className="text-muted-foreground leading-relaxed">{t.contactText}<br /><strong className="text-foreground">Email:</strong> {dict.common.email}</p></section>
+    </LegalPageLayout>
+  )
+}
