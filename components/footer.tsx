@@ -17,19 +17,19 @@ export function Footer({ dict, navDict, locale }: FooterProps) {
               <div className="w-8 h-8 rounded-md bg-primary/20 border border-primary/30 flex items-center justify-center">
                 <span className="text-primary font-bold text-sm">A</span>
               </div>
-              <span className="text-sm font-medium text-foreground">{dict.companyName}</span>
+              <span className="text-sm font-medium text-foreground whitespace-nowrap">{dict.companyName}</span>
             </div>
-            <p className="text-sm text-muted-foreground">{dict.location}</p>
+            <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-md bg-rose-700/20 border border-rose-700/30 flex items-center justify-center"><span className="text-rose-700 font-bold text-sm">W</span></div><p className="text-sm text-muted-foreground whitespace-nowrap">{dict.location}</p></div>
             <a href={`mailto:${dict.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">{dict.email}</a>
           </div>
           <p className="text-sm text-muted-foreground text-center">© {new Date().getFullYear()} {dict.companyName}. {dict.copyright}</p>
           <nav className="flex items-center flex-wrap justify-center gap-x-6 gap-y-2">
-            <a href="#services" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.services}</a>
-            <a href="#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.about}</a>
-            <a href="#contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.contact}</a>
+            <a href={`/${locale}#services`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.services}</a>
+            <a href={`/${locale}#about`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.about}</a>
+            <a href={`/${locale}#contact`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.contact}</a>
             <a href={`/${locale}/privacy`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.privacyPolicy}</a>
             <a href={`/${locale}/terms`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.termsOfService}</a>
-            <a href={`/${locale}/disclaimer`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.disclaimer}</a>
+                <a href={`/${locale}/disclaimer`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.disclaimer}</a>
           </nav>
         </div>
       </div>
