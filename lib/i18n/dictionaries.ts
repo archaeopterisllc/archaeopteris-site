@@ -20,6 +20,7 @@ const dictionaries = {
       privacyPolicy: "Privacy Policy",
       termsOfService: "Terms of Service",
       disclaimer: "Disclaimer",
+      propFirmIndustry: "Prop Firm Industry",
     },
     // Hero
     hero: {

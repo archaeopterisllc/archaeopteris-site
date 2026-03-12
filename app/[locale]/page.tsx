@@ -8,12 +8,14 @@ import { About } from '@/components/about'
 import { Contact } from '@/components/contact'
 import { Legal } from '@/components/legal'
 import { Footer } from '@/components/footer'
+import { Navbar } from '@/components/navbar'
 
 export default async function Home({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params
   const dict = getDictionary(locale)
   return (
     <main className="min-h-screen bg-background">
+      <Navbar locale={locale} langDict={dict.language} navDict={dict.nav} />
       <Hero dict={dict.hero} locale={locale} langDict={dict.language} />
       <TrustSignals dict={dict.trust} />
       <Services dict={dict.services} />
