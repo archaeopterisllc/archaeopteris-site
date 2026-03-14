@@ -22,8 +22,7 @@ export function Footer({ dict, navDict, locale }: FooterProps) {
             <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-md bg-rose-700/20 border border-rose-700/30 flex items-center justify-center"><span className="text-rose-700 font-bold text-sm">W</span></div><p className="text-sm text-muted-foreground whitespace-nowrap">{dict.location}</p></div>
             <a href={`mailto:${dict.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">{dict.email}</a>
           </div>
-          <p className="text-xs text-muted-foreground/50 text-center mb-2">This website is currently under development. Services listed are planned future offerings and do not represent active services.</p>
-            <p className="text-sm text-muted-foreground text-center">© {new Date().getFullYear()} {dict.companyName}. {dict.copyright}</p>
+          <p className="text-sm text-muted-foreground text-center">© {new Date().getFullYear()} {dict.companyName}. {dict.copyright}</p>
           <nav className="flex items-center flex-wrap justify-center gap-x-6 gap-y-2">
             <a href={`/${locale}#services`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.services}</a>
             <a href={`/${locale}#about`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{navDict.about}</a>
