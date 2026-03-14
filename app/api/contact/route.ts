@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         <p><strong>Service:</strong> ${service}</p>
         <p><strong>Message:</strong> ${message}</p>
       `
-    }*/)
+    })*/
 
     return NextResponse.json({ success: true })
   } catch (error) {
