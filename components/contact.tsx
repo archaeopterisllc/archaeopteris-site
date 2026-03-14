@@ -19,20 +19,23 @@ export function Contact({ dict }: ContactProps) {
   const [errorMessage, setErrorMessage] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setStatus("loading")
-    setErrorMessage("")
+  e.preventDefault()
+  setStatus("loading")
+  setErrorMessage("")
+  try {
     const response = await fetch('/api/contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(formData)
-})
-
-if (!response.ok) throw new Error('Failed')
-setStatus('success')
-setFormData({ name: '', email: '', company: '', service: '', message: '' })
-
-
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    })
+    if (!response.ok) throw new Error('Failed')
+    setStatus('success')
+    setFormData({ name: '', email: '', company: '', service: '', message: '' })
+  } catch (err) {
+    setStatus('error')
+    setErrorMessage(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+  }
+}
   return (
     <section id="contact" className="py-24 bg-background">
       <div className="max-w-6xl mx-auto px-6">
