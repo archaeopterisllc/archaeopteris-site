@@ -27,7 +27,7 @@ export function Navbar({ locale, langDict, navDict }: NavbarProps) {
 
   const links = [
     { href: `/${locale}`, label: locale === "vi" ? "Trang chủ" : "Home" },
-    { href: `/${locale}/industry/vibecoding`, label: locale === "vi" ? "Công Nghệ Phần Mềm" : "Software Technology" },
+    { href: `/${locale}/industry/software-technology`, label: locale === "vi" ? "Công Nghệ Phần Mềm" : "Software Technology" },
     { href: `/${locale}/industry/propfirm`, label: locale === "vi" ? "Giao Dịch" : "Trading" },
   ]
 
