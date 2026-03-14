@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { Resend } from 'resend'
+/*import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
 
 const supabase = createClient(
@@ -7,7 +7,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY)*/
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     if (error) throw error
 
     // Gửi email qua Resend
-    await resend.emails.send({
+    /*await resend.emails.send({
       from: 'contact@archaeopteris.us',
       to: 'contact@archaeopteris.us',
       subject: `New Contact: ${name} - ${service}`,
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         <p><strong>Service:</strong> ${service}</p>
         <p><strong>Message:</strong> ${message}</p>
       `
-    })
+    }*/)
 
     return NextResponse.json({ success: true })
   } catch (error) {
