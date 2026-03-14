@@ -22,17 +22,16 @@ export function Contact({ dict }: ContactProps) {
     e.preventDefault()
     setStatus("loading")
     setErrorMessage("")
-    try {
-      const supabase = createClient()
-      const { error } = await supabase.from("contacts").insert([{ name: formData.name, email: formData.email, company: formData.company || null, service: formData.service, message: formData.message }])
-      if (error) throw error
-      setStatus("success")
-      setFormData({ name: "", email: "", company: "", service: "", message: "" })
-    } catch (err) {
-      setStatus("error")
-      setErrorMessage(err instanceof Error ? err.message : "Something went wrong. Please try again.")
-    }
-  }
+    const response = await fetch('/api/contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(formData)
+})
+
+if (!response.ok) throw new Error('Failed')
+setStatus('success')
+setFormData({ name: '', email: '', company: '', service: '', message: '' })
+
 
   return (
     <section id="contact" className="py-24 bg-background">
