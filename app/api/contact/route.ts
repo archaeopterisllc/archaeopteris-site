@@ -24,8 +24,8 @@ export async function POST(request: Request) {
     // Gửi email qua Resend
     await resend.emails.send({
       from: 'contact@archaeopteris.us',
-      to: 'onboarding@resend.dev',
-      //to: 'contact@archaeopteris.us',
+      //to: 'onboarding@resend.dev',
+      to: 'contact@archaeopteris.us',
       subject: `New Contact: ${name} - ${service}`,
       html: `
         <h2>New Contact Form Submission</h2>
