@@ -4,9 +4,11 @@ import { NextResponse } from 'next/server'
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_ANON_KEY!
 )
 console.log("Dang ket noi den URL:", process.env.SUPABASE_URL);
+
+console.log("Dang check anon:", process.env.SUPABASE_ANON_KEY);
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
