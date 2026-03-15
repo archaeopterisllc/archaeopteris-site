@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     if (error) throw error
 
     // Gửi email qua Resend
-   /* await resend.emails.send({
+   await resend.emails.send({
       from: 'contact@archaeopteris.us',
       //to: 'onboarding@resend.dev',
       to: 'archaeopteris.llc@gmail.com',
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         <p><strong>Service:</strong> ${service}</p>
         <p><strong>Message:</strong> ${message}</p>
       `
-    })*/
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
