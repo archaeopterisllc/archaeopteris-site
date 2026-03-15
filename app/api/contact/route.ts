@@ -12,7 +12,8 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, email, company, service, message } = body
+    console.log('Form data:', body)
+    /*const { name, email, company, service, message } = body
 
     // Lưu vào Supabase
     const { error } = await supabase
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
         <p><strong>Service:</strong> ${service}</p>
         <p><strong>Message:</strong> ${message}</p>
       `
-    })
+    })*/
 
     return NextResponse.json({ success: true })
   } catch (error) {
