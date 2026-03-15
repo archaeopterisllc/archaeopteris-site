@@ -29,7 +29,7 @@ export async function POST(request: Request) {
    await resend.emails.send({
       from: 'contact@archaeopteris.us',
       //to: 'onboarding@resend.dev',
-      to: 'archaeopteris.llc@gmail.com',
+      to: 'contact@archaeopteris.us',
       subject: `New Contact: ${name} - ${service}`,
       html: `
         <h2>New Contact Form Submission</h2>
