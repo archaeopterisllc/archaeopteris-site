@@ -3,8 +3,8 @@ import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.NSUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
 )
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -12,7 +12,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    //console.log('Form data:', body)
+    console.log('Form data:', body)
     const { name, email, company, service, message } = body
 
     // Lưu vào Supabase
