@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const { name, email, company, service, message } = body
 
     // Lưu vào Supabase
-    const { error } = await supabase
+    const {data, error } = await supabase
       .from('contacts')
       .insert([{ name, email, company, service, message }])
 
