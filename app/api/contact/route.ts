@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
 
 const supabase = createClient(
-  process.env.NSUPABASE_URL,
+  process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 )
 
