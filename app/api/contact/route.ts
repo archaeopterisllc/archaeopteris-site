@@ -12,8 +12,8 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    console.log('Form data:', body)
-    /*const { name, email, company, service, message } = body
+    //console.log('Form data:', body)
+    const { name, email, company, service, message } = body
 
     // Lưu vào Supabase
     const { error } = await supabase
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     if (error) throw error
 
     // Gửi email qua Resend
-    await resend.emails.send({
+   /* await resend.emails.send({
       from: 'contact@archaeopteris.us',
       //to: 'onboarding@resend.dev',
       to: 'archaeopteris.llc@gmail.com',
