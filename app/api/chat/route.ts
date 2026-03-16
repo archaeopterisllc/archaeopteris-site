@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: "Lỗi Server" }), { status: 500 });
   }
 }*/
-import { anthropic } from '@ai-sdk/anthropic';
+/*import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
 
 export const runtime = 'edge';
@@ -78,5 +78,21 @@ export async function POST(req: Request) {
   });
 
   return result.toDataStreamResponse();
-}
+}*/
 
+import { openai } from '@ai-sdk/openai'; // Đổi import
+import { streamText } from 'ai';
+
+export const runtime = 'edge';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  
+  const result = await streamText({
+    model: openai('gpt-4o-mini'), // Dùng gpt-4o-mini cho nhanh và rẻ
+    messages,
+    system: "Bạn là trợ lý kỹ thuật của dự án Archaeopteris.",
+  });
+  
+  return result.toDataStreamResponse();
+}
