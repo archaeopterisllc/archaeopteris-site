@@ -27,7 +27,7 @@ export function AIChat() {
   );
 }*/
 
-'use client';
+/*'use client';
 import { useChat } from '@ai-sdk/react';
 import { Button } from '@/components/ui/button';
 
@@ -40,7 +40,7 @@ export function AIChat() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 w-80 bg-background border rounded-lg shadow-2xl p-4">
-      {/* Hiển thị lỗi nếu có */}
+      {/* Hiển thị lỗi nếu có *//*}
       {error && <div className="text-red-500 text-[10px] mb-2">Lỗi: {error.message}</div>}
       
       <div className="h-64 overflow-y-auto mb-4 space-y-2">
@@ -59,6 +59,48 @@ export function AIChat() {
         />
         <Button type="submit" size="sm">Gửi</Button>
       </form>
+    </div>
+  );
+}
+*/
+"use client";
+
+import { useState } from "react";
+
+export default function ChatBox() {
+  const [message, setMessage] = useState("");
+  const [chat, setChat] = useState<string[]>([]);
+
+  const sendMessage = async () => {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    });
+
+    const data = await res.json();
+
+    setChat([...chat, "You: " + message, "AI: " + data.reply]);
+    setMessage("");
+  };
+
+  return (
+    <div className="p-4 border rounded-xl">
+      <div className="h-64 overflow-y-auto">
+        {chat.map((msg, i) => (
+          <p key={i}>{msg}</p>
+        ))}
+      </div>
+
+      <input
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        className="border p-2 w-full"
+        placeholder="Ask AI..."
+      />
+
+      <button onClick={sendMessage} className="mt-2 px-4 py-2 bg-black text-white">
+        Send
+      </button>
     </div>
   );
 }
