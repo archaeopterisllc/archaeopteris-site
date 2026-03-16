@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   return result.toDataStreamResponse();
 }
 */
-import { anthropic } from '@ai-sdk/anthropic';
+/*import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
 
 export const runtime = 'edge';
@@ -31,4 +31,27 @@ export async function POST(req: Request) {
   });
   
   return result.toDataStreamResponse();
+}
+*/
+import { anthropic } from '@ai-sdk/anthropic';
+import { streamText } from 'ai';
+
+export const runtime = 'edge'; // Vẫn giữ edge
+
+export async function POST(req: Request) {
+  try {
+    const { messages } = await req.json();
+    
+    // Đảm bảo dùng đúng biến môi trường ANTHROPIC_API_KEY
+    const result = await streamText({
+      model: anthropic('claude-3-7-sonnet-20250219'),
+      messages,
+      system: "Bạn là trợ lý kỹ thuật cấp cao.",
+    });
+
+    return result.toDataStreamResponse();
+  } catch (error) {
+    console.error("Lỗi tại API chat:", error);
+    return new Response(JSON.stringify({ error: "Lỗi Server" }), { status: 500 });
+  }
 }
