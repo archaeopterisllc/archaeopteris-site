@@ -22,24 +22,7 @@ export function Hero({ dict, locale, langDict }: HeroProps) {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
       </div>
       <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`, backgroundSize: "60px 60px" }} />
-   {/* Announcement badge */}
-<div className="flex justify-center mb-6">
-  <div
-    className="
-    px-4 py-1.5
-    text-xs font-medium
-    rounded-full
-    border border-primary/30
-    bg-primary/10
-    text-primary
-    backdrop-blur-sm
-    "
-  >
-    🚀 Building in public — features evolving rapidly
-  </div>
-</div>
-
-{/* Logo + company name */}
+   
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
         <div className="flex items-center justify-center gap-3 mb-8">
@@ -55,7 +38,7 @@ export function Hero({ dict, locale, langDict }: HeroProps) {
     backdrop-blur-sm
     "
   >
-    <span🚀 Building in public — new features shipping soon</span>
+    🚀 Building in public — new features shipping soon
   </div>
 </div>
           <div className="w-12 h-12 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
