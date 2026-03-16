@@ -14,24 +14,7 @@ interface HeroProps {
 
 export function Hero({ dict, locale, langDict }: HeroProps) {
   return (
-    {/* Announcement badge */}
-<div className="flex justify-center mb-6">
-  <div
-    className="
-    px-4 py-1.5
-    text-xs font-medium
-    rounded-full
-    border border-primary/30
-    bg-primary/10
-    text-primary
-    backdrop-blur-sm
-    "
-  >
-    🚀 Building in public — features evolving rapidly
-  </div>
-</div>
-
-{/* Logo + company name */}
+ 
 
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-background">
