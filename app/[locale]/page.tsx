@@ -9,6 +9,7 @@ import { Contact } from '@/components/contact'
 import { Legal } from '@/components/legal'
 import { Footer } from '@/components/footer'
 import { Navbar } from '@/components/navbar'
+import { Announcement } from '@/components/announcement'
 
 export default async function Home({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params
@@ -16,6 +17,7 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
   return (
     <main className="min-h-screen bg-background">
       <Navbar locale={locale} langDict={dict.language} navDict={dict.nav} />
+      <Announcement text={dict.notice.building} />
       <Hero dict={dict.hero} locale={locale} langDict={dict.language} />
       <TrustSignals dict={dict.trust} />
       <Services dict={dict.services} />

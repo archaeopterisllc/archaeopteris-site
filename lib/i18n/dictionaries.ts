@@ -2,6 +2,9 @@ import type { Locale } from "./config"
 
 const dictionaries = {
   en: {
+    notice: {
+  building: "🚀 Building in public — features evolving rapidly."
+},
     // Common
     common: {
       companyName: "Archaeopteris LLC",
@@ -273,6 +276,9 @@ const dictionaries = {
     },
   },
   vi: {
+    notice: {
+  building: "🚀 Đang xây dựng công khai — tính năng liên tục được phát triển."
+},
     // Common
     common: {
       companyName: "Archaeopteris LLC",
