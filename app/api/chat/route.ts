@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     // Đảm bảo dùng đúng biến môi trường ANTHROPIC_API_KEY
     const result = await streamText({
       model: anthropic('claude-3-7-sonnet-20250219'),
-      apiKey: process.env.Claude_API_KEY,
+     // apiKey: process.env.Claude_API_KEY,
       messages,
       system: "Bạn là trợ lý kỹ thuật cấp cao.",
     });
