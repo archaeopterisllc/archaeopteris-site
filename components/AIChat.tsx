@@ -27,7 +27,7 @@ export function AIChat() {
   );
 }*/
 
-/*'use client';
+'use client';
 import { useChat } from '@ai-sdk/react';
 import { Button } from '@/components/ui/button';
 
@@ -40,7 +40,7 @@ export function AIChat() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 w-80 bg-background border rounded-lg shadow-2xl p-4">
-      {/* Hiển thị lỗi nếu có *//*}
+      {/* Hiển thị lỗi nếu có */}
       {error && <div className="text-red-500 text-[10px] mb-2">Lỗi: {error.message}</div>}
       
       <div className="h-64 overflow-y-auto mb-4 space-y-2">
@@ -62,8 +62,8 @@ export function AIChat() {
     </div>
   );
 }
-*/
-"use client";
+
+/*"use client";
 
 import { useState } from "react";
 
@@ -103,4 +103,4 @@ export default function ChatBox() {
       </button>
     </div>
   );
-}
+}*/
