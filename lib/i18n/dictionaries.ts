@@ -3,7 +3,7 @@ import type { Locale } from "./config"
 const dictionaries = {
   en: {
     notice: {
-  building: "🚧 This website is currently under development."
+  building: "🚀 Building in public — features evolving rapidly."
 },
     // Common
     common: {
@@ -277,7 +277,7 @@ const dictionaries = {
   },
   vi: {
     notice: {
-  building: "🚧 Website đang trong quá trình phát triển."
+  building: "🚀 Đang xây dựng công khai — tính năng liên tục được phát triển."
 },
     // Common
     common: {
