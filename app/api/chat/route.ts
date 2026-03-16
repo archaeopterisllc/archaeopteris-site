@@ -96,7 +96,7 @@ export async function POST(req: Request) {
   
   return result.toDataStreamResponse();
 }*/
-import { openai } from '@ai-sdk/openai';
+/*import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 
 export const runtime = 'edge';
@@ -116,5 +116,28 @@ export async function POST(req: Request) {
     console.error("LỖI API:", error);
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
+}
+*/
+import { openai } from '@ai-sdk/openai';
+import { streamText } from 'ai';
+
+export const runtime = 'edge';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  
+  // DEBUG: Kiểm tra xem Key có tồn tại không
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    console.error("LỖI NGHIÊM TRỌNG: OPENAI_API_KEY không được tìm thấy trong process.env");
+    return new Response(JSON.stringify({ error: "Missing API Key" }), { status: 500 });
+  }
+
+  const result = await streamText({
+    model: openai('gpt-4o-mini', { apiKey }),
+    messages,
+  });
+  
+  return result.toDataStreamResponse();
 }
 
