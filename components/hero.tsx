@@ -41,7 +41,7 @@ export function Hero({ dict, locale, langDict }: HeroProps) {
 {/* Logo + company name */}
 <div className="flex items-center justify-center gap-3 mb-8">
         <div className="flex items-center justify-center gap-3 mb-8">
-          {  /*<div className="flex justify-center mb-6">
+          {/*<div className="flex justify-center mb-6">
   <div
     className="
     px-4 py-1.5
