@@ -38,7 +38,7 @@ samplePosts: Post[];
 };
 
 export default function BlogPage({ dict }: { dict: BlogDict }) {
-const [activeTab, setActiveTab] = useState<“browse” | “write”>(“browse”);
+const [activeTab, setActiveTab] = useState<'browse' | 'wirte'>('browse');
 const [activeCategory, setActiveCategory] = useState(dict.catAll);
 const [topic, setTopic] = useState(””);
 const [keywords, setKeywords] = useState(””);
