@@ -366,7 +366,7 @@ excerpt: { fontSize:'0.92rem', color:'#9ca3af', lineHeight:1.7, marginBottom:'1.
 tagRow: { display:'flex', alignItems:'center', gap:'0.5rem', flexWrap:'wrap' },
 tag: { fontFamily:'‘JetBrains Mono’,monospace', fontSize:'0.67rem', color:'#4b5563', border:'1px solid #1f2937', padding:'0.18rem 0.5rem', borderRadius:3 },
 arrow: { fontSize:'1rem', transition:'color 0.2s', marginLeft:'auto' },
-grid: { display:“grid”, gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:'1rem' },
+grid: { display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:'1rem' },
 card: { border:'1px solid #111827', borderRadius:8, padding:'1.4rem', background:'#0d1117' },
 cardTop: { display:'flex', alignItems:'center', gap:'0.5rem', marginBottom:'0.75rem' },
 catLabel: { fontSize:'0.72rem', fontFamily:'‘JetBrains Mono’,monospace', fontWeight:500, letterSpacing:'0.06em' },
