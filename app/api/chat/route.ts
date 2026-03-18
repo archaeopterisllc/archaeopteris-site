@@ -1,4 +1,18 @@
-import OpenAI from 'openai';
+import { openai } from '@ai-sdk/openai'
+import { generateText } from 'ai'
+
+export async function POST(req: Request) {
+  const { messages } = await req.json()
+
+  const { text } = await generateText({
+    model: openai('gpt-4o-mini'),
+    messages,
+  })
+
+  return Response.json({ reply: text })
+}
+
+/*import OpenAI from 'openai';
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
