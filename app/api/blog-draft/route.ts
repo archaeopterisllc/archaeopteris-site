@@ -1,4 +1,48 @@
-import { NextRequest, NextResponse } from "next/server";
+import { createOpenAI } from '@ai-sdk/openai'
+import { generateText } from 'ai'
+
+const groq = createOpenAI({
+  baseURL: 'https://api.groq.com/openai/v1',
+  apiKey: process.env.GROQ_API_KEY,
+})
+
+export async function POST(req: Request) {
+  try {
+    const { title, keywords, tone } = await req.json()
+
+    if (!title) {
+      return Response.json({ error: 'Title is required' }, { status: 400 })
+    }
+
+    const prompt = `You are an expert fintech writer for Archaeopteris LLC. Write a professional blog post draft:
+
+**Topic:** ${title}
+${keywords ? `**Keywords:** ${keywords}` : ''}
+**Tone:** ${tone || 'professional'}
+**Audience:** Prop traders, brokers, fintech engineers
+
+Requirements:
+- Write in Markdown
+- Strong hook opening
+- 3-5 sections with ## headings
+- Include technical depth: numbers, protocols, specifics
+- End with a CTA relevant to trading infrastructure or development services
+- 600-900 words
+- Return only Markdown content, no preamble.`
+
+    const { text } = await generateText({
+      model: groq('llama-3.3-70b-versatile'),
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    return Response.json({ draft: text })
+  } catch (error) {
+    console.error('Blog draft error:', error)
+    return Response.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+/*import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,4 +98,4 @@ Requirements:
     console.error("Blog draft error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+}*/
