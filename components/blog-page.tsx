@@ -50,16 +50,16 @@ const [copied, setCopied] = useState(false);
 const draftRef = useRef<HTMLDivElement>(null);
 
 const tones = [
-{ key: “tone1”, label: dict.tone1 },
-{ key: “tone2”, label: dict.tone2 },
-{ key: “tone3”, label: dict.tone3 },
-{ key: “tone4”, label: dict.tone4 },
+{ key: 'tone1', label: dict.tone1 },
+{ key: 'tone2', label: dict.tone2 },
+{ key: 'tone3', label: dict.tone3 },
+{ key: 'tone4', label: dict.tone4 },
 ];
 
 // Assign alternating accents
 const posts: Post[] = dict.samplePosts.map((p, i) => ({
 …p,
-accent: i % 2 === 0 ? “green” : “blue”,
+accent: i % 2 === 0 ? 'green' : 'blue',
 }));
 
 const allCategories = [dict.catAll, …Object.values(dict.categories)];
