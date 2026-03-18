@@ -1,4 +1,4 @@
-“use client”;
+'use client';
 
 // components/blog-page.tsx
 // Usage: pass `dict` from your getDictionary(locale) call
