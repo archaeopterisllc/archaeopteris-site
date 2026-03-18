@@ -362,7 +362,7 @@ featuredBadge: { fontFamily:"‘JetBrains Mono’,monospace', fontSize:'0.65rem'
 meta: { fontSize:'0.78rem', color:'#4b5563', fontFamily:'‘JetBrains Mono’,monospace' },
 metaDot: { color:'#1f2937' },
 featuredTitle: { fontFamily:'‘Playfair Display’,serif', fontSize:'clamp(1.3rem,3vw,1.7rem)', fontWeight:700, color:'#f9fafb', lineHeight:1.25, marginBottom:'0.85rem' },
-excerpt: { fontSize:“0.92rem', color:'#9ca3af', lineHeight:1.7, marginBottom:'1.25rem' },
+excerpt: { fontSize:'0.92rem', color:'#9ca3af', lineHeight:1.7, marginBottom:'1.25rem' },
 tagRow: { display:'flex', alignItems:'center', gap:'0.5rem', flexWrap:'wrap' },
 tag: { fontFamily:'‘JetBrains Mono’,monospace', fontSize:'0.67rem', color:'#4b5563', border:'1px solid #1f2937', padding:'0.18rem 0.5rem', borderRadius:3 },
 arrow: { fontSize:'1rem', transition:'color 0.2s', marginLeft:'auto' },
