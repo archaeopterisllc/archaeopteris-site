@@ -3,7 +3,7 @@
 // components/blog-page.tsx
 // Usage: pass `dict` from your getDictionary(locale) call
 
-import { useState, useRef } from “react”;
+import { useState, useRef } from 'react';
 
 type Post = {
 title: string;
