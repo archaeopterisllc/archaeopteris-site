@@ -12,7 +12,7 @@ date: string;
 readTime: string;
 excerpt: string;
 tags: string[];
-accent?: “green” | “blue”;
+accent?: 'green' | 'blue';
 };
 
 type BlogDict = {
