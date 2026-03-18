@@ -391,7 +391,7 @@ dot: { display:'inline-block', width:6, height:6, borderRadius:'50%', background
 loadingText: { fontFamily:'‘JetBrains Mono’,monospace', fontSize:'0.78rem', color:'#4b5563' },
 outputCard: { border:'1px solid #111827', borderRadius:8, overflow:'hidden', background:'#0d1117' },
 outputHead: { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.85rem 1.25rem', borderBottom:'1px solid #111827', background:'#111827' },
-outputLabel: { fontFamily:'‘JetBrains Mono’,monospace”, fontSize:“0.65rem”, letterSpacing:“0.12em”, color:”#10b981” },
+outputLabel: { fontFamily:'‘JetBrains Mono’,monospace', fontSize:“0.65rem”, letterSpacing:“0.12em”, color:”#10b981” },
 actBtn: { padding:'0.28rem 0.7rem', fontSize:'0.72rem', fontFamily:'‘JetBrains Mono’,monospace', border:'1px solid #1f2937', borderRadius:4, background:'transparent', color:'#6b7280' },
 draftArea: { width:'100%', minHeight:400, padding:'1.4rem', background:'#0d1117', border:'none', color:'#cbd5e1', fontSize:'0.9rem', lineHeight:1.75, fontFamily:'‘Inter’,sans-serif' },
 outputFoot: { padding:'0.6rem 1.25rem', borderTop:'1px solid #111827', fontSize:'0.7rem', color:'#374151', fontFamily:'‘JetBrains Mono’,monospace', background:'#0a0a0a' },
