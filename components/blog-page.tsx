@@ -338,14 +338,14 @@ const css = `@import url('https://fonts.googleapis.com/css2?family=Playfair+Disp
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const s: Record<string, React.CSSProperties> = {
-page: { background:”#0a0a0a”, minHeight:“100vh”, color:”#e2e8f0”, fontFamily:”‘Inter’,sans-serif” },
-hero: { padding:“72px 0 56px”, borderBottom:“1px solid #111827” },
-heroInner: { maxWidth:860, margin:“0 auto”, padding:“0 1.5rem” },
-badge: { fontFamily:”‘JetBrains Mono’,monospace”, fontSize:“0.72rem”, letterSpacing:“0.1em”, color:”#6b7280”, marginBottom:“1.25rem”, textTransform:“uppercase” },
-heroTitle: { fontFamily:”‘Playfair Display’,serif”, fontSize:“clamp(2.4rem,6vw,4rem)”, fontWeight:800, lineHeight:1.1, letterSpacing:”-0.02em”, color:”#f9fafb”, marginBottom:“1.25rem” },
-green: { color:”#10b981” },
-blue: { color:”#3b82f6” },
-heroSub: { fontSize:“1rem”, color:”#9ca3af”, lineHeight:1.65, marginBottom:“2.5rem” },
+page: { background:'#0a0a0a', minHeight:'100vh', color:'#e2e8f0', fontFamily:'‘Inter’,sans-serif' },
+hero: { padding:'72px 0 56px', borderBottom:'1px solid #111827' },
+heroInner: { maxWidth:860, margin:'0 auto', padding:'0 1.5rem' },
+badge: { fontFamily:'‘JetBrains Mono’,monospace', fontSize:'0.72rem', letterSpacing:'0.1em', color:'#6b7280', marginBottom:'1.25rem', textTransform:'uppercase' },
+heroTitle: { fontFamily:'‘Playfair Display’,serif', fontSize:“clamp(2.4rem,6vw,4rem)”, fontWeight:800, lineHeight:1.1, letterSpacing:'-0.02em', color:'#f9fafb', marginBottom:'1.25rem' },
+green: { color:'#10b981' },
+blue: { color:'#3b82f6' },
+heroSub: { fontSize:'1rem', color:'#9ca3af', lineHeight:1.65, marginBottom:'2.5rem' },
 stats: { display:“flex”, gap:“2.5rem” },
 stat: { display:“flex”, flexDirection:“column”, gap:3 },
 statVal: { fontSize:“0.9rem”, fontWeight:600, color:”#10b981” },
