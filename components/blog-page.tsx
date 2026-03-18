@@ -70,7 +70,7 @@ activeCategory === dict.catAll
 : posts.filter((p) => p.category === activeCategory);
 
 const accentColor = (a?: 'green' | 'blue') =>
-a === “blue” ? '#3b82f6' : '#10b981';
+a === 'blue' ? '#3b82f6' : '#10b981';
 
 const handleGenerate = async () => {
 if (!topic.trim()) { setError(dict.topicRequired); return; }
