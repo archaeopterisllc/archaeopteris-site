@@ -20,7 +20,7 @@ return result.toDataStreamResponse()
     messages,*/
  // })
 
-  return Response.json({ reply: text })
+//  return Response.json({ reply: text })
 }
 
 /*import { openai } from '@ai-sdk/openai'
