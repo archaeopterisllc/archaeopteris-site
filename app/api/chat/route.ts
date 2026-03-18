@@ -1,5 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai'
-import { generateText } from 'ai'
+import { streamText } from 'ai'
 
 const groq = createOpenAI({
   baseURL: 'https://api.groq.com/openai/v1',
@@ -9,10 +9,15 @@ const groq = createOpenAI({
 export async function POST(req: Request) {
   const { messages } = await req.json()
 console.log('Key chars:', [...(process.env.GROQ_API_KEY || '')].map((c, i) => `${i}:${c.charCodeAt(0)}`).join(' '))
+const result = await streamText({
+  model: groq('llama-3.3-70b-versatile'),
+  messages,
+})
+return result.toDataStreamResponse()
 
-  const { text } = await generateText({
+  /*const { text } = await generateText({
     model: groq('llama-3.3-70b-versatile'),
-    messages,
+    messages,*/
   })
 
   return Response.json({ reply: text })
