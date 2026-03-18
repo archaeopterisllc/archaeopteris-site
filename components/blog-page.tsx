@@ -158,7 +158,7 @@ return (
           {allCategories.map((c) => (
             <button
               key={c}
-              className={`arch-cat${activeCategory === c ? ' active' : 'k}`}
+              className={`arch-cat${activeCategory === c ? ' active' : ''}`}
               style={s.catPill}
               onClick={() => setActiveCategory(c)}
             >
