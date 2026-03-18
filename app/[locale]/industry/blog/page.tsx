@@ -1,4 +1,6 @@
 import type { Locale } from "@/lib/i18n/config"
+import { getDictionary } from "@/lib/i18n/dictionaries"
+
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import BlogPage from "@/components/blog-page"
@@ -10,6 +12,8 @@ export default async function BlogRoute({
 }) {
   const { locale } = await params
   const isVi = locale === "vi"
+  const dict = getDictionary(locale)
+
 
   const t = {
     badge: isVi ? "AI Blog · Phân tích Fintech" : "AI Blog · Fintech Insights",
@@ -85,11 +89,19 @@ export default async function BlogRoute({
     ],
   }
 
-  return (
+  /*return (
     <>
       <Navbar />
       <BlogPage dict={t} />
       <Footer />
     </>
-  )
+  )*/
+  return (
+  <main className="min-h-screen bg-background">
+    <Navbar locale={locale} langDict={dict.language} navDict={dict.nav} />
+    <BlogPage dict={t} />
+    <Footer dict={dict.common} navDict={dict.nav} locale={locale} />
+  </main>
+)
+
 }
