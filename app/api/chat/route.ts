@@ -1,3 +1,25 @@
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const completion = await client.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: 'You are a helpful assistant for Archaeopteris LLC, a trading technology company.' },
+      ...messages,
+    ],
+  });
+
+  return Response.json({ 
+    reply: completion.choices[0].message.content 
+  });
+}
+
 /*import { anthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
 
@@ -118,13 +140,13 @@ export async function POST(req: Request) {
   }
 }
 */
-import { openai } from '@ai-sdk/openai';
+/*import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 /*const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });*/
 
-export const runtime = 'edge';
+/*export const runtime = 'edge';
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -142,7 +164,7 @@ export async function POST(req: Request) {
   });
   
   return result.toDataStreamResponse();
-}
+}*/
 
 /*import OpenAI from "openai";
 
