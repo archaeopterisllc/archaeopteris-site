@@ -58,11 +58,11 @@ const tones = [
 
 // Assign alternating accents
 const posts: Post[] = dict.samplePosts.map((p, i) => ({
-…p,
+...p,
 accent: i % 2 === 0 ? 'green' : 'blue',
 }));
 
-const allCategories = [dict.catAll, …Object.values(dict.categories)];
+const allCategories = [dict.catAll, ...Object.values(dict.categories)];
 
 const filtered =
 activeCategory === dict.catAll
