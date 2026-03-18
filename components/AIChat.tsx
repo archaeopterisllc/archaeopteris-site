@@ -1,4 +1,4 @@
-'use client';
+/*'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -83,7 +83,7 @@ export function AIChat() {
       </form>
     </div>
   );
-}
+}*/
 
 /*'use client';
 import { useChat } from '@ai-sdk/react';
@@ -114,7 +114,7 @@ export function AIChat() {
   );
 }*/
 
-/*'use client';
+'use client';
 import { useChat } from '@ai-sdk/react';
 import { Button } from '@/components/ui/button';
 
@@ -154,7 +154,7 @@ export function AIChat() {
       </form>
     </div>
   );
-}*/
+}
 
 /*"use client";
 
