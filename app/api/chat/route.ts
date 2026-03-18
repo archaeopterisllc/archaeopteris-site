@@ -18,7 +18,7 @@ return result.toDataStreamResponse()
   /*const { text } = await generateText({
     model: groq('llama-3.3-70b-versatile'),
     messages,*/
-  })
+ // })
 
   return Response.json({ reply: text })
 }
