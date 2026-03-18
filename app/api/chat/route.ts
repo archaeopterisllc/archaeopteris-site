@@ -1,0 +1,228 @@
+import { createOpenAI } from '@ai-sdk/openai'
+import { streamText } from 'ai'
+
+const groq = createOpenAI({
+  baseURL: 'https://api.groq.com/openai/v1',
+  apiKey: process.env.GROQ_API_KEY,
+})
+
+export async function POST(req: Request) {
+  const { messages } = await req.json()
+console.log('Key chars:', [...(process.env.GROQ_API_KEY || '')].map((c, i) => `${i}:${c.charCodeAt(0)}`).join(' '))
+const result = await streamText({
+  model: groq('llama-3.3-70b-versatile'),
+  messages,
+})
+return result.toDataStreamResponse()
+
+  /*const { text } = await generateText({
+    model: groq('llama-3.3-70b-versatile'),
+    messages,*/
+ // })
+
+//  return Response.json({ reply: text })
+}
+
+/*import { openai } from '@ai-sdk/openai'
+import { generateText } from 'ai'
+
+export async function POST(req: Request) {
+  const { messages } = await req.json()
+
+  const { text } = await generateText({
+    model: openai('gpt-4o-mini'),
+    messages,
+  })
+
+  return Response.json({ reply: text })
+}*/
+
+/*import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const completion = await client.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: 'You are a helpful assistant for Archaeopteris LLC, a trading technology company.' },
+      ...messages,
+    ],
+  });
+
+  return Response.json({ 
+    reply: completion.choices[0].message.content 
+  });
+}
+
+/*import { anthropic } from '@ai-sdk/anthropic';
+import { streamText } from 'ai';
+
+export const runtime = 'edge';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  const result = await streamText({
+    model: anthropic('claude-3-7-sonnet-20250219'),
+    messages,
+    system: "Bạn là trợ lý kỹ thuật của dự án Archaeopteris. Sử dụng các component trong thư mục @/components/ui để đề xuất giải pháp."
+  });
+  return result.toDataStreamResponse();
+}
+*/
+/*import { anthropic } from '@ai-sdk/anthropic';
+import { streamText } from 'ai';
+
+export const runtime = 'edge';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  
+  const result = await streamText({
+    // Chỉ định rõ biến môi trường anh dùng
+    model: anthropic('claude-3-7-sonnet-20250219', {
+      apiKey: process.env.Claude_API_KEY, 
+    }),
+    messages,
+    system: "Bạn là trợ lý kỹ thuật của dự án Archaeopteris.",
+  });
+  
+  return result.toDataStreamResponse();
+}
+*/
+/*import { anthropic } from '@ai-sdk/anthropic';
+import { streamText } from 'ai';
+
+export const runtime = 'edge'; // Vẫn giữ edge
+
+export async function POST(req: Request) {
+  try {
+    const { messages } = await req.json();
+    
+    // Đảm bảo dùng đúng biến môi trường ANTHROPIC_API_KEY
+    const result = await streamText({
+      model: anthropic('claude-3-7-sonnet-20250219'),
+     // apiKey: process.env.Claude_API_KEY,
+      messages,
+      system: "Bạn là trợ lý kỹ thuật cấp cao.",
+    });
+
+    return result.toDataStreamResponse();
+  } catch (error) {
+    console.error("Lỗi tại API chat:", error);
+    return new Response(JSON.stringify({ error: "Lỗi Server" }), { status: 500 });
+  }
+}*/
+/*import { anthropic } from '@ai-sdk/anthropic';
+import { streamText } from 'ai';
+
+export const runtime = 'edge';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  
+  // Dùng trực tiếp process.env để debug
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  
+  if (!apiKey) {
+    console.error("LỖI: Không tìm thấy API KEY trong process.env");
+    return new Response(JSON.stringify({ error: "Missing API Key" }), { status: 500 });
+  }
+
+  const result = await streamText({
+    model: anthropic('claude-3-7-sonnet-20250219', { apiKey }),
+    messages,
+  });
+
+  return result.toDataStreamResponse();
+}*/
+
+/*import { openai } from '@ai-sdk/openai'; // Đổi import
+import { streamText } from 'ai';
+
+export const runtime = 'edge';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  
+  const result = await streamText({
+    model: openai('gpt-4o-mini'), // Dùng gpt-4o-mini cho nhanh và rẻ
+    messages,
+    system: "Bạn là trợ lý kỹ thuật của dự án Archaeopteris.",
+  });
+  
+  return result.toDataStreamResponse();
+}*/
+/*import { openai } from '@ai-sdk/openai';
+import { streamText } from 'ai';
+
+export const runtime = 'edge';
+
+export async function POST(req: Request) {
+  try {
+    const { messages } = await req.json();
+    
+    const result = await streamText({
+      model: openai('gpt-4o-mini'),
+      messages,
+      system: "Bạn là trợ lý kỹ thuật của dự án Archaeopteris.",
+    });
+    
+    return result.toDataStreamResponse();
+  } catch (error: any) {
+    console.error("LỖI API:", error);
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  }
+}
+*/
+/*import { openai } from '@ai-sdk/openai';
+import { streamText } from 'ai';
+/*const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});*/
+
+/*export const runtime = 'edge';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  
+  // DEBUG: Kiểm tra xem Key có tồn tại không
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    console.error("LỖI NGHIÊM TRỌNG: OPENAI_API_KEY không được tìm thấy trong process.env");
+    return new Response(JSON.stringify({ error: "Missing API Key" }), { status: 500 });
+  }
+
+  const result = await streamText({
+    model: openai('gpt-4o-mini', { apiKey }),
+    messages,
+  });
+  
+  return result.toDataStreamResponse();
+}*/
+
+/*import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export async function POST(req: Request) {
+  const { message } = await req.json();
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4.1-mini",
+    messages: [
+      { role: "system", content: "You are a helpful AI assistant." },
+      { role: "user", content: message }
+    ],
+  });
+
+  return Response.json({
+    reply: completion.choices[0].message.content,
+  });
+}*/
