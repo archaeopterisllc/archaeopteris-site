@@ -8,6 +8,7 @@ const groq = createOpenAI({
 
 export async function POST(req: Request) {
   const { messages } = await req.json()
+console.log('Key chars:', [...(process.env.GROQ_API_KEY || '')].map((c, i) => `${i}:${c.charCodeAt(0)}`).join(' '))
 
   const { text } = await generateText({
     model: groq('llama-3.3-70b-versatile'),
