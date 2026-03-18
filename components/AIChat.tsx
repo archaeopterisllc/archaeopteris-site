@@ -32,11 +32,17 @@ import { useChat } from '@ai-sdk/react';
 import { Button } from '@/components/ui/button';
 
 export function AIChat() {
-  const { messages, input, handleInputChange, handleSubmit, error } = useChat({
+  /*const { messages, input, handleInputChange, handleSubmit, error } = useChat({
     // Thêm các callback để bắt lỗi
     onResponse: (response) => console.log("Response nhận được:", response),
     onError: (err) => console.error("Lỗi từ AI SDK:", err),
-  });
+  });*/
+  const { messages, input, handleInputChange, handleSubmit, error } = useChat({
+  api: '/api/chat',
+  onResponse: (response) => console.log("Response nhận được:", response),
+  onError: (err) => console.error("Lỗi từ AI SDK:", err),
+});
+
 
   return (
     <div className="fixed bottom-4 right-4 z-50 w-80 bg-background border rounded-lg shadow-2xl p-4">
