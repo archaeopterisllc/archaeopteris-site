@@ -358,7 +358,7 @@ catRow: { display:'flex', gap:'0.5rem', flexWrap:'wrap', marginBottom:'1.75rem' 
 catPill: { padding:'0.35rem 0.9rem', fontSize:'0.78rem', fontFamily:'‘JetBrains Mono’,monospace', border:'1px solid #1f2937', borderRadius:20, background:'transparent', color:'#6b7280' },
 featured: { border:'1px solid #1f2937', borderRadius:8, padding:'1.75rem 2rem', marginBottom:'1.25rem', background:'#0d1117' },
 featuredTop: { display:'flex', alignItems:'center', gap:'0.75rem', marginBottom:'1rem' },
-featuredBadge: { fontFamily:"‘JetBrains Mono’,monospace', fontSize:'0.65rem', letterSpacing:'0.12em', padding:'0.2rem 0.6rem', borderRadius:3 },
+featuredBadge: { fontFamily:'‘JetBrains Mono’,monospace', fontSize:'0.65rem', letterSpacing:'0.12em', padding:'0.2rem 0.6rem', borderRadius:3 },
 meta: { fontSize:'0.78rem', color:'#4b5563', fontFamily:'‘JetBrains Mono’,monospace' },
 metaDot: { color:'#1f2937' },
 featuredTitle: { fontFamily:'‘Playfair Display’,serif', fontSize:'clamp(1.3rem,3vw,1.7rem)', fontWeight:700, color:'#f9fafb', lineHeight:1.25, marginBottom:'0.85rem' },
