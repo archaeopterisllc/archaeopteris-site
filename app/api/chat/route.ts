@@ -120,9 +120,9 @@ export async function POST(req: Request) {
 */
 import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
-/*const openai = new OpenAI({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});*/
+});
 
 export const runtime = 'edge';
 
