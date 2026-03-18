@@ -70,15 +70,15 @@ activeCategory === dict.catAll
 : posts.filter((p) => p.category === activeCategory);
 
 const accentColor = (a?: 'green' | 'blue') =>
-a === “blue” ? “#3b82f6” : “#10b981”;
+a === “blue” ? '#3b82f6' : '#10b981';
 
 const handleGenerate = async () => {
 if (!topic.trim()) { setError(dict.topicRequired); return; }
-setError(””); setLoading(true); setDraft(””);
+setError(''); setLoading(true); setDraft('');
 try {
 const res = await fetch('/api/blog-draft', {
-method: “POST”,
-headers: { “Content-Type”: 'application/json' },
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
 title: topic,
 keywords,
