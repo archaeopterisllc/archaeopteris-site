@@ -1,3 +1,90 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+
+export function AIChat() {
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || loading) return;
+
+    const userMsg = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMsg]);
+    setInput('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [...messages, userMsg] }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lỗi server');
+
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+    } catch (err: unknown) {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: err instanceof Error ? err.message : 'Có lỗi xảy ra.' 
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 w-80 bg-background border rounded-lg shadow-lg">
+      <div className="h-64 overflow-y-auto p-3 space-y-2">
+        {messages.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center mt-8">
+            Xin chào! Tôi có thể giúp gì cho bạn?
+          </p>
+        )}
+        {messages.map((m, i) => (
+          <div key={i} className={`text-xs ${m.role === 'user' ? 'text-right' : 'text-left'}`}>
+            <span className={`inline-block px-2 py-1 rounded-lg ${
+              m.role === 'user' 
+                ? 'bg-primary text-primary-foreground' 
+                : 'bg-muted text-foreground'
+            }`}>
+              {m.content}
+            </span>
+          </div>
+        ))}
+        {loading && (
+          <div className="text-xs text-left">
+            <span className="inline-block px-2 py-1 rounded-lg bg-muted text-muted-foreground">
+              Đang trả lời...
+            </span>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+      <form onSubmit={handleSubmit} className="flex gap-2 p-2 border-t">
+        <input
+          className="flex-1 bg-muted p-2 rounded text-sm outline-none"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          placeholder="Lệnh cho..."
+          disabled={loading}
+        />
+        <Button type="submit" size="sm" disabled={loading}>Gửi</Button>
+      </form>
+    </div>
+  );
+}
+
 /*'use client';
 import { useChat } from '@ai-sdk/react';
 import { Button } from '@/components/ui/button'; // Tận dụng folder UI sẵn có của anh
@@ -27,7 +114,7 @@ export function AIChat() {
   );
 }*/
 
-'use client';
+/*'use client';
 import { useChat } from '@ai-sdk/react';
 import { Button } from '@/components/ui/button';
 
@@ -67,7 +154,7 @@ export function AIChat() {
       </form>
     </div>
   );
-}
+}*/
 
 /*"use client";
 
