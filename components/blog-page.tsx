@@ -45,7 +45,7 @@ const [keywords, setKeywords] = useState();
 const [tone, setTone] = useState('tone1');
 const [draft, setDraft] = useState('');
 const [loading, setLoading] = useState(false);
-const [error, setError] = useState(””);
+const [error, setError] = useState('');
 const [copied, setCopied] = useState(false);
 const draftRef = useRef<HTMLDivElement>(null);
 
@@ -69,28 +69,28 @@ activeCategory === dict.catAll
 ? posts
 : posts.filter((p) => p.category === activeCategory);
 
-const accentColor = (a?: “green” | “blue”) =>
+const accentColor = (a?: 'green' | 'blue') =>
 a === “blue” ? “#3b82f6” : “#10b981”;
 
 const handleGenerate = async () => {
 if (!topic.trim()) { setError(dict.topicRequired); return; }
 setError(””); setLoading(true); setDraft(””);
 try {
-const res = await fetch(”/api/blog-draft”, {
+const res = await fetch('/api/blog-draft', {
 method: “POST”,
-headers: { “Content-Type”: “application/json” },
+headers: { “Content-Type”: 'application/json' },
 body: JSON.stringify({
 title: topic,
 keywords,
-tone: tones.find((t) => t.key === tone)?.label ?? “professional”,
+tone: tones.find((t) => t.key === tone)?.label ?? 'professional',
 }),
 });
 const data = await res.json();
-if (!res.ok) throw new Error(data.error || “API error”);
+if (!res.ok) throw new Error(data.error || 'API error');
 setDraft(data.draft);
-setTimeout(() => draftRef.current?.scrollIntoView({ behavior: “smooth” }), 100);
+setTimeout(() => draftRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
 } catch (e: unknown) {
-setError(e instanceof Error ? e.message : “Error”);
+setError(e instanceof Error ? e.message : 'Error');
 } finally {
 setLoading(false);
 }
@@ -138,7 +138,7 @@ return (
       {(["browse", "write"] as const).map((tab) => (
         <button
           key={tab}
-          className={`arch-tab${activeTab === tab ? " active" : ""}`}
+          className={`arch-tab${activeTab === tab ? ' active' : ''}`}
           style={s.tab}
           onClick={() => setActiveTab(tab)}
         >
@@ -158,7 +158,7 @@ return (
           {allCategories.map((c) => (
             <button
               key={c}
-              className={`arch-cat${activeCategory === c ? " active" : ""}`}
+              className={`arch-cat${activeCategory === c ? ' active' : 'k}`}
               style={s.catPill}
               onClick={() => setActiveCategory(c)}
             >
@@ -220,7 +220,7 @@ return (
     )}
 
     {/* ══ WRITE ══ */}
-    {activeTab === "write" && (
+    {activeTab === 'write' && (
       <div className="fadein">
         <div style={s.writeHead}>
           <h2 style={s.writeTitle}>
@@ -247,8 +247,8 @@ return (
           {/* Keywords */}
           <div style={s.field}>
             <label style={s.label}>
-              {dict.labelKeywords}{" "}
-              <span style={{ color: "#374151", fontSize: "0.7rem" }}>{dict.labelKeywordsOptional}</span>
+              {dict.labelKeywords}{' '}
+              <span style={{ color: '#374151', fontSize: '0.7rem' }}>{dict.labelKeywordsOptional}</span>
             </label>
             <input
               style={s.input}
@@ -265,7 +265,7 @@ return (
               {tones.map(({ key, label }) => (
                 <button
                   key={key}
-                  className={`arch-tone${tone === key ? " active" : ""}`}
+                  className={`arch-tone${tone === key ? ' active' : ''}`}
                   style={s.tonePill}
                   onClick={() => setTone(key)}
                 >
@@ -278,7 +278,7 @@ return (
           {error && <div style={s.errorBox}>⚠ {error}</div>}
 
           <button
-            className="arch-gen"
+            className='arch-gen'
             style={s.genBtn}
             onClick={handleGenerate}
             disabled={loading}
@@ -303,14 +303,14 @@ return (
 
         {/* Output */}
         {draft && (
-          <div ref={draftRef} className="fadein" style={s.outputCard}>
+          <div ref={draftRef} className='fadein' style={s.outputCard}>
             <div style={s.outputHead}>
               <span style={s.outputLabel}>{dict.outputLabel}</span>
               <div style={{ display: "flex", gap: "0.5rem" }}>
                 <button className="arch-act" style={s.actBtn} onClick={handleCopy}>
                   {copied ? dict.copiedBtn : dict.copyBtn}
                 </button>
-                <button className="arch-act" style={{ ...s.actBtn, borderColor: "#1f2937" }} onClick={() => setDraft("")}>
+                <button className='arch-act' style={{ ...s.actBtn, borderColor: '#1f2937' }} onClick={() => setDraft('')}>
                   {dict.clearBtn}
                 </button>
               </div>
