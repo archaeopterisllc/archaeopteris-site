@@ -215,8 +215,13 @@ return (
         {/* Featured */}
         {filtered[0] && (
           <div className="arch-card" style={s.featured}
+            onClick={() => {
+  console.log('slug:', filtered[0].slug)
+  console.log('locale:', locale)
+  router.push(`/${locale}/industry/blog/${filtered[0].slug || ''}`)
+}}>
+
             
-            onClick={() => router.push(`/${locale}/industry/blog/${filtered[0].slug || ''}`)}>
 
             <div style={s.featuredTop}>
               <span style={{
