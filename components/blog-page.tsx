@@ -2,7 +2,7 @@
 
 // components/blog-page.tsx
 // Usage: pass `dict` from your getDictionary(locale) call
-/*const [dbPosts, setDbPosts] = useState<Post[]>([])
+const [dbPosts, setDbPosts] = useState<Post[]>([])
 
 useEffect(() => {
   fetch('/api/posts?status=published')
@@ -10,7 +10,7 @@ useEffect(() => {
     .then(data => {
       if (data.posts?.length > 0) setDbPosts(data.posts)
     })
-}, [])*/
+}, [])
 
 
 import { useState, useRef, useEffect } from 'react';
