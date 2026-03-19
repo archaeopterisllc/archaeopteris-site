@@ -1,4 +1,8 @@
 'use client';
+import { useRouter } from 'next/navigation'
+// trong function:
+//const router = useRouter()
+
 
 // components/blog-page.tsx
 // Usage: pass `dict` from your getDictionary(locale) call
@@ -48,6 +52,9 @@ samplePosts: Post[];
 };
 
 export default function BlogPage({ dict, locale = 'en' }: { dict: BlogDict; locale?: string }) {
+//import { useRouter } from 'next/navigation'
+// trong function:
+const router = useRouter()
 
 //export default function BlogPage({ dict }: { dict: BlogDict }) {
 const [activeTab, setActiveTab] = useState<'browse' | 'write'>('browse');
@@ -207,7 +214,10 @@ return (
 
         {/* Featured */}
         {filtered[0] && (
-          <div className="arch-card" style={s.featured}>
+          <div className="arch-card" style={s.featured}
+            
+            onClick={() => router.push(`/${locale}/industry/blog/${filtered[0].slug || ''}`)}>
+
             <div style={s.featuredTop}>
               <span style={{
                 ...s.featuredBadge,
@@ -233,7 +243,10 @@ return (
         {/* Grid */}
         <div style={s.grid}>
           {filtered.slice(1).map((post) => (
-            <div key={post.title} className="arch-card" style={s.card}>
+            <div key={post.title} className="arch-card" style={s.card}
+              
+             onClick={() => router.push(`/${locale}/industry/blog/${post.slug || ''}`)}>
+
               <div style={s.cardTop}>
                 <span style={{ ...s.catLabel, color: accentColor(post.accent) }}>
                   {post.category}
