@@ -227,7 +227,7 @@ return (
               <span style={s.metaDot}>·</span>
               <span style={s.meta}>{filtered[0].readTime} {dict.readMore}</span>
             </div>
-          </Link>
+          
             <h2 style={s.featuredTitle}>{filtered[0].title}</h2>
             <p style={s.excerpt}>{filtered[0].excerpt}</p>
             <div style={s.tagRow}>
@@ -235,6 +235,7 @@ return (
               <span style={{ ...s.arrow, color: accentColor(filtered[0].accent) }}>→</span>
             </div>
           </div>
+      </Link>
         )}
 
         {/* Grid */}
@@ -251,7 +252,7 @@ return (
                 <span style={s.metaDot}>·</span>
                 <span style={s.meta}>{post.readTime} {dict.readMore}</span>
               </div>
-              </Link>
+              
               <h3 style={s.cardTitle}>{post.title}</h3>
               <p style={s.cardExcerpt}>{post.excerpt}</p>
               <div style={s.tagRow}>
@@ -264,6 +265,7 @@ return (
 
         {filtered.length === 0 && (
           <p style={s.empty}>{dict.noArticles}</p>
+      </Link>
         )}
       </div>
     )}
