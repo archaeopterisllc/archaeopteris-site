@@ -27,13 +27,18 @@ ${keywords ? `**Keywords:** ${keywords}` : ''}
 **Tone:** ${tone || 'professional'}
 **Language:** ${locale === 'vi' ? 'Vietnamese' : 'English'}
 **Audience:** Prop traders, brokers, fintech engineers
+**Company:** Archaeopteris LLC
+**Website:** archaeopteris.us
+**Email:** contact@archaeopteris.us
+- Never use archaeopteris.com, always use archaeopteris.us
+
 
 Requirements:
 - Write in Markdown
 - Strong hook opening
 - 3-5 sections with ## headings
 - Include technical depth: numbers, protocols, specifics
-- End with a CTA relevant to trading infrastructure or development services
+- End with a CTA mentioning Archaeopteris LLC (website: archaeopteris.us, email: contact@archaeopteris.us)
 - 600-900 words
 - Return only Markdown content, no preamble.`
 
