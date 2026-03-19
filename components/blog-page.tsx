@@ -82,10 +82,20 @@ const posts: Post[] = dict.samplePosts.map((p, i) => ({
 ...p,
 accent: i % 2 === 0 ? 'green' : 'blue',
 }));*/
-const posts: Post[] = (dbPosts.length > 0 ? dbPosts : dict.samplePosts).map((p, i) => ({
+/*const posts: Post[] = (dbPosts.length > 0 ? dbPosts : dict.samplePosts).map((p, i) => ({
   ...p,
   accent: i % 2 === 0 ? 'green' : 'blue',
+}))*/
+const posts: Post[] = (dbPosts.length > 0 ? dbPosts : dict.samplePosts).map((p: any, i) => ({
+  title: p.title || '',
+  category: p.category || 'Fintech',
+  date: p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : p.date || '',
+  readTime: p.readTime || '5',
+  excerpt: p.excerpt || p.content?.slice(0, 150).replace(/#+\s/g, '') + '...' || '',
+  tags: p.tags || [],
+  accent: i % 2 === 0 ? 'green' : 'blue',
 }))
+
 
 
 const allCategories = [dict.catAll, ...Object.values(dict.categories)];
