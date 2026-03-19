@@ -2,7 +2,7 @@
 
 // components/blog-page.tsx
 // Usage: pass `dict` from your getDictionary(locale) call
-const [dbPosts, setDbPosts] = useState<Post[]>([])
+/*const [dbPosts, setDbPosts] = useState<Post[]>([])
 
 useEffect(() => {
   fetch('/api/posts?status=published')
@@ -10,7 +10,7 @@ useEffect(() => {
     .then(data => {
       if (data.posts?.length > 0) setDbPosts(data.posts)
     })
-}, [])
+}, [])*/
 
 
 import { useState, useRef, useEffect } from 'react';
@@ -57,7 +57,18 @@ const [draft, setDraft] = useState('');
 const [loading, setLoading] = useState(false);
 const [error, setError] = useState('');
 const [copied, setCopied] = useState(false);
-const draftRef, dbPosts = useRef<HTMLDivElement>(null);
+const draftRef = useRef<HTMLDivElement>(null);
+
+const [dbPosts, setDbPosts] = useState<Post[]>([])
+
+useEffect(() => {
+  fetch('/api/posts?status=published')
+    .then(r => r.json())
+    .then(data => {
+      if (data.posts?.length > 0) setDbPosts(data.posts)
+    })
+}, [])
+
 
 const tones = [
 { key: 'tone1', label: dict.tone1 },
