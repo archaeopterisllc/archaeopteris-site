@@ -211,7 +211,7 @@ return (
         {filtered[0] && (
     
   <Link href={`/${locale}/industry/blog/${filtered[0].slug || filtered[0].title?.toLowerCase().replace(/\s+/g, '-')}`}>
-    <div className="arch-card" style={s.featured}>
+    
 
           <div className="arch-card" style={s.featured}>
             <div style={s.featuredTop}>
