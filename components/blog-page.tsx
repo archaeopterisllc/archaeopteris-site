@@ -1,11 +1,26 @@
 'use client';
+import { useRouter } from 'next/navigation'
+// trong function:
+//const router = useRouter()
+
 
 // components/blog-page.tsx
 // Usage: pass `dict` from your getDictionary(locale) call
+/*const [dbPosts, setDbPosts] = useState<Post[]>([])
 
-import { useState, useRef } from 'react';
+useEffect(() => {
+  fetch('/api/posts?status=published')
+    .then(r => r.json())
+    .then(data => {
+      if (data.posts?.length > 0) setDbPosts(data.posts)
+    })
+}, [])*/
+
+
+import { useState, useRef, useEffect } from 'react';
 
 type Post = {
+slug?: string;  // thêm dòng này
 title: string;
 category: string;
 date: string;
@@ -37,8 +52,13 @@ categories: Record<string, string>;
 samplePosts: Post[];
 };
 
-export default function BlogPage({ dict }: { dict: BlogDict }) {
-const [activeTab, setActiveTab] = useState<'browse' | 'wirte'>('browse');
+export default function BlogPage({ dict, locale = 'en' }: { dict: BlogDict; locale?: string }) {
+//import { useRouter } from 'next/navigation'
+// trong function:
+const router = useRouter()
+
+//export default function BlogPage({ dict }: { dict: BlogDict }) {
+const [activeTab, setActiveTab] = useState<'browse' | 'write'>('browse');
 const [activeCategory, setActiveCategory] = useState(dict.catAll);
 const [topic, setTopic] = useState();
 const [keywords, setKeywords] = useState();
@@ -49,6 +69,17 @@ const [error, setError] = useState('');
 const [copied, setCopied] = useState(false);
 const draftRef = useRef<HTMLDivElement>(null);
 
+const [dbPosts, setDbPosts] = useState<Post[]>([])
+
+useEffect(() => {
+  fetch('/api/posts?status=published')
+    .then(r => r.json())
+    .then(data => {
+      if (data.posts?.length > 0) setDbPosts(data.posts)
+    })
+}, [])
+
+
 const tones = [
 { key: 'tone1', label: dict.tone1 },
 { key: 'tone2', label: dict.tone2 },
@@ -56,11 +87,27 @@ const tones = [
 { key: 'tone4', label: dict.tone4 },
 ];
 
-// Assign alternating accents
+/*// Assign alternating accents
 const posts: Post[] = dict.samplePosts.map((p, i) => ({
 ...p,
 accent: i % 2 === 0 ? 'green' : 'blue',
-}));
+}));*/
+/*const posts: Post[] = (dbPosts.length > 0 ? dbPosts : dict.samplePosts).map((p, i) => ({
+  ...p,
+  accent: i % 2 === 0 ? 'green' : 'blue',
+}))*/
+const posts: Post[] = (dbPosts.length > 0 ? dbPosts : dict.samplePosts).map((p: any, i) => ({
+  slug: p.slug,  // thêm dòng này
+  title: p.title || '',
+  category: p.category || 'Fintech',
+  date: p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : p.date || '',
+  readTime: p.readTime || '5',
+  excerpt: p.excerpt || p.content?.slice(0, 150).replace(/#+\s/g, '') + '...' || '',
+  tags: p.tags || [],
+  accent: i % 2 === 0 ? 'green' : 'blue',
+}))
+
+
 
 const allCategories = [dict.catAll, ...Object.values(dict.categories)];
 
@@ -83,6 +130,7 @@ body: JSON.stringify({
 title: topic,
 keywords,
 tone: tones.find((t) => t.key === tone)?.label ?? 'professional',
+locale: locale,
 }),
 });
 const data = await res.json();
@@ -169,7 +217,16 @@ return (
 
         {/* Featured */}
         {filtered[0] && (
-          <div className="arch-card" style={s.featured}>
+          <div className="arch-card" style={s.featured}
+            onClick={() => {
+              //alert(`slug: ${filtered[0].slug} | locale: ${locale}`)
+ // console.log('slug:', filtered[0].slug)
+ // console.log('locale:', locale)
+  router.push(`/${locale}/industry/blog/${filtered[0].slug || ''}`)
+}}>
+
+            
+
             <div style={s.featuredTop}>
               <span style={{
                 ...s.featuredBadge,
@@ -195,7 +252,10 @@ return (
         {/* Grid */}
         <div style={s.grid}>
           {filtered.slice(1).map((post) => (
-            <div key={post.title} className="arch-card" style={s.card}>
+            <div key={post.title} className="arch-card" style={s.card}
+              
+             onClick={() => router.push(`/${locale}/industry/blog/${post.slug || ''}`)}>
+
               <div style={s.cardTop}>
                 <span style={{ ...s.catLabel, color: accentColor(post.accent) }}>
                   {post.category}

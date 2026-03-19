@@ -99,7 +99,7 @@ export default async function BlogRoute({
   return (
   <main className="min-h-screen bg-background">
     <Navbar locale={locale} langDict={dict.language} navDict={dict.nav} />
-    <BlogPage dict={t} />
+    <BlogPage dict={t} locale={locale} />
     <Footer dict={dict.common} navDict={dict.nav} locale={locale} />
   </main>
 )
