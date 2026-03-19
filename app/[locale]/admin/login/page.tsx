@@ -29,7 +29,10 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/en/admin')
+   
+    //router.push('/en/admin')
+    window.location.href = '/en/admin'
+
   }
 
   return (
