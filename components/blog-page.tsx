@@ -57,7 +57,7 @@ const [draft, setDraft] = useState('');
 const [loading, setLoading] = useState(false);
 const [error, setError] = useState('');
 const [copied, setCopied] = useState(false);
-const draftRef = useRef<HTMLDivElement>(null);
+const draftRef, dbPosts = useRef<HTMLDivElement>(null);
 
 const tones = [
 { key: 'tone1', label: dict.tone1 },
