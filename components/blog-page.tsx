@@ -12,6 +12,7 @@ useEffect(() => {
     })
 }, [])*/
 
+import Link from 'next/link'
 
 import { useState, useRef, useEffect } from 'react';
 
@@ -204,9 +205,14 @@ return (
             </button>
           ))}
         </div>
+        
 
         {/* Featured */}
         {filtered[0] && (
+    
+  <Link href={`/${locale}/industry/blog/${filtered[0].slug || filtered[0].title?.toLowerCase().replace(/\s+/g, '-')}`}>
+    <div className="arch-card" style={s.featured}>
+
           <div className="arch-card" style={s.featured}>
             <div style={s.featuredTop}>
               <span style={{
@@ -221,6 +227,7 @@ return (
               <span style={s.metaDot}>·</span>
               <span style={s.meta}>{filtered[0].readTime} {dict.readMore}</span>
             </div>
+          </Link>
             <h2 style={s.featuredTitle}>{filtered[0].title}</h2>
             <p style={s.excerpt}>{filtered[0].excerpt}</p>
             <div style={s.tagRow}>
@@ -233,6 +240,9 @@ return (
         {/* Grid */}
         <div style={s.grid}>
           {filtered.slice(1).map((post) => (
+    <Link key={post.title} href={`/${locale}/industry/blog/${post.slug || post.title?.toLowerCase().replace(/\s+/g, '-')}`}>
+  <div className="arch-card" style={s.card}>
+
             <div key={post.title} className="arch-card" style={s.card}>
               <div style={s.cardTop}>
                 <span style={{ ...s.catLabel, color: accentColor(post.accent) }}>
@@ -241,6 +251,7 @@ return (
                 <span style={s.metaDot}>·</span>
                 <span style={s.meta}>{post.readTime} {dict.readMore}</span>
               </div>
+              </Link>
               <h3 style={s.cardTitle}>{post.title}</h3>
               <p style={s.cardExcerpt}>{post.excerpt}</p>
               <div style={s.tagRow}>
