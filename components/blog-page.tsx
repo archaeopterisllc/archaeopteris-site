@@ -129,7 +129,7 @@ headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
 title: topic,
 keywords,
-tone: tones.find((t) => t.key === tone)?.label ?? 'professional',
+tone: tones.find((t) => t.key === tone)?.label ?? 'professional', local,
 }),
 });
 const data = await res.json();
