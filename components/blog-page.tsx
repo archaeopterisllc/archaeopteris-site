@@ -245,7 +245,7 @@ return (
     <Link key={post.title} href={`/${locale}/industry/blog/${post.slug || post.title?.toLowerCase().replace(/\s+/g, '-')}`}>
   <div className="arch-card" style={s.card}>
 
-            <div key={post.title} className="arch-card" style={s.card}>
+            
               <div style={s.cardTop}>
                 <span style={{ ...s.catLabel, color: accentColor(post.accent) }}>
                   {post.category}
