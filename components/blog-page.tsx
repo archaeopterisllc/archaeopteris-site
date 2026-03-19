@@ -47,7 +47,9 @@ categories: Record<string, string>;
 samplePosts: Post[];
 };
 
-export default function BlogPage({ dict }: { dict: BlogDict }) {
+export default function BlogPage({ dict, locale = 'en' }: { dict: BlogDict; locale?: string }) {
+
+//export default function BlogPage({ dict }: { dict: BlogDict }) {
 const [activeTab, setActiveTab] = useState<'browse' | 'write'>('browse');
 const [activeCategory, setActiveCategory] = useState(dict.catAll);
 const [topic, setTopic] = useState();
