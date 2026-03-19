@@ -1,5 +1,5 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'
 // trong function:
 //const router = useRouter()
 
