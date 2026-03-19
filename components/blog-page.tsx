@@ -2,6 +2,16 @@
 
 // components/blog-page.tsx
 // Usage: pass `dict` from your getDictionary(locale) call
+const [dbPosts, setDbPosts] = useState<Post[]>([])
+
+useEffect(() => {
+  fetch('/api/posts?status=published')
+    .then(r => r.json())
+    .then(data => {
+      if (data.posts?.length > 0) setDbPosts(data.posts)
+    })
+}, [])
+
 
 import { useState, useRef } from 'react';
 
@@ -56,11 +66,16 @@ const tones = [
 { key: 'tone4', label: dict.tone4 },
 ];
 
-// Assign alternating accents
+/*// Assign alternating accents
 const posts: Post[] = dict.samplePosts.map((p, i) => ({
 ...p,
 accent: i % 2 === 0 ? 'green' : 'blue',
-}));
+}));*/
+const posts: Post[] = (dbPosts.length > 0 ? dbPosts : dict.samplePosts).map((p, i) => ({
+  ...p,
+  accent: i % 2 === 0 ? 'green' : 'blue',
+}))
+
 
 const allCategories = [dict.catAll, ...Object.values(dict.categories)];
 
