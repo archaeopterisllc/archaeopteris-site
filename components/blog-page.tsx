@@ -218,9 +218,9 @@ return (
         {filtered[0] && (
           <div className="arch-card" style={s.featured}
             onClick={() => {
-              alert(`slug: ${filtered[0].slug} | locale: ${locale}`)
-  console.log('slug:', filtered[0].slug)
-  console.log('locale:', locale)
+              //alert(`slug: ${filtered[0].slug} | locale: ${locale}`)
+ // console.log('slug:', filtered[0].slug)
+ // console.log('locale:', locale)
   router.push(`/${locale}/industry/blog/${filtered[0].slug || ''}`)
 }}>
 
