@@ -261,7 +261,7 @@ return (
                 <span style={{ ...s.arrow, color: accentColor(post.accent), marginLeft: "auto" }}>→</span>
               </div>
             </div>
-          ))}
+          )}
         </div>
 
         {filtered.length === 0 && (
