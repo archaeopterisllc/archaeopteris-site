@@ -20,6 +20,7 @@ useEffect(() => {
 import { useState, useRef, useEffect } from 'react';
 
 type Post = {
+slug?: string;  // thêm dòng này
 title: string;
 category: string;
 date: string;
@@ -96,6 +97,7 @@ accent: i % 2 === 0 ? 'green' : 'blue',
   accent: i % 2 === 0 ? 'green' : 'blue',
 }))*/
 const posts: Post[] = (dbPosts.length > 0 ? dbPosts : dict.samplePosts).map((p: any, i) => ({
+  slug: p.slug,  // thêm dòng này
   title: p.title || '',
   category: p.category || 'Fintech',
   date: p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : p.date || '',
