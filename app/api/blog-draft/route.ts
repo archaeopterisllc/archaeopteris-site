@@ -49,7 +49,7 @@ Requirements:
 
     const { text } = await generateText({
       //model: groq('qwen/qwen3-32b'),
-      model: openrouter('qwen/qwen3-next-80b-a3b-instruct:free'),
+      model: openrouter('qwen/qwen3.6-plus-preview:free'),
 
       messages: [{ role: 'user', content: prompt }],
     })
