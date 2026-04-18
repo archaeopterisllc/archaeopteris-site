@@ -43,7 +43,7 @@ Requirements:
 - Return only Markdown content, no preamble.`
 
     const { text } = await generateText({
-      model: groq('llama-3.3-70b-versatile'),
+      model: groq('qwen/qwen3-32b'),
       messages: [{ role: 'user', content: prompt }],
     })
 
