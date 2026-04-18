@@ -35,7 +35,7 @@ export function Certificates() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-3">
-            Certified Trader
+          <span className="text-white">Certified </span><span className="text-red-500">Trader</span>
           </h2>
           <p className="text-muted-foreground text-lg">
             Verified by leading proprietary trading firms
