@@ -52,7 +52,7 @@ export function Certificates() {
                   src={cert.image}
                   alt={`${cert.firm} ${cert.type}`}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
               <div className="flex flex-col gap-1">
