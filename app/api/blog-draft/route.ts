@@ -2,15 +2,15 @@ import { createOpenAI } from '@ai-sdk/openai'
 import { generateText } from 'ai'
 import { createClient } from '@supabase/supabase-js'
 
-const openrouter = createOpenAI({
+/*const openrouter = createOpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
   apiKey: process.env.OPENROUTER_API_KEY,
-})
-/*
+})*/
+
 const groq = createOpenAI({
   baseURL: 'https://api.groq.com/openai/v1',
   apiKey: process.env.GROQ_API_KEY,
-})*/
+})
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,8 +48,8 @@ Requirements:
 - Return only Markdown content, no preamble.`
 
     const { text } = await generateText({
-      //model: groq('qwen/qwen3-32b'),
-      model: openrouter('qwen/qwen3.6-plus-preview:free'),
+      model: groq('qwen/qwen3-32b'),
+      //model: openrouter('qwen/qwen3.6-plus-preview:free'),
 
       messages: [{ role: 'user', content: prompt }],
     })
