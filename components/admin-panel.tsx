@@ -12,6 +12,8 @@ type Post = {
   tone: string
   created_at: string
   updated_at: string
+  content_en?: string
+  content_vi?: string
 }
 
 export default function AdminPanel() {
@@ -34,20 +36,53 @@ export default function AdminPanel() {
 
   const handleSelect = (post: Post) => {
     setSelected(post)
-    setContent(post.content)
-  }
+   // setContent(post.content)
+   setContent(post.locale === 'vi' ? post.content_vi : post.content_en)
 
-  const handleSave = async () => {
+  }
+const handleSave = async () => {
+  if (!selected) return
+  setLoading(true)
+  
+  // Auto translate sang locale còn lại
+  const translateRes = await fetch('/api/translate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      content, 
+      fromLocale: selected.locale 
+    })
+  })
+  const { translated } = await translateRes.json()
+
+  await fetch(`/api/posts/${selected.id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      content_en: selected.locale === 'vi' ? translated : content,
+      content_vi: selected.locale === 'vi' ? content : translated
+    })
+  })
+  setLoading(false)
+  fetchPosts()
+}
+
+ /* const handleSave = async () => {
     if (!selected) return
     setLoading(true)
     await fetch(`/api/posts/${selected.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content }),
+      //body: JSON.stringify({ content }),
+      body: JSON.stringify({ 
+  content_en: post.locale === 'vi' ? undefined : content,
+  content_vi: post.locale === 'vi' ? content : undefined
+}),
+
     })
     setLoading(false)
     fetchPosts()
-  }
+  }*/
 
   const handlePublish = async () => {
     if (!selected) return
