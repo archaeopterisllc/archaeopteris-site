@@ -133,7 +133,7 @@ const [enResult, viResult] = await Promise.all([
 
     if (error) console.error('Supabase error:', error)
 
-    return Response.json({ draft: enResult.text, postId: post?.id })
+    return Response.json({ draft: locale === 'vi' ? viResult.text : enResult.text, postId: post?.id })
   } catch (error) {
     console.error('Blog draft error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })
