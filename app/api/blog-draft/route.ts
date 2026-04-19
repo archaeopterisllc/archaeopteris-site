@@ -113,6 +113,7 @@ const [enResult, viResult] = await Promise.all([
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .slice(0, 80)
+      + '-' + Date.now()
 
     const { data: post, error } = await supabase
       .from('posts')
