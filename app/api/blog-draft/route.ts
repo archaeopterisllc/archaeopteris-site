@@ -24,8 +24,47 @@ export async function POST(req: Request) {
     if (!title) {
       return Response.json({ error: 'Title is required' }, { status: 400 })
     }
+const promptEN = `You are an expert fintech writer for Archaeopteris LLC.
+**Topic:** ${title}
+${keywords ? `**Keywords:** ${keywords}` : ''}
+**Tone:** ${tone || 'professional'}
+**Language:** Write entirely in English only.
+**Audience:** Prop traders, brokers, fintech engineers
+**Company:** Archaeopteris LLC
+**Website:** archaeopteris.us
+**Email:** contact@archaeopteris.us
+- Never use archaeopteris.com, always use archaeopteris.us
 
-    const prompt = `You are an expert fintech writer for Archaeopteris LLC. Write a professional blog post draft:
+Requirements:
+- Write in Markdown
+- Strong hook opening
+- 3-5 sections with ## headings
+- Include technical depth: numbers, protocols, specifics
+- End with a CTA mentioning Archaeopteris LLC
+- 600-900 words
+- Return only Markdown content, no preamble.`
+
+const promptVI = `Bạn là chuyên gia viết blog fintech cho Archaeopteris LLC.
+**Chủ đề:** ${title}
+${keywords ? `**Từ khóa:** ${keywords}` : ''}
+**Giọng văn:** ${tone || 'chuyên nghiệp'}
+**Ngôn ngữ:** Viết hoàn toàn bằng tiếng Việt, không dùng tiếng Anh.
+**Đối tượng:** Prop traders, brokers, kỹ sư fintech
+**Công ty:** Archaeopteris LLC
+**Website:** archaeopteris.us
+**Email:** contact@archaeopteris.us
+- Không dùng archaeopteris.com, luôn dùng archaeopteris.us
+
+Yêu cầu:
+- Viết bằng Markdown
+- Mở đầu mạnh, thu hút
+- 3-5 phần với ## headings
+- Có chiều sâu kỹ thuật: số liệu, giao thức, chi tiết cụ thể
+- Kết thúc với CTA nhắc đến Archaeopteris LLC
+- 600-900 từ
+- Chỉ trả về nội dung Markdown, không có lời mở đầu.`
+
+    /*const prompt = `You are an expert fintech writer for Archaeopteris LLC. Write a professional blog post draft:
 
     IMPORTANT: Respond ONLY in ${locale === 'vi' ? 'Vietnamese' : 'English'}. Do not use any other language.
 
@@ -47,7 +86,7 @@ Requirements:
 - Include technical depth: numbers, protocols, specifics
 - End with a CTA mentioning Archaeopteris LLC (website: archaeopteris.us, email: contact@archaeopteris.us)
 - 600-900 words
-- Return only Markdown content, no preamble.`
+- Return only Markdown content, no preamble.`*/
 
     const { text } = await generateText({
       model: groq('qwen/qwen3-32b'),
