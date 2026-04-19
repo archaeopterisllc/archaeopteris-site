@@ -1,5 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation'
+import { StringifyOptions } from 'querystring';
 // trong function:
 //const router = useRouter()
 
@@ -28,6 +29,8 @@ readTime: string;
 excerpt: string;
 tags: string[];
 accent?: 'green' | 'blue';
+content_en?: String;
+content_vi?: String;
 };
 
 type BlogDict = {
@@ -102,7 +105,8 @@ const posts: Post[] = (dbPosts.length > 0 ? dbPosts : dict.samplePosts).map((p: 
   category: p.category || 'Fintech',
   date: p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : p.date || '',
   readTime: p.readTime || '5',
-  excerpt: p.excerpt || p.content?.slice(0, 150).replace(/#+\s/g, '') + '...' || '',
+  excerpt: p.excerpt || (locale === 'vi' ? p.content_vi : p.content_en)
+?.slice(0, 150).replace(/#+\s/g, '') + '...' || '',
   tags: p.tags || [],
   accent: i % 2 === 0 ? 'green' : 'blue',
 }))
