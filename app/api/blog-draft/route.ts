@@ -88,12 +88,24 @@ Requirements:
 - 600-900 words
 - Return only Markdown content, no preamble.`*/
 
-    const { text } = await generateText({
+   /* const { text } = await generateText({
       model: groq('qwen/qwen3-32b'),
       //model: openrouter('qwen/qwen3.6-plus-preview:free'),
 
       messages: [{ role: 'user', content: promptEN }],
-    })
+    })*/
+   // Thay generateText hiện tại bằng:
+const [enResult, viResult] = await Promise.all([
+  generateText({
+    model: groq('llama-3.3-70b-versatile'),
+    messages: [{ role: 'user', content: promptEN }]
+  }),
+  generateText({
+    model: groq('llama-3.3-70b-versatile'),
+    messages: [{ role: 'user', content: promptVI }]
+  })
+])
+
 
     // Auto save vào Supabase
     const slug = title
@@ -109,7 +121,9 @@ Requirements:
         slug,
         keywords,
         tone,
-        content: text,
+        content_en: enResult.text,
+        content_vi: viResult.text,
+
         locale: locale || 'en',
         status: 'draft',
       })
