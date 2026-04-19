@@ -92,7 +92,7 @@ Requirements:
       model: groq('qwen/qwen3-32b'),
       //model: openrouter('qwen/qwen3.6-plus-preview:free'),
 
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: promptEN }],
     })
 
     // Auto save vào Supabase
