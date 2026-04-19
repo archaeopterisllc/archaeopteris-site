@@ -12,6 +12,8 @@ type Post = {
   tone: string
   created_at: string
   updated_at: string
+  content_en?: string
+  content_vi?: string
 }
 
 export default function AdminPanel() {

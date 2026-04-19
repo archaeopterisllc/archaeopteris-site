@@ -29,8 +29,8 @@ readTime: string;
 excerpt: string;
 tags: string[];
 accent?: 'green' | 'blue';
-content_en?: String;
-content_vi?: String;
+content_en?: string;
+content_vi?: string;
 };
 
 type BlogDict = {
