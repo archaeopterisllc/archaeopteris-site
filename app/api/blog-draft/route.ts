@@ -27,6 +27,8 @@ export async function POST(req: Request) {
 
     const prompt = `You are an expert fintech writer for Archaeopteris LLC. Write a professional blog post draft:
 
+    IMPORTANT: Respond ONLY in ${locale === 'vi' ? 'Vietnamese' : 'English'}. Do not use any other language.
+
 **Topic:** ${title}
 ${keywords ? `**Keywords:** ${keywords}` : ''}
 **Tone:** ${tone || 'professional'}
