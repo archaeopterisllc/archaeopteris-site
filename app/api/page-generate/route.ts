@@ -15,15 +15,17 @@ Generate a complete Next.js page component for the "${slug}" page.
 
 Description: ${description}
 
-Requirements:
-- Use Tailwind CSS only
-- Dark theme (bg-background, text-foreground)
-- Emerald green accent: #10b981
-- Include: Hero section, main content sections, CTA
-- Bilingual: accept a locale prop, show EN/VI content inline using ternary
-- Professional fintech style
-- Company: Archaeopteris LLC, website: archaeopteris.us
-- Return ONLY the TSX component code, no explanation, no markdown backticks.`
+STRICT Requirements:
+- Use Tailwind CSS only, no external libraries
+- Dark theme: bg-background, text-foreground
+- Emerald green accent: text-emerald-400, border-emerald-500, bg-emerald-600
+- Hero section + 2-3 content sections + CTA at bottom
+- BILINGUAL: every text string must use ternary: locale === 'vi' ? 'Vietnamese text' : 'English text'
+- Component signature: export default function Page({ params }: { params: { locale: string } })
+- First line inside component: const locale = params.locale
+- Professional fintech style matching Archaeopteris LLC brand
+- Company: Archaeopteris LLC, website: archaeopteris.us, email: contact@archaeopteris.us
+- Return ONLY the TSX code, no explanation, no markdown backticks, no comments outside JSX.`
 
     const { text } = await generateText({
       model: groq('llama-3.3-70b-versatile'),
