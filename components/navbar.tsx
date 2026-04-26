@@ -18,6 +18,21 @@ export function Navbar({ locale, langDict, navDict }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
+  const [dynamicPages, setDynamicPages] = useState<{href: string, label: string}[]>([])
+
+  useEffect(() => {
+    fetch('/api/pages')
+      .then(res => res.json())
+      .then(data => {
+        const pages = (data.pages || [])
+          .filter((p: any) => p.status === 'published' && !['home', 'about', 'services'].includes(p.slug))
+          .map((p: any) => ({
+            href: `/${locale}/${p.slug}`,
+            label: locale === 'vi' ? p.title_vi || p.title_en : p.title_en
+          }))
+        setDynamicPages(pages)
+      })
+  }, [locale])
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -61,6 +76,14 @@ export function Navbar({ locale, langDict, navDict }: NavbarProps) {
                     : "text-foreground hover:text-primary hover:bg-secondary/50"
                 }`}
               >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+          <div className="hidden md:flex items-center gap-1">
+            {dynamicPages.map(link => (
+              <Link key={link.href} href={link.href}
+                className="px-3 py-1.5 rounded-lg text-sm transition-colors text-foreground hover:text-primary hover:bg-secondary/50">
                 {link.label}
               </Link>
             ))}
