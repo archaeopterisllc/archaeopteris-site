@@ -6,6 +6,18 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+export async function generateStaticParams() {
+  const { data } = await supabase
+    .from('pages')
+    .select('slug')
+    .eq('status', 'published')
+
+  const locales = ['en', 'vi']
+  return (data || []).flatMap(page =>
+    locales.map(locale => ({ locale, slug: page.slug }))
+  )
+}
+
 export default async function DynamicPage({ params }: { params: { locale: string; slug: string } }) {
   const { locale, slug } = params
 
