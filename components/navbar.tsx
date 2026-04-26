@@ -18,6 +18,21 @@ export function Navbar({ locale, langDict, navDict }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
+const [dynamicPages, setDynamicPages] = useState<{href: string, label: string}[]>([])
+
+useEffect(() => {
+  fetch('/api/pages')
+    .then(res => res.json())
+    .then(data => {
+      const pages = (data.pages || [])
+        .filter((p: any) => p.status === 'published')
+        .map((p: any) => ({
+          href: `/${locale}/${p.slug}`,
+          label: locale === 'vi' ? p.title_vi || p.title_en : p.title_en
+        }))
+      setDynamicPages(pages)
+    })
+}, [locale])
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -76,6 +91,12 @@ export function Navbar({ locale, langDict, navDict }: NavbarProps) {
             </button>
           </div>
         </nav>
+{dynamicPages.map(link => (
+  <Link key={link.href} href={link.href}
+    className="text-sm hover:text-primary transition-colors">
+    {link.label}
+  </Link>
+))}
 
         {mobileOpen && (
           <div className="absolute top-14 left-4 right-4 bg-background/95 backdrop-blur-md border border-border rounded-2xl shadow-lg p-3 flex flex-col gap-1">
