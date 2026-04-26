@@ -15,7 +15,7 @@ export default async function DynamicPage({ params }: {
   params: Promise<{ locale: string; slug: string }>
 }) {
   const { locale, slug } = await params
-  const dict = getDictionary(locale)
+  const dict = await getDictionary(locale)
 
   const { data: page } = await supabase
     .from('pages')
