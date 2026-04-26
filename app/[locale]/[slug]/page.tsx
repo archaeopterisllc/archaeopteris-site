@@ -5,11 +5,13 @@ export const dynamic = 'force-dynamic'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default async function DynamicPage({ params }: { params: { locale: string; slug: string } }) {
-  const { locale, slug } = params
+export default async function DynamicPage({ params }: {
+  params: Promise<{ locale: string; slug: string }>
+}) {
+  const { locale, slug } = await params
 
   const { data: page } = await supabase
     .from('pages')
