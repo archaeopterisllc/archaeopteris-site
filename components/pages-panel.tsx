@@ -26,7 +26,7 @@ export default function PagesPanel() {
   const fetchPages = async () => {
     const res = await fetch('/api/pages')
     const data = await res.json()
-    setPages(data.pages || [])
+    console.log('pages data:', data); setPages(data.pages || [])
   }
 
   const handleSelect = (page: Page) => {
