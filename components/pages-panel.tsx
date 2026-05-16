@@ -104,7 +104,7 @@ export default function PagesPanel() {
     await fetch('/api/pages', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: selected.id, status: 'published' })
+      body: JSON.stringify({ id: selected.id, status: 'published', tsx_content: generatedCode })
     })
     setSelected({ ...selected, status: 'published' })
     setLoading(false)
