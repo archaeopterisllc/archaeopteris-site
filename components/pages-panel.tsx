@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import LivePageRenderer from '@/components/live-page-renderer'
 
 type Page = {
   id: string
@@ -26,6 +27,7 @@ const [showStylePicker, setShowStylePicker] = useState(false)
 const [selectedStyles, setSelectedStyles] = useState<string[]>([])
 const [showTechPicker, setShowTechPicker] = useState(false)
 const [selectedTechs, setSelectedTechs] = useState<string[]>([])
+const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
 
   const [generatedCode, setGeneratedCode] = useState('')
   const [showGenerate, setShowGenerate] = useState(false)
