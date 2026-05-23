@@ -8,7 +8,17 @@ export default function LivePageRenderer({ code }: { code: string }) {
       code={code} 
       noInline={true}
       enableTypeScript={false}
-      scope={{ React: ReactLib, useState: ReactLib.useState, useEffect: ReactLib.useEffect, useRef: ReactLib.useRef }}
+      scope={{ 
+  React: ReactLib, 
+  useState: ReactLib.useState, 
+  useEffect: ReactLib.useEffect, 
+  useRef: ReactLib.useRef,
+  Math,
+  setTimeout,
+  clearTimeout
+}}
+
+      //scope={{ React: ReactLib, useState: ReactLib.useState, useEffect: ReactLib.useEffect, useRef: ReactLib.useRef }}
     >
       <LiveError className="text-red-500 p-4 text-sm" />
       <div className="w-full min-h-screen overflow-y-auto">
