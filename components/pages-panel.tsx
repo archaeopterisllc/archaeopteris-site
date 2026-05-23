@@ -369,7 +369,8 @@ useEffect(() => {
       >⚡ Live</button>
     </div>
     {previewMode === 'code'
-      ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} readOnly />
+      ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} onChange={e => setGeneratedCode(e.target.value)} />
+
       : <div ref={previewRef} className="border rounded overflow-y-auto" style={{height: '60vh'}}>
     <div style={{
       transform: `scale(${scale})`,
