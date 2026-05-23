@@ -370,7 +370,7 @@ useEffect(() => {
     </div>
     {previewMode === 'code'
       ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} readOnly />
-      : <div ref={previewRef} className="border rounded overflow-hidden" style={{height: '60vh'}}>
+      : <div ref={previewRef} className="border rounded overflow-y-auto" style={{height: '60vh'}}>
     <div style={{
       transform: `scale(${scale})`,
       transformOrigin: 'top left',
