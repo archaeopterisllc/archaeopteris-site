@@ -101,7 +101,11 @@ export default function PagesPanel() {
   const handlePublish = async () => {
     if (!selected) return
     setLoading(true)
-    const cleanCode = generatedCode.replace(/```jsx|```tsx|```/g, '').trim()
+    const cleanCode = generatedCode
+  .replace(/```jsx|```tsx|```/g, '')
+  .replace(/^import.*$/gm, '')
+  .trim()
+
 
     await fetch('/api/pages', {
       method: 'PATCH',
