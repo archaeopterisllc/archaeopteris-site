@@ -266,7 +266,11 @@ const styleOptions = [
 </button>
 {showStylePicker && (
   <div className="absolute z-10 bg-gray-900 border border-gray-700 rounded-xl p-4 mt-1 shadow-xl">
-    <p className="text-xs text-gray-400 mb-2">Select styles:</p>
+    <div className="flex justify-between items-center mb-2">
+  <p className="text-xs text-gray-400">Select styles:</p>
+  <button onClick={() => setShowStylePicker(false)} className="text-xs text-gray-500">✕</button>
+</div>
+
     <div className="flex flex-wrap gap-2">
       {styleOptions.map((style) => (
         <button
