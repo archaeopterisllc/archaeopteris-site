@@ -8,13 +8,15 @@ const groq = createOpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { slug, description, vibe } = await req.json()
+    const { slug, description, vibe, styles } = await req.json()
 
     const prompt = `You are an expert React/Next.js developer. Create a stunning, production-ready page component.
 
 Page: "${slug}"
 Description: ${description}
 Vibe: ${vibe || 'modern'}
+Style techniques: ${styles || 'glassmorphism dark'}
+
 
 Requirements:
 - Tailwind CSS only, dark theme (bg-gray-950, bg-gray-900)

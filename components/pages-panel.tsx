@@ -22,6 +22,8 @@ export default function PagesPanel() {
   const [tab, setTab] = useState<'en' | 'vi'>('en')
   const [description, setDescription] = useState('')
   const [vibe, setVibe] = useState<'mystical' | 'modern' | 'classical'>('modern')
+const [showStylePicker, setShowStylePicker] = useState(false)
+const [selectedStyles, setSelectedStyles] = useState<string[]>([])
 
   const [generatedCode, setGeneratedCode] = useState('')
   const [showGenerate, setShowGenerate] = useState(false)
@@ -93,7 +95,8 @@ export default function PagesPanel() {
     const res = await fetch('/api/page-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: selected.slug, description, vibe })
+      body: JSON.stringify({ slug: selected.slug, description, vibe, styles: selectedStyles.join(', ') })
+
 
     })
     const data = await res.json()
@@ -132,6 +135,11 @@ export default function PagesPanel() {
     setLoading(false)
     fetchPages()
   }
+const styleOptions = [
+  'Glassmorphism', 'Bento Grid', 'Magazine', 'Minimal Dark',
+  'Luxury Dark', 'Neon Glow', 'Gradient Mesh', 'Editorial',
+  'Dashboard', 'Parallax', 'Card Grid', 'Full Screen Hero'
+]
 
   return (
     <div className="flex max-w-7xl mx-auto px-4 py-10 gap-6">
@@ -250,6 +258,31 @@ export default function PagesPanel() {
     </button>
   ))}
 </div>
+<button
+  onClick={() => setShowStylePicker(!showStylePicker)}
+  className="px-3 py-1 text-xs rounded border border-gray-600 text-gray-400 hover:border-emerald-500"
+>
+  🎨 Styles {selectedStyles.length > 0 && `(${selectedStyles.length})`}
+</button>
+{showStylePicker && (
+  <div className="absolute z-10 bg-gray-900 border border-gray-700 rounded-xl p-4 mt-1 shadow-xl">
+    <p className="text-xs text-gray-400 mb-2">Select styles:</p>
+    <div className="flex flex-wrap gap-2">
+      {styleOptions.map((style) => (
+        <button
+          key={style}
+          onClick={() => setSelectedStyles(prev => 
+            prev.includes(style) ? prev.filter(s => s !== style) : [...prev, style]
+          )}
+          className={`px-2 py-1 text-xs rounded ${selectedStyles.includes(style) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}
+        >
+          {style}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
 
                 <textarea
                   className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
