@@ -105,6 +105,8 @@ const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
     })
     const data = await res.json()
     setGeneratedCode(data.code || '')
+    setPreviewMode('code')
+
     setLoading(false)
   }
 
@@ -346,15 +348,26 @@ const techOptions = [
                   {loading ? 'Generating...' : '✨ Generate TSX'}
                 </button>
                 {generatedCode && (
-                  <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">Copy và paste vào file page:</p>
-                    <textarea
-                      className="w-full h-64 bg-background border rounded p-3 text-xs font-mono resize-none outline-none"
-                      value={generatedCode}
-                      readOnly
-                    />
-                  </div>
-                )}
+  <div className="space-y-2">
+    <div className="flex gap-2 text-xs">
+      <button
+        onClick={() => setPreviewMode('code')}
+        className={`px-2 py-1 rounded border ${previewMode === 'code' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
+      >Code</button>
+      <button
+        onClick={() => setPreviewMode('live')}
+        className={`px-2 py-1 rounded border ${previewMode === 'live' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
+      >⚡ Live</button>
+    </div>
+    {previewMode === 'code'
+      ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} readOnly />
+      : <div className="border rounded overflow-y-auto" style={{height: '500px'}}>
+          <LivePageRenderer code={generatedCode} />
+        </div>
+    }
+  </div>
+)}
+
               </div>
             )}
 
