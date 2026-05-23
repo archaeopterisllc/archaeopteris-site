@@ -106,7 +106,6 @@ const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
     const data = await res.json()
     setGeneratedCode(data.code || '')
     setPreviewMode('code')
-
     setLoading(false)
   }
 
