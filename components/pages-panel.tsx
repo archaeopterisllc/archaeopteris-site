@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect , useRef} from 'react'
+import LivePageRenderer from '@/components/live-page-renderer'
 
 type Page = {
   id: string
@@ -21,6 +22,15 @@ export default function PagesPanel() {
   const [contentVi, setContentVi] = useState('')
   const [tab, setTab] = useState<'en' | 'vi'>('en')
   const [description, setDescription] = useState('')
+  const [vibe, setVibe] = useState<'mystical' | 'modern' | 'classical'>('modern')
+const [showStylePicker, setShowStylePicker] = useState(false)
+const [selectedStyles, setSelectedStyles] = useState<string[]>([])
+const [showTechPicker, setShowTechPicker] = useState(false)
+const [selectedTechs, setSelectedTechs] = useState<string[]>([])
+const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
+const previewRef = useRef<HTMLDivElement>(null)
+const [scale, setScale] = useState(1)
+
   const [generatedCode, setGeneratedCode] = useState('')
   const [showGenerate, setShowGenerate] = useState(false)
   const [showNewPage, setShowNewPage] = useState(false)
@@ -91,20 +101,29 @@ export default function PagesPanel() {
     const res = await fetch('/api/page-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: selected.slug, description })
+      body: JSON.stringify({ slug: selected.slug, description, vibe, styles: selectedStyles.join(', '), techs: selectedTechs.join(', ') })
+
+
     })
     const data = await res.json()
     setGeneratedCode(data.code || '')
+    setPreviewMode('code')
     setLoading(false)
   }
 
   const handlePublish = async () => {
     if (!selected) return
     setLoading(true)
+    const cleanCode = generatedCode
+  .replace(/```jsx|```tsx|```/g, '')
+  .replace(/^import.*$/gm, '')
+  .trim()
+
+
     await fetch('/api/pages', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: selected.id, status: 'published' })
+      body: JSON.stringify({ id: selected.id, status: 'published', tsx_content: cleanCode })
     })
     setSelected({ ...selected, status: 'published' })
     setLoading(false)
@@ -123,6 +142,36 @@ export default function PagesPanel() {
     setLoading(false)
     fetchPages()
   }
+const styleOptions = [
+  'Glassmorphism', 'Bento Grid', 'Magazine', 'Minimal Dark',
+  'Luxury Dark', 'Neon Glow', 'Gradient Mesh', 'Editorial',
+  'Dashboard', 'Parallax', 'Card Grid', 'Full Screen Hero',
+  'Neumorphism', 'Aurora Background', 'Frosted Glass',
+  'Brutalism', 'Memphis Design', 'Claymorphism',
+  'Retro Futurism', 'Cyberpunk', 'Japandi', 'Swiss Style'
+]
+
+
+const techOptions = [
+  'React Hooks', 'useState Animation', 'CSS Transitions',
+  'Parallax Scroll', 'Intersection Observer', 'CSS Grid',
+  'Flexbox', 'SVG Animation', 'Canvas', 'WebGL',
+  'Framer Motion', 'GSAP', 'Scroll Animations',
+  'Micro-interactions', 'Loading Skeletons', 'CSS Variables',
+  'Dark Mode Toggle', 'Lazy Loading', 'Infinite Scroll',
+  'Debounce', 'Virtual List', 'Code Splitting',
+  'Web Animations API', 'CSS Custom Properties',
+  'ResizeObserver', 'MutationObserver'
+]
+useEffect(() => {
+  if (!previewRef.current) return
+  const observer = new ResizeObserver(([entry]) => {
+    setScale(entry.contentRect.width / 1280)
+  })
+  observer.observe(previewRef.current)
+  return () => observer.disconnect()
+}, [previewMode])
+
 
   return (
     <div className="flex max-w-7xl mx-auto px-4 py-10 gap-6">
@@ -233,6 +282,67 @@ export default function PagesPanel() {
             {showGenerate && (
               <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
                 <p className="text-sm font-medium">✨ AI Generate Page Component</p>
+                <div className="flex gap-2 mb-2">
+  {(['mystical', 'modern', 'classical'] as const).map((v) => (
+    <button key={v} onClick={() => setVibe(v)}
+      className={`px-3 py-1 text-xs rounded capitalize ${vibe === v ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
+      {v}
+    </button>
+  ))}
+</div>
+<button
+  onClick={() => setShowStylePicker(!showStylePicker)}
+  className="px-3 py-1 text-xs rounded border border-gray-600 text-gray-400 hover:border-emerald-500"
+>
+  🎨 Styles {selectedStyles.length > 0 && `(${selectedStyles.length})`}
+</button>
+{showStylePicker && (
+  <div className="absolute z-10 bg-gray-900 border border-gray-700 rounded-xl p-4 mt-1 shadow-xl">
+    <div className="flex justify-between items-center mb-2">
+  <p className="text-xs text-gray-400">Select styles:</p>
+  <button onClick={() => setShowStylePicker(false)} className="text-xs text-gray-500">✕</button>
+</div>
+
+    <div className="flex flex-wrap gap-2">
+      {styleOptions.map((style) => (
+        <button
+          key={style}
+          onClick={() => setSelectedStyles(prev => 
+            prev.includes(style) ? prev.filter(s => s !== style) : [...prev, style]
+          )}
+          className={`px-2 py-1 text-xs rounded ${selectedStyles.includes(style) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}
+        >
+          {style}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
+<button
+  onClick={() => setShowTechPicker(!showTechPicker)}
+  className="px-3 py-1 text-xs rounded border border-gray-600 text-gray-400 hover:border-emerald-500"
+>
+  ⚡ Tech {selectedTechs.length > 0 && `(${selectedTechs.length})`}
+</button>
+
+{showTechPicker && (
+  <div className="absolute z-10 bg-gray-900 border border-gray-700 rounded-xl p-4 mt-1 shadow-xl">
+    <div className="flex justify-between items-center mb-2">
+      <p className="text-xs text-gray-400">Select tech:</p>
+      <button onClick={() => setShowTechPicker(false)} className="text-xs text-gray-500">✕</button>
+    </div>
+    <div className="flex flex-wrap gap-2">
+      {techOptions.map((tech) => (
+        <button key={tech} onClick={() => setSelectedTechs(prev => prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech])}
+          className={`px-2 py-1 text-xs rounded ${selectedTechs.includes(tech) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
+          {tech}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
                 <textarea
                   className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
                   value={description}
@@ -247,15 +357,35 @@ export default function PagesPanel() {
                   {loading ? 'Generating...' : '✨ Generate TSX'}
                 </button>
                 {generatedCode && (
-                  <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">Copy và paste vào file page:</p>
-                    <textarea
-                      className="w-full h-64 bg-background border rounded p-3 text-xs font-mono resize-none outline-none"
-                      value={generatedCode}
-                      readOnly
-                    />
-                  </div>
-                )}
+  <div className="space-y-2">
+    <div className="flex gap-2 text-xs">
+      <button
+        onClick={() => setPreviewMode('code')}
+        className={`px-2 py-1 rounded border ${previewMode === 'code' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
+      >Code</button>
+      <button
+        onClick={() => setPreviewMode('live')}
+        className={`px-2 py-1 rounded border ${previewMode === 'live' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
+      >⚡ Live</button>
+    </div>
+    {previewMode === 'code'
+      ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} onChange={e => setGeneratedCode(e.target.value)} />
+
+      : <div ref={previewRef} className="border rounded overflow-y-auto" style={{height: '60vh'}}>
+    <div style={{
+      transform: `scale(${scale})`,
+      transformOrigin: 'top left',
+      width: `${100 / scale}%`,
+      height: `${100 / scale}%`,
+    }}>
+      <LivePageRenderer code={generatedCode} />
+    </div>
+  </div>
+
+    }
+  </div>
+)}
+
               </div>
             )}
 
