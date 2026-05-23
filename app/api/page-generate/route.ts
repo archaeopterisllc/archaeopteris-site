@@ -10,21 +10,24 @@ export async function POST(req: Request) {
   try {
     const { slug, description } = await req.json()
 
-    const prompt = `You are an expert React/Next.js developer. Generate a stunning, modern page component.
+    const prompt = `You are an expert React/Next.js developer. Create a stunning, production-ready page component.
 
 Page: "${slug}"
 Description: ${description}
+Vibe: ${vibe || 'modern'}
 
-STRICT Requirements:
-- Use Tailwind CSS only
-- Dark theme: bg-gray-900, text-white
-- Emerald green (#10b981) and blue (#3b82f6) accents
-- Full hero section with gradient heading, subtitle, CTA button
-- 2-3 sections with glassmorphism cards (backdrop-blur, bg-white/10)
-- Smooth CSS animations (animate-pulse, animate-bounce, transition-all)
-- Bilingual: show VI and EN text together
-- Export as: render(<YourComponent />)
-- Return ONLY the JSX code, no imports, no explanation `
+Requirements:
+- Tailwind CSS only, dark theme (bg-gray-950, bg-gray-900)
+- Hero: min-h-screen, flex center, large gradient heading (from-emerald-400 via-teal-300 to-blue-500), subtitle, CTA button
+- Glassmorphism cards: bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl
+- Animations: transition-all duration-300 hover:scale-105 hover:bg-white/10
+- Grid sections: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
+- Typography: text-5xl font-black tracking-tight for hero, text-xl for subtitles
+- Spacing: py-24 px-6 max-w-7xl mx-auto for sections
+- Bilingual VI/EN inline
+- Mobile first responsive
+- End with: render(<App />)
+- Return ONLY JSX, no imports, no explanation, no backticks `
 
 
     const { text } = await generateText({
