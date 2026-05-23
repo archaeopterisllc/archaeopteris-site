@@ -26,7 +26,11 @@ Requirements:
 - Spacing: py-24 px-6 max-w-7xl mx-auto for sections
 - Bilingual VI/EN inline
 - Mobile first responsive
-- End with: render(<App />)
+- Hero: bg-gradient-to-br from-gray-950 via-emerald-950 to-gray-900, min-h-screen flex items-center justify-center text-center
+- Heading: text-6xl font-black bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent
+- Cards: bg-gray-800/50 backdrop-blur border border-gray-700 rounded-2xl p-6 hover:border-emerald-500 transition-all
+- CTA button: bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-8 py-4 rounded-full
+- Add emojis for visual interest
 - Return ONLY JSX, no imports, no explanation, no backticks
 - Use className NOT class (this is JSX not HTML)
 - Define a function component named App
