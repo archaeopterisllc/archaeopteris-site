@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { getDictionary } from '@/lib/i18n/dictionaries'
+import LivePageRenderer from '@/components/live-page-renderer'
+
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +35,7 @@ export default async function DynamicPage({ params }: {
     <main className="min-h-screen bg-background">
       <Navbar locale={locale} langDict={dict.language} navDict={dict.nav} />
     {page.tsx_content ? (
-  <div dangerouslySetInnerHTML={{ __html: page.tsx_content }} />
+  <LivePageRenderer code={page.tsx_content} />
 ) : (
   <div className="max-w-4xl mx-auto px-4 py-16">
     <h1 className="text-4xl font-bold mb-8">{title}</h1>

@@ -101,10 +101,12 @@ export default function PagesPanel() {
   const handlePublish = async () => {
     if (!selected) return
     setLoading(true)
+    const cleanCode = generatedCode.replace(/```jsx|```tsx|```/g, '').trim()
+
     await fetch('/api/pages', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: selected.id, status: 'published', tsx_content: generatedCode })
+      body: JSON.stringify({ id: selected.id, status: 'published', tsx_content: cleanCode })
     })
     setSelected({ ...selected, status: 'published' })
     setLoading(false)
