@@ -296,6 +296,29 @@ const techOptions = [
   </div>
 )}
 
+<button
+  onClick={() => setShowTechPicker(!showTechPicker)}
+  className="px-3 py-1 text-xs rounded border border-gray-600 text-gray-400 hover:border-emerald-500"
+>
+  ⚡ Tech {selectedTechs.length > 0 && `(${selectedTechs.length})`}
+</button>
+
+{showTechPicker && (
+  <div className="absolute z-10 bg-gray-900 border border-gray-700 rounded-xl p-4 mt-1 shadow-xl">
+    <div className="flex justify-between items-center mb-2">
+      <p className="text-xs text-gray-400">Select tech:</p>
+      <button onClick={() => setShowTechPicker(false)} className="text-xs text-gray-500">✕</button>
+    </div>
+    <div className="flex flex-wrap gap-2">
+      {techOptions.map((tech) => (
+        <button key={tech} onClick={() => setSelectedTechs(prev => prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech])}
+          className={`px-2 py-1 text-xs rounded ${selectedTechs.includes(tech) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
+          {tech}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
 
                 <textarea
                   className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
