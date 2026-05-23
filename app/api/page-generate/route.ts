@@ -8,7 +8,7 @@ const groq = createOpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { slug, description } = await req.json()
+    const { slug, description, vibe } = await req.json()
 
     const prompt = `You are an expert React/Next.js developer. Create a stunning, production-ready page component.
 
