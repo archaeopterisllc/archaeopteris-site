@@ -8,14 +8,14 @@ const groq = createOpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { slug, description, vibe, styles } = await req.json()
-
+    const { slug, description, vibe, styles, techs } = await req.json()
     const prompt = `You are an expert React/Next.js developer. Create a stunning, production-ready page component.
 
 Page: "${slug}"
 Description: ${description}
 Vibe: ${vibe || 'modern'}
 Style techniques: ${styles || 'glassmorphism dark'}
+Tech features: ${techs || 'CSS transitions, hover effects'}
 
 
 Requirements:

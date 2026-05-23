@@ -24,6 +24,8 @@ export default function PagesPanel() {
   const [vibe, setVibe] = useState<'mystical' | 'modern' | 'classical'>('modern')
 const [showStylePicker, setShowStylePicker] = useState(false)
 const [selectedStyles, setSelectedStyles] = useState<string[]>([])
+const [showTechPicker, setShowTechPicker] = useState(false)
+const [selectedTechs, setSelectedTechs] = useState<string[]>([])
 
   const [generatedCode, setGeneratedCode] = useState('')
   const [showGenerate, setShowGenerate] = useState(false)
@@ -95,7 +97,7 @@ const [selectedStyles, setSelectedStyles] = useState<string[]>([])
     const res = await fetch('/api/page-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: selected.slug, description, vibe, styles: selectedStyles.join(', ') })
+      body: JSON.stringify({ slug: selected.slug, description, vibe, styles: selectedStyles.join(', '), techs: selectedTechs.join(', ') })
 
 
     })
@@ -139,6 +141,13 @@ const styleOptions = [
   'Glassmorphism', 'Bento Grid', 'Magazine', 'Minimal Dark',
   'Luxury Dark', 'Neon Glow', 'Gradient Mesh', 'Editorial',
   'Dashboard', 'Parallax', 'Card Grid', 'Full Screen Hero'
+]
+
+const techOptions = [
+  'React Hooks', 'useState Animation', 'CSS Transitions',
+  'Parallax Scroll', 'Intersection Observer', 'CSS Grid',
+  'Flexbox', 'SVG Animation', 'Canvas', 'WebGL',
+  'Framer Motion', 'GSAP'
 ]
 
   return (
