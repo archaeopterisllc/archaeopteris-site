@@ -140,15 +140,25 @@ const [selectedTechs, setSelectedTechs] = useState<string[]>([])
 const styleOptions = [
   'Glassmorphism', 'Bento Grid', 'Magazine', 'Minimal Dark',
   'Luxury Dark', 'Neon Glow', 'Gradient Mesh', 'Editorial',
-  'Dashboard', 'Parallax', 'Card Grid', 'Full Screen Hero'
+  'Dashboard', 'Parallax', 'Card Grid', 'Full Screen Hero',
+  'Neumorphism', 'Aurora Background', 'Frosted Glass',
+  'Brutalism', 'Memphis Design', 'Claymorphism',
+  'Retro Futurism', 'Cyberpunk', 'Japandi', 'Swiss Style'
 ]
+
 
 const techOptions = [
   'React Hooks', 'useState Animation', 'CSS Transitions',
   'Parallax Scroll', 'Intersection Observer', 'CSS Grid',
   'Flexbox', 'SVG Animation', 'Canvas', 'WebGL',
-  'Framer Motion', 'GSAP'
+  'Framer Motion', 'GSAP', 'Scroll Animations',
+  'Micro-interactions', 'Loading Skeletons', 'CSS Variables',
+  'Dark Mode Toggle', 'Lazy Loading', 'Infinite Scroll',
+  'Debounce', 'Virtual List', 'Code Splitting',
+  'Web Animations API', 'CSS Custom Properties',
+  'ResizeObserver', 'MutationObserver'
 ]
+
 
   return (
     <div className="flex max-w-7xl mx-auto px-4 py-10 gap-6">
