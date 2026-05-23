@@ -27,7 +27,19 @@ Requirements:
 - Bilingual VI/EN inline
 - Mobile first responsive
 - End with: render(<App />)
-- Return ONLY JSX, no imports, no explanation, no backticks `
+- Return ONLY JSX, no imports, no explanation, no backticks
+- Use className NOT class (this is JSX not HTML)
+- Define a function component named App
+- End with: render(<App />)
+- Example structure:
+function App() {
+  return (
+    <div className="...">
+      ...
+    </div>
+  )
+}
+render(<App />) `
 
 
     const { text } = await generateText({
