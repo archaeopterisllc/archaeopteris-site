@@ -21,6 +21,8 @@ export default function PagesPanel() {
   const [contentVi, setContentVi] = useState('')
   const [tab, setTab] = useState<'en' | 'vi'>('en')
   const [description, setDescription] = useState('')
+  const [vibe, setVibe] = useState<'mystical' | 'modern' | 'classical'>('modern')
+
   const [generatedCode, setGeneratedCode] = useState('')
   const [showGenerate, setShowGenerate] = useState(false)
   const [showNewPage, setShowNewPage] = useState(false)
@@ -91,7 +93,8 @@ export default function PagesPanel() {
     const res = await fetch('/api/page-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: selected.slug, description })
+      body: JSON.stringify({ slug: selected.slug, description, vibe })
+
     })
     const data = await res.json()
     setGeneratedCode(data.code || '')
@@ -239,6 +242,15 @@ export default function PagesPanel() {
             {showGenerate && (
               <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
                 <p className="text-sm font-medium">✨ AI Generate Page Component</p>
+                <div className="flex gap-2 mb-2">
+  {(['mystical', 'modern', 'classical'] as const).map((v) => (
+    <button key={v} onClick={() => setVibe(v)}
+      className={`px-3 py-1 text-xs rounded capitalize ${vibe === v ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
+      {v}
+    </button>
+  ))}
+</div>
+
                 <textarea
                   className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
                   value={description}
