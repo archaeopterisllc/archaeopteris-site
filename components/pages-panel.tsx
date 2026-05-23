@@ -170,7 +170,7 @@ useEffect(() => {
   })
   observer.observe(previewRef.current)
   return () => observer.disconnect()
-}, [])
+}, [previewMode])
 
 
   return (
