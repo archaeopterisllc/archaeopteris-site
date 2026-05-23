@@ -24,8 +24,7 @@ STRICT Requirements:
 - Smooth CSS animations (animate-pulse, animate-bounce, transition-all)
 - Bilingual: show VI and EN text together
 - Export as: render(<YourComponent />)
-- Return ONLY the JSX code, no imports, no explanation
- `
+- Return ONLY the JSX code, no imports, no explanation `
 
 
     const { text } = await generateText({
