@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect , useRef} from 'react'
 import LivePageRenderer from '@/components/live-page-renderer'
 
 type Page = {
@@ -28,6 +28,8 @@ const [selectedStyles, setSelectedStyles] = useState<string[]>([])
 const [showTechPicker, setShowTechPicker] = useState(false)
 const [selectedTechs, setSelectedTechs] = useState<string[]>([])
 const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
+const previewRef = useRef<HTMLDivElement>(null)
+const [scale, setScale] = useState(1)
 
   const [generatedCode, setGeneratedCode] = useState('')
   const [showGenerate, setShowGenerate] = useState(false)
@@ -161,6 +163,14 @@ const techOptions = [
   'Web Animations API', 'CSS Custom Properties',
   'ResizeObserver', 'MutationObserver'
 ]
+useEffect(() => {
+  if (!previewRef.current) return
+  const observer = new ResizeObserver(([entry]) => {
+    setScale(entry.contentRect.width / 1280)
+  })
+  observer.observe(previewRef.current)
+  return () => observer.disconnect()
+}, [])
 
 
   return (
@@ -360,9 +370,17 @@ const techOptions = [
     </div>
     {previewMode === 'code'
       ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} readOnly />
-      : <div className="border rounded overflow-y-auto" style={{height: '500px'}}>
-          <LivePageRenderer code={generatedCode} />
-        </div>
+      : <div ref={previewRef} className="border rounded overflow-hidden" style={{height: '60vh'}}>
+    <div style={{
+      transform: `scale(${scale})`,
+      transformOrigin: 'top left',
+      width: `${100 / scale}%`,
+      height: `${100 / scale}%`,
+    }}>
+      <LivePageRenderer code={generatedCode} />
+    </div>
+  </div>
+
     }
   </div>
 )}
