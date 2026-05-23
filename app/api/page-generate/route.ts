@@ -10,20 +10,22 @@ export async function POST(req: Request) {
   try {
     const { slug, description } = await req.json()
 
-    const prompt = `You are an expert Next.js developer for Archaeopteris LLC (fintech company).
-Generate a complete Next.js page component for the "${slug}" page.
+    const prompt = `You are an expert React/Next.js developer. Generate a stunning, modern page component.
 
+Page: "${slug}"
 Description: ${description}
 
 STRICT Requirements:
-- Use Tailwind CSS only, no external libraries
-- Dark theme: bg-background, text-foreground
-- Emerald green accent: text-emerald-400, border-emerald-500, bg-emerald-600
-- Hero section + 2-3 content sections + CTA at bottom
-- Include both EN and VI text visible on page
-- Professional fintech style matching Archaeopteris LLC brand
-- Company: Archaeopteris LLC, website: archaeopteris.us, email: contact@archaeopteris.us
-- Return ONLY pure HTML with Tailwind classes, no JSX, no explanation, no markdown backticks. `
+- Use Tailwind CSS only
+- Dark theme: bg-gray-900, text-white
+- Emerald green (#10b981) and blue (#3b82f6) accents
+- Full hero section with gradient heading, subtitle, CTA button
+- 2-3 sections with glassmorphism cards (backdrop-blur, bg-white/10)
+- Smooth CSS animations (animate-pulse, animate-bounce, transition-all)
+- Bilingual: show VI and EN text together
+- Export as: render(<YourComponent />)
+- Return ONLY the JSX code, no imports, no explanation
+ `
 
 
     const { text } = await generateText({
