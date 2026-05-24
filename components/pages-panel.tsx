@@ -76,7 +76,8 @@ const [scale, setScale] = useState(1)
     await fetch('/api/pages', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: selected.id, content_en: contentEn, content_vi: contentVi })
+      body: JSON.stringify({ id: selected.id, content_en: contentEn, content_vi: contentVi, title_en: selected.title_en })
+
     })
     setLoading(false)
     fetchPages()
@@ -239,6 +240,20 @@ useEffect(() => {
               }`}>
                 {page.status === 'published' ? 'Published' : 'Draft'}
               </span>
+              <button
+  onClick={async (e) => {
+    e.stopPropagation()
+    if (!confirm('Xóa page này?')) return
+    await fetch('/api/pages', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: page.id })
+    })
+    fetchPages()
+  }}
+  className="text-xs px-1.5 py-0.5 rounded bg-red-900/50 text-red-400 hover:bg-red-800"
+>✕</button>
+
             </div>
             <p className="text-xs text-muted-foreground mt-1">/{page.slug}</p>
             {page.title_vi && <span className="text-xs text-blue-500">🌐 VI</span>}
@@ -256,7 +271,12 @@ useEffect(() => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold">{selected.title_en}</h2>
+                <input
+  className="w-full bg-background border rounded px-3 py-1 text-xl font-bold mb-1"
+  value={selected.title_en}
+  onChange={e => setSelected({...selected, title_en: e.target.value})}
+/>
+
                 <p className="text-sm text-muted-foreground">/{selected.slug}</p>
               </div>
               <div className="flex gap-2 flex-wrap">

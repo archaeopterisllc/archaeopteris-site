@@ -50,8 +50,8 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE — delete page
 export async function DELETE(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const id = searchParams.get('id')
+  const { id } = await req.json()
+
 
   const { error } = await supabase
     .from('pages')
