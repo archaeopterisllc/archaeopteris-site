@@ -52,7 +52,8 @@ const [scale, setScale] = useState(1)
     setContentVi(page.content_vi || '')
     setTab('en')
     setGeneratedCode(page.tsx_content || '')
-    setShowGenerate(false)
+    setShowGenerate(!!page.tsx_content)
+
   }
 
   const handleNewPage = async () => {
