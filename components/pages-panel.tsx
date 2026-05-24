@@ -2,6 +2,7 @@
 
 import { useState, useEffect , useRef} from 'react'
 import LivePageRenderer from '@/components/live-page-renderer'
+import { VIBES, LAYOUTS, STYLES, TYPOGRAPHY, ANIMATIONS, TECH, COLORS, COMPONENTS, INTERACTIONS, buildPrompt, getConflicts } from '@/lib/prompt-library'
 
 type Page = {
   id: string
