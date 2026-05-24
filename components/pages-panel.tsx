@@ -50,7 +50,7 @@ const [scale, setScale] = useState(1)
     setContentEn(page.content_en || '')
     setContentVi(page.content_vi || '')
     setTab('en')
-    setGeneratedCode('')
+    setGeneratedCode(page.tsx_content || '')
     setShowGenerate(false)
   }
 
@@ -356,7 +356,7 @@ useEffect(() => {
                 >
                   {loading ? 'Generating...' : '✨ Generate TSX'}
                 </button>
-                {generatedCode && (
+                {(generatedCode || selected?.tsx_content) && (
   <div className="space-y-2">
     <div className="flex gap-2 text-xs">
       <button
