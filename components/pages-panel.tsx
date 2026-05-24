@@ -175,7 +175,8 @@ useEffect(() => {
 
 
   return (
-    <div className="flex max-w-7xl mx-auto px-4 py-10 gap-6">
+    <div className="flex flex-col md:flex-row max-w-7xl mx-auto px-4 py-10 gap-6">
+
       {/* Sidebar */}
       <div className="w-80 shrink-0 space-y-2">
         <div className="flex items-center justify-between mb-4">
