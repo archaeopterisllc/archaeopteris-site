@@ -356,7 +356,7 @@ useEffect(() => {
                 >
                   {loading ? 'Generating...' : '✨ Generate TSX'}
                 </button>
-                {generatedCode && (
+                {(generatedCode || selected?.tsx_content) && (
   <div className="space-y-2">
     <div className="flex gap-2 text-xs">
       <button
