@@ -50,7 +50,7 @@ const [scale, setScale] = useState(1)
     setContentEn(page.content_en || '')
     setContentVi(page.content_vi || '')
     setTab('en')
-    setGeneratedCode('')
+    setGeneratedCode(page.tsx_content || '')
     setShowGenerate(false)
   }
 
