@@ -114,7 +114,8 @@ export default function AdminPanel() {
       {activeTab === 'pages' ? <PagesPanel /> : (
         <div className="flex gap-6">
           {/* Sidebar */}
-          <div className="w-80 shrink-0">
+          <div className="w-full lg:w-80 shrink-0">
+
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold">Blog Posts</h2>
               <select
