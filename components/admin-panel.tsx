@@ -93,7 +93,8 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-4 py-10 gap-6">
+
       {/* Tab switcher */}
       <div className="flex gap-2 mb-6 border-b pb-2">
         <button
