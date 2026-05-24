@@ -112,7 +112,8 @@ export default function AdminPanel() {
       </div>
 
       {activeTab === 'pages' ? <PagesPanel /> : (
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+
           {/* Sidebar */}
           <div className="w-full lg:w-80 shrink-0">
 
