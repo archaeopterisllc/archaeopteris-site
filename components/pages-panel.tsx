@@ -24,7 +24,8 @@ export default function PagesPanel() {
   const [contentVi, setContentVi] = useState('')
   const [tab, setTab] = useState<'en' | 'vi'>('en')
   const [description, setDescription] = useState('')
-  const [vibe, setVibe] = useState<'mystical' | 'modern' | 'classical'>('modern')
+  const [vibe, setVibe] = useState<string>('modern')
+
 const [showStylePicker, setShowStylePicker] = useState(false)
 const [selectedStyles, setSelectedStyles] = useState<string[]>([])
 const [showTechPicker, setShowTechPicker] = useState(false)
@@ -38,6 +39,7 @@ const [scale, setScale] = useState(1)
   const [showNewPage, setShowNewPage] = useState(false)
   const [newSlug, setNewSlug] = useState('')
   const [newTitle, setNewTitle] = useState('')
+const [keywords, setKeywords] = useState('')
 
   useEffect(() => { fetchPages() }, [])
 
@@ -303,71 +305,99 @@ useEffect(() => {
               </div>
             </div>
 
-            {showGenerate && (
+           {showGenerate && (
   <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
     <p className="text-sm font-medium">✨ AI Generate Page Component</p>
-    
-    {/* Vibe selector - full width row */}
-    <div className="flex gap-2 w-full">
-      {(['mystical', 'modern', 'classical'] as const).map((v) => (
-        <button key={v} onClick={() => setVibe(v)}
-          className={`flex-1 px-3 py-1.5 text-xs rounded capitalize ${vibe === v ? 'bg-emerald-600 text-white' : 'border'}`}>
-          {v}
+
+    {/* Keywords */}
+    <input
+      className="w-full bg-background border rounded px-3 py-1.5 text-sm outline-none"
+      placeholder="Keywords (e.g. trading, minimal, dark...)"
+      value={keywords}
+      onChange={(e) => setKeywords(e.target.value)}
+    />
+
+    {/* Vibe - from lib */}
+    <div className="flex flex-wrap gap-2">
+      {VIBES.map((v) => (
+        <button key={v.id} onClick={() => setVibe(v.id)}
+          className={`px-3 py-1 text-xs rounded capitalize ${vibe === v.id ? 'bg-emerald-600 text-white' : 'border'}`}>
+          {v.label}
         </button>
       ))}
     </div>
 
-    {/* Style + Tech - same row */}
+    {/* Style + Tech */}
     <div className="flex gap-2">
       <button onClick={() => setShowStylePicker(!showStylePicker)}
-        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400 hover:border-emerald-500">
+        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
         🎨 Styles {selectedStyles.length > 0 && `(${selectedStyles.length})`}
       </button>
       <button onClick={() => setShowTechPicker(!showTechPicker)}
-        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400 hover:border-emerald-500">
+        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
         ⚡ Tech {selectedTechs.length > 0 && `(${selectedTechs.length})`}
       </button>
     </div>
 
-    {/* Style picker dropdown */}
+    {/* Style picker - from lib */}
     {showStylePicker && (
-      <div className="border border-gray-700 rounded-xl p-4 mt-1 shadow-xl bg-gray-900">
-        <div className="flex justify-between items-center mb-2">
+      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
+        <div className="flex justify-between mb-2">
           <p className="text-xs text-gray-400">Select styles:</p>
           <button onClick={() => setShowStylePicker(false)} className="text-xs text-gray-500">✕</button>
         </div>
         <div className="flex flex-wrap gap-2">
-          {styleOptions.map((style) => (
-            <button key={style} onClick={() => setSelectedStyles(prev =>
-              prev.includes(style) ? prev.filter(s => s !== style) : [...prev, style])}
-              className={`px-2 py-1 text-xs rounded ${selectedStyles.includes(style) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
-              {style}
-            </button>
-          ))}
+          {STYLES.map((s) => {
+            const conflicted = getConflicts(selectedStyles).includes(s.id)
+            return (
+              <button key={s.id}
+                disabled={conflicted}
+                onClick={() => setSelectedStyles(prev =>
+                  prev.includes(s.id) ? prev.filter(x => x !== s.id) : [...prev, s.id])}
+                className={`px-2 py-1 text-xs rounded transition-all ${
+                  selectedStyles.includes(s.id) ? 'bg-emerald-600 text-white' 
+                  : conflicted ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
+                  : 'border border-gray-600 text-gray-400 hover:border-emerald-500'}`}
+                title={conflicted ? 'Conflicts with selected styles' : ''}>
+                {s.label}
+              </button>
+            )
+          })}
         </div>
       </div>
     )}
 
-    {/* Tech picker dropdown */}
+    {/* Tech picker - from lib */}
     {showTechPicker && (
-      <div className="border border-gray-700 rounded-xl p-4 mt-1 shadow-xl bg-gray-900">
-        <div className="flex justify-between items-center mb-2">
+      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
+        <div className="flex justify-between mb-2">
           <p className="text-xs text-gray-400">Select tech:</p>
           <button onClick={() => setShowTechPicker(false)} className="text-xs text-gray-500">✕</button>
         </div>
         <div className="flex flex-wrap gap-2">
-          {techOptions.map((tech) => (
-            <button key={tech} onClick={() => setSelectedTechs(prev =>
-              prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech])}
-              className={`px-2 py-1 text-xs rounded ${selectedTechs.includes(tech) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
-              {tech}
+          {TECH.map((t) => (
+            <button key={t.id}
+              onClick={() => setSelectedTechs(prev =>
+                prev.includes(t.id) ? prev.filter(x => x !== t.id) : [...prev, t.id])}
+              className={`px-2 py-1 text-xs rounded ${selectedTechs.includes(t.id) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
+              {t.label}
             </button>
           ))}
         </div>
       </div>
     )}
 
-    {/* Textarea - full width */}
+    {/* Active prompt preview */}
+    {(keywords || vibe || selectedStyles.length > 0) && (
+      <div className="p-2 rounded bg-black/40 border border-gray-800 text-xs text-gray-500 font-mono max-h-20 overflow-auto">
+        {buildPrompt(
+          [...VIBES.filter(v => v.id === vibe), ...STYLES.filter(s => selectedStyles.includes(s.id)), ...TECH.filter(t => selectedTechs.includes(t.id))],
+          description, keywords
+        ).slice(0, 200)}...
+      </div>
+    )}
+
+    {/* Textarea */}
     <textarea
       className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
       value={description}
@@ -375,7 +405,7 @@ useEffect(() => {
       placeholder="Mô tả trang này..."
     />
 
-    {/* Generate button - full width */}
+    {/* Generate */}
     <button onClick={handleGenerate}
       disabled={loading || !description}
       className="w-full px-4 py-2.5 text-sm bg-emerald-600 text-white rounded disabled:opacity-50 font-medium">
@@ -383,6 +413,7 @@ useEffect(() => {
     </button>
   </div>
 )}
+
 
                 {(generatedCode || selected?.tsx_content) && (
   <div className="space-y-2">
