@@ -7,6 +7,9 @@ import {
   buildPromptClean, validateSelection,
   type Snippet,
 } from '@/lib/prompt-libraryn'
+import {
+  TEMPLATES, COLLECTIONS, resolveSnippets, type Template,
+} from '@/lib/templates'
 
 type Page = {
   id: string
@@ -18,6 +21,17 @@ type Page = {
   content_vi: string | null
   tsx_content: string | null
   updated_at: string
+}
+
+const MOOD_EMOJI: Record<string, string> = {
+  bold: '⚡', elegant: '✦', playful: '🎉', technical: '⚙️',
+  warm: '🌿', edgy: '🔥', minimal: '◻️', immersive: '🌌',
+}
+
+const DIFFICULTY_DOT: Record<string, { dots: string; color: string }> = {
+  simple:  { dots: '●○○', color: 'text-emerald-400' },
+  medium:  { dots: '●●○', color: 'text-amber-400' },
+  complex: { dots: '●●●', color: 'text-rose-400' },
 }
 
 export default function PagesPanel() {
@@ -32,8 +46,12 @@ export default function PagesPanel() {
 
   const [showStylePicker, setShowStylePicker] = useState(false)
   const [showTechPicker, setShowTechPicker] = useState(false)
-  // unified: replaces selectedStyles + selectedTechs
   const [selectedSnippets, setSelectedSnippets] = useState<string[]>([])
+
+  // Generator tabs
+  const [generatorTab, setGeneratorTab] = useState<'snippets' | 'templates'>('snippets')
+  const [templateSearch, setTemplateSearch] = useState('')
+  const [activeCollection, setActiveCollection] = useState<string>('')
 
   const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
   const previewRef = useRef<HTMLDivElement>(null)
@@ -105,7 +123,6 @@ export default function PagesPanel() {
     setLoading(false)
   }
 
-  // Build selected Snippet objects from IDs
   const getSelectedSnippetObjs = (): Snippet[] => {
     const allSnippets = [...VIBES, ...STYLES, ...TECH, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
     const vibeObj = VIBES.find(v => v.id === vibe)
@@ -113,26 +130,21 @@ export default function PagesPanel() {
     return vibeObj ? [vibeObj, ...rest.filter(s => s.id !== vibe)] : rest
   }
 
-  // Check if a snippet id is blocked by current selection
   const getBlockedIds = (): Set<string> => {
-  const objs = getSelectedSnippetObjs()
-  if (objs.length === 0) return new Set()
-  const blocked = new Set<string>()
-  objs.forEach(snippet => {
-    snippet.conflicts?.forEach(c => blocked.add(c))
-  })
-  return blocked
-}
-
+    const objs = getSelectedSnippetObjs()
+    if (objs.length === 0) return new Set()
+    const blocked = new Set<string>()
+    objs.forEach(snippet => {
+      snippet.conflicts?.forEach(c => blocked.add(c))
+    })
+    return blocked
+  }
 
   const toggleSnippet = (id: string) => {
     const next = selectedSnippets.includes(id)
       ? selectedSnippets.filter(x => x !== id)
       : [...selectedSnippets, id]
-
     setSelectedSnippets(next)
-
-    // Re-validate and show warnings
     const allSnippets = [...VIBES, ...STYLES, ...TECH, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
     const vibeObj = VIBES.find(v => v.id === vibe)
     const objs = [
@@ -143,15 +155,44 @@ export default function PagesPanel() {
     setValidationWarnings(warnings)
   }
 
+  // Apply a full template preset
+  const applyTemplate = (template: Template) => {
+    const snippets = resolveSnippets(template.snippetIds)
+    const vibeSnippet = snippets.find(s => s.category === 'vibe')
+    const rest = snippets.filter(s => s.category !== 'vibe')
+    setVibe(vibeSnippet?.id ?? '')
+    setSelectedSnippets(rest.map(s => s.id))
+    setKeywords(template.defaultKeywords ?? '')
+    setDescription(template.examplePrompt)
+    const { warnings } = validateSelection(snippets)
+    setValidationWarnings(warnings)
+    // Switch to snippets tab so user sees what was applied
+    setGeneratorTab('snippets')
+  }
+
+  const filteredTemplates = (() => {
+    let list = activeCollection
+      ? TEMPLATES.filter(t => COLLECTIONS[activeCollection]?.includes(t.id))
+      : TEMPLATES
+    if (templateSearch.trim()) {
+      const q = templateSearch.toLowerCase()
+      list = list.filter(t =>
+        t.name.toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q) ||
+        t.tags?.some(tag => tag.includes(q)) ||
+        t.category.includes(q) ||
+        t.mood.includes(q)
+      )
+    }
+    return list
+  })()
+
   const handleGenerate = async () => {
     if (!selected || !description) return
     setLoading(true)
-
     const snippetObjs = getSelectedSnippetObjs()
     const { valid, removed } = validateSelection(snippetObjs)
-
     const prompt = buildPromptClean(valid, description, keywords)
-
     const res = await fetch('/api/page-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -159,10 +200,8 @@ export default function PagesPanel() {
     })
     const data = await res.json()
     setGeneratedCode((data.code || '').replace(/```jsx|```tsx|```/g, '').trim())
-
     setPreviewMode('code')
     setLoading(false)
-
     if (removed.length > 0) {
       setValidationWarnings(prev => [
         ...prev,
@@ -343,95 +382,250 @@ export default function PagesPanel() {
               <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
                 <p className="text-sm font-medium">✨ AI Generate Page Component</p>
 
-                {/* Keywords */}
-                <input
-                  className="w-full bg-background border rounded px-3 py-1.5 text-sm outline-none"
-                  placeholder="Keywords (e.g. trading, minimal, dark...)"
-                  value={keywords}
-                  onChange={(e) => setKeywords(e.target.value)}
-                />
-
-                {/* Vibe */}
-                <div className="flex flex-wrap gap-2">
-                  {VIBES.map((v) => (
-                    <button key={v.id} onClick={() => setVibe(vibe === v.id ? '' : v.id)}
-                      className={`px-3 py-1 text-xs rounded capitalize ${vibe === v.id ? 'bg-emerald-600 text-white' : 'border'}`}>
-                      {v.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Style + Tech pickers */}
-                <div className="flex gap-2">
-                  <button onClick={() => setShowStylePicker(!showStylePicker)}
-                    className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
-                    🎨 Styles {selectedStyleCount > 0 && `(${selectedStyleCount})`}
+                {/* ── Generator Mode Tabs ── */}
+                <div className="flex gap-1 p-1 bg-black/30 rounded-lg">
+                  <button
+                    onClick={() => setGeneratorTab('snippets')}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-md transition-all font-medium ${
+                      generatorTab === 'snippets'
+                        ? 'bg-emerald-600 text-white shadow'
+                        : 'text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    🧩 Snippets
                   </button>
-                  <button onClick={() => setShowTechPicker(!showTechPicker)}
-                    className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
-                    ⚡ Tech {selectedTechCount > 0 && `(${selectedTechCount})`}
+                  <button
+                    onClick={() => setGeneratorTab('templates')}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-md transition-all font-medium ${
+                      generatorTab === 'templates'
+                        ? 'bg-emerald-600 text-white shadow'
+                        : 'text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    🗂️ Templates <span className="opacity-60">({TEMPLATES.length})</span>
                   </button>
                 </div>
 
-                {/* Style picker */}
-                {showStylePicker && (
-                  <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
-                    <div className="flex justify-between mb-2">
-                      <p className="text-xs text-gray-400">Select styles:</p>
-                      <button onClick={() => setShowStylePicker(false)} className="text-xs text-gray-500">✕</button>
+                {/* ══════════════════════════════════════════
+                    TEMPLATES TAB
+                ══════════════════════════════════════════ */}
+                {generatorTab === 'templates' && (
+                  <div className="space-y-3">
+
+                    {/* Search */}
+                    <input
+                      className="w-full bg-background border rounded px-3 py-1.5 text-sm outline-none"
+                      placeholder="Search... (saas, dark, bilingual, trading, minimal...)"
+                      value={templateSearch}
+                      onChange={e => setTemplateSearch(e.target.value)}
+                    />
+
+                    {/* Collection filter pills */}
+                    <div className="flex gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => setActiveCollection('')}
+                        className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
+                          activeCollection === ''
+                            ? 'bg-emerald-600 text-white border-emerald-600'
+                            : 'border-gray-700 text-gray-400 hover:border-emerald-500'
+                        }`}
+                      >
+                        All
+                      </button>
+                      {Object.keys(COLLECTIONS).map(col => (
+                        <button
+                          key={col}
+                          onClick={() => setActiveCollection(activeCollection === col ? '' : col)}
+                          className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
+                            activeCollection === col
+                              ? 'bg-emerald-600 text-white border-emerald-600'
+                              : 'border-gray-700 text-gray-400 hover:border-emerald-500'
+                          }`}
+                        >
+                          {col}
+                        </button>
+                      ))}
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {[...STYLES, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS].map((s) => {
-                        const isSelected = selectedSnippets.includes(s.id)
-                        const isBlocked = !isSelected && blockedIds.has(s.id)
-                        return (
-                          <button key={s.id}
-                            disabled={isBlocked}
-                            onClick={() => toggleSnippet(s.id)}
-                            className={`px-2 py-1 text-xs rounded transition-all ${
-                              isSelected ? 'bg-emerald-600 text-white'
-                              : isBlocked ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
-                              : 'border border-gray-600 text-gray-400 hover:border-emerald-500'
-                            }`}
-                            title={isBlocked ? 'Conflicts with current selection' : ''}>
-                            {s.label}
-                          </button>
-                        )
-                      })}
+
+                    {/* Count */}
+                    <p className="text-xs text-gray-500">
+                      {filteredTemplates.length} templates
+                      {activeCollection && ` in "${activeCollection}"`}
+                    </p>
+
+                    {/* Template list */}
+                    <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                      {filteredTemplates.map(template => (
+                        <button
+                          key={template.id}
+                          onClick={() => applyTemplate(template)}
+                          className="w-full text-left p-3 rounded-lg border border-gray-700
+                                     hover:border-emerald-500 bg-gray-900/60 hover:bg-gray-900
+                                     transition-all group"
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Color swatch */}
+                            <div
+                              className="w-8 h-8 rounded-md shrink-0 mt-0.5 border border-white/10"
+                              style={{ backgroundColor: template.previewColor ?? '#333' }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              {/* Name + mood */}
+                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                <span className="text-xs font-semibold text-gray-100 group-hover:text-emerald-400 transition-colors">
+                                  {template.name}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {MOOD_EMOJI[template.mood] ?? ''} {template.mood}
+                                </span>
+                              </div>
+                              {/* Description */}
+                              <p className="text-xs text-gray-400 leading-snug mb-1.5 line-clamp-2">
+                                {template.description}
+                              </p>
+                              {/* Meta row */}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 capitalize">
+                                  {template.category}
+                                </span>
+                                {template.difficulty && (
+                                  <span className={`text-xs font-mono ${DIFFICULTY_DOT[template.difficulty]?.color}`}>
+                                    {DIFFICULTY_DOT[template.difficulty]?.dots}
+                                  </span>
+                                )}
+                                {template.estimatedSections && (
+                                  <span className="text-xs text-gray-600">
+                                    ~{template.estimatedSections} sections
+                                  </span>
+                                )}
+                                {template.tags?.slice(0, 3).map(tag => (
+                                  <span key={tag} className="text-xs text-gray-600">#{tag}</span>
+                                ))}
+                              </div>
+                            </div>
+                            {/* Arrow */}
+                            <span className="text-gray-600 group-hover:text-emerald-400 transition-colors shrink-0">
+                              →
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+
+                      {filteredTemplates.length === 0 && (
+                        <p className="text-xs text-gray-500 text-center py-8">
+                          Không tìm thấy template nào cho &ldquo;{templateSearch}&rdquo;
+                        </p>
+                      )}
                     </div>
+
                   </div>
                 )}
 
-                {/* Tech picker */}
-                {showTechPicker && (
-                  <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
-                    <div className="flex justify-between mb-2">
-                      <p className="text-xs text-gray-400">Select tech:</p>
-                      <button onClick={() => setShowTechPicker(false)} className="text-xs text-gray-500">✕</button>
-                    </div>
+                {/* ══════════════════════════════════════════
+                    SNIPPETS TAB (giữ nguyên logic cũ)
+                ══════════════════════════════════════════ */}
+                {generatorTab === 'snippets' && (
+                  <div className="space-y-3">
+
+                    {/* Keywords */}
+                    <input
+                      className="w-full bg-background border rounded px-3 py-1.5 text-sm outline-none"
+                      placeholder="Keywords (e.g. trading, minimal, dark...)"
+                      value={keywords}
+                      onChange={(e) => setKeywords(e.target.value)}
+                    />
+
+                    {/* Vibe */}
                     <div className="flex flex-wrap gap-2">
-                      {TECH.map((t) => {
-                        const isSelected = selectedSnippets.includes(t.id)
-                        const isBlocked = !isSelected && blockedIds.has(t.id)
-                        return (
-                          <button key={t.id}
-                            disabled={isBlocked}
-                            onClick={() => toggleSnippet(t.id)}
-                            className={`px-2 py-1 text-xs rounded transition-all ${
-                              isSelected ? 'bg-emerald-600 text-white'
-                              : isBlocked ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
-                              : 'border border-gray-600 text-gray-400 hover:border-emerald-500'
-                            }`}
-                            title={isBlocked ? 'Conflicts with current selection' : ''}>
-                            {t.label}
-                          </button>
-                        )
-                      })}
+                      {VIBES.map((v) => (
+                        <button key={v.id} onClick={() => setVibe(vibe === v.id ? '' : v.id)}
+                          className={`px-3 py-1 text-xs rounded capitalize ${vibe === v.id ? 'bg-emerald-600 text-white' : 'border'}`}>
+                          {v.label}
+                        </button>
+                      ))}
                     </div>
+
+                    {/* Style + Tech pickers */}
+                    <div className="flex gap-2">
+                      <button onClick={() => setShowStylePicker(!showStylePicker)}
+                        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
+                        🎨 Styles {selectedStyleCount > 0 && `(${selectedStyleCount})`}
+                      </button>
+                      <button onClick={() => setShowTechPicker(!showTechPicker)}
+                        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
+                        ⚡ Tech {selectedTechCount > 0 && `(${selectedTechCount})`}
+                      </button>
+                    </div>
+
+                    {/* Style picker */}
+                    {showStylePicker && (
+                      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
+                        <div className="flex justify-between mb-2">
+                          <p className="text-xs text-gray-400">Select styles:</p>
+                          <button onClick={() => setShowStylePicker(false)} className="text-xs text-gray-500">✕</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {[...STYLES, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS].map((s) => {
+                            const isSelected = selectedSnippets.includes(s.id)
+                            const isBlocked = !isSelected && blockedIds.has(s.id)
+                            return (
+                              <button key={s.id}
+                                disabled={isBlocked}
+                                onClick={() => toggleSnippet(s.id)}
+                                className={`px-2 py-1 text-xs rounded transition-all ${
+                                  isSelected ? 'bg-emerald-600 text-white'
+                                  : isBlocked ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
+                                  : 'border border-gray-600 text-gray-400 hover:border-emerald-500'
+                                }`}
+                                title={isBlocked ? 'Conflicts with current selection' : ''}>
+                                {s.label}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tech picker */}
+                    {showTechPicker && (
+                      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
+                        <div className="flex justify-between mb-2">
+                          <p className="text-xs text-gray-400">Select tech:</p>
+                          <button onClick={() => setShowTechPicker(false)} className="text-xs text-gray-500">✕</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {TECH.map((t) => {
+                            const isSelected = selectedSnippets.includes(t.id)
+                            const isBlocked = !isSelected && blockedIds.has(t.id)
+                            return (
+                              <button key={t.id}
+                                disabled={isBlocked}
+                                onClick={() => toggleSnippet(t.id)}
+                                className={`px-2 py-1 text-xs rounded transition-all ${
+                                  isSelected ? 'bg-emerald-600 text-white'
+                                  : isBlocked ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
+                                  : 'border border-gray-600 text-gray-400 hover:border-emerald-500'
+                                }`}
+                                title={isBlocked ? 'Conflicts with current selection' : ''}>
+                                {t.label}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Prompt preview */}
+                    {(keywords || vibe || selectedSnippets.length > 0) && (
+                      <div className="p-2 rounded bg-black/40 border border-gray-800 text-xs text-gray-500 font-mono max-h-20 overflow-auto">
+                        {buildPromptClean(getSelectedSnippetObjs(), description || '...', keywords).slice(0, 200)}...
+                      </div>
+                    )}
+
                   </div>
                 )}
 
-                {/* Validation warnings */}
+                {/* ── Validation warnings (chung cả 2 tab) ── */}
                 {validationWarnings.length > 0 && (
                   <div className="space-y-1">
                     {validationWarnings.map((w, i) => (
@@ -442,14 +636,7 @@ export default function PagesPanel() {
                   </div>
                 )}
 
-                {/* Prompt preview */}
-                {(keywords || vibe || selectedSnippets.length > 0) && (
-                  <div className="p-2 rounded bg-black/40 border border-gray-800 text-xs text-gray-500 font-mono max-h-20 overflow-auto">
-                    {buildPromptClean(getSelectedSnippetObjs(), description || '...', keywords).slice(0, 200)}...
-                  </div>
-                )}
-
-                {/* Description */}
+                {/* ── Description ── */}
                 <textarea
                   className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
                   value={description}
@@ -457,12 +644,13 @@ export default function PagesPanel() {
                   placeholder="Mô tả trang này..."
                 />
 
-                {/* Generate */}
+                {/* ── Generate button ── */}
                 <button onClick={handleGenerate}
                   disabled={loading || !description}
                   className="w-full px-4 py-2.5 text-sm bg-emerald-600 text-white rounded disabled:opacity-50 font-medium">
                   {loading ? 'Generating...' : '✨ Generate TSX'}
                 </button>
+
               </div>
             )}
 
