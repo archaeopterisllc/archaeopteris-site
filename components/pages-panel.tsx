@@ -158,7 +158,8 @@ export default function PagesPanel() {
       body: JSON.stringify({ slug: selected.slug, prompt })
     })
     const data = await res.json()
-    setGeneratedCode(data.code || '')
+    setGeneratedCode((data.code || '').replace(/```jsx|```tsx|```/g, '').trim())
+
     setPreviewMode('code')
     setLoading(false)
 
