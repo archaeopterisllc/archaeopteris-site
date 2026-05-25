@@ -116,6 +116,7 @@ export default function PagesPanel() {
   // Check if a snippet id is blocked by current selection
   const getBlockedIds = (): Set<string> => {
     const objs = getSelectedSnippetObjs()
+    alert('objs length: ' + objs.length)
     if (objs.length === 0) return new Set()
 
     const { valid } = validateSelection(objs)
