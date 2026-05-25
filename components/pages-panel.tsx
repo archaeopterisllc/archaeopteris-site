@@ -1,8 +1,12 @@
 'use client'
 
-import { useState, useEffect , useRef} from 'react'
+import { useState, useEffect, useRef } from 'react'
 import LivePageRenderer from '@/components/live-page-renderer'
-import { VIBES, LAYOUTS, STYLES, TYPOGRAPHY, ANIMATIONS, TECH, COLORS, COMPONENTS, INTERACTIONS, buildPrompt, getConflicts } from '@/lib/prompt-library'
+import {
+  VIBES, STYLES, TECH, ANIMATIONS, COMPONENTS, INTERACTIONS,
+  buildPromptClean, validateSelection,
+  type Snippet,
+} from '@/lib/prompt-libraryn'
 
 type Page = {
   id: string
@@ -24,22 +28,24 @@ export default function PagesPanel() {
   const [contentVi, setContentVi] = useState('')
   const [tab, setTab] = useState<'en' | 'vi'>('en')
   const [description, setDescription] = useState('')
-  const [vibe, setVibe] = useState<string>('modern')
+  const [vibe, setVibe] = useState<string>('')
 
-const [showStylePicker, setShowStylePicker] = useState(false)
-const [selectedStyles, setSelectedStyles] = useState<string[]>([])
-const [showTechPicker, setShowTechPicker] = useState(false)
-const [selectedTechs, setSelectedTechs] = useState<string[]>([])
-const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
-const previewRef = useRef<HTMLDivElement>(null)
-const [scale, setScale] = useState(1)
+  const [showStylePicker, setShowStylePicker] = useState(false)
+  const [showTechPicker, setShowTechPicker] = useState(false)
+  // unified: replaces selectedStyles + selectedTechs
+  const [selectedSnippets, setSelectedSnippets] = useState<string[]>([])
+
+  const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
 
   const [generatedCode, setGeneratedCode] = useState('')
   const [showGenerate, setShowGenerate] = useState(false)
   const [showNewPage, setShowNewPage] = useState(false)
   const [newSlug, setNewSlug] = useState('')
   const [newTitle, setNewTitle] = useState('')
-const [keywords, setKeywords] = useState('')
+  const [keywords, setKeywords] = useState('')
+  const [validationWarnings, setValidationWarnings] = useState<string[]>([])
 
   useEffect(() => { fetchPages() }, [])
 
@@ -56,7 +62,6 @@ const [keywords, setKeywords] = useState('')
     setTab('en')
     setGeneratedCode(page.tsx_content || '')
     setShowGenerate(!!page.tsx_content)
-
   }
 
   const handleNewPage = async () => {
@@ -81,7 +86,6 @@ const [keywords, setKeywords] = useState('')
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: selected.id, content_en: contentEn, content_vi: contentVi, title_en: selected.title_en })
-
     })
     setLoading(false)
     fetchPages()
@@ -101,31 +105,82 @@ const [keywords, setKeywords] = useState('')
     setLoading(false)
   }
 
+  // Build selected Snippet objects from IDs
+  const getSelectedSnippetObjs = (): Snippet[] => {
+    const allSnippets = [...VIBES, ...STYLES, ...TECH, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
+    const vibeObj = VIBES.find(v => v.id === vibe)
+    const rest = allSnippets.filter(s => selectedSnippets.includes(s.id))
+    return vibeObj ? [vibeObj, ...rest.filter(s => s.id !== vibe)] : rest
+  }
+
+  // Check if a snippet id is blocked by current selection
+  const getBlockedIds = (): Set<string> => {
+    const objs = getSelectedSnippetObjs()
+    const { valid } = validateSelection(objs)
+    const validIds = new Set(valid.map(v => v.id))
+    // blocked = not in valid AND not already selected
+    const allSnippets = [...STYLES, ...TECH, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
+    const blocked = new Set<string>()
+    allSnippets.forEach(s => {
+      if (!validIds.has(s.id) && !selectedSnippets.includes(s.id)) {
+        blocked.add(s.id)
+      }
+    })
+    return blocked
+  }
+
+  const toggleSnippet = (id: string) => {
+    const next = selectedSnippets.includes(id)
+      ? selectedSnippets.filter(x => x !== id)
+      : [...selectedSnippets, id]
+
+    setSelectedSnippets(next)
+
+    // Re-validate and show warnings
+    const allSnippets = [...VIBES, ...STYLES, ...TECH, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
+    const vibeObj = VIBES.find(v => v.id === vibe)
+    const objs = [
+      ...(vibeObj ? [vibeObj] : []),
+      ...allSnippets.filter(s => next.includes(s.id))
+    ]
+    const { warnings } = validateSelection(objs)
+    setValidationWarnings(warnings)
+  }
+
   const handleGenerate = async () => {
     if (!selected || !description) return
     setLoading(true)
+
+    const snippetObjs = getSelectedSnippetObjs()
+    const { valid, removed } = validateSelection(snippetObjs)
+
+    const prompt = buildPromptClean(valid, description, keywords)
+
     const res = await fetch('/api/page-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: selected.slug, description, vibe, styles: selectedStyles.join(', '), techs: selectedTechs.join(', ') })
-
-
+      body: JSON.stringify({ slug: selected.slug, prompt })
     })
     const data = await res.json()
     setGeneratedCode(data.code || '')
     setPreviewMode('code')
     setLoading(false)
+
+    if (removed.length > 0) {
+      setValidationWarnings(prev => [
+        ...prev,
+        `Auto-removed conflicts: ${removed.map(r => r.snippet.label).join(', ')}`
+      ])
+    }
   }
 
   const handlePublish = async () => {
     if (!selected) return
     setLoading(true)
     const cleanCode = generatedCode
-  .replace(/```jsx|```tsx|```/g, '')
-  .replace(/^import.*$/gm, '')
-  .trim()
-
-
+      .replace(/```jsx|```tsx|```/g, '')
+      .replace(/^import.*$/gm, '')
+      .trim()
     await fetch('/api/pages', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -148,36 +203,20 @@ const [keywords, setKeywords] = useState('')
     setLoading(false)
     fetchPages()
   }
-const styleOptions = [
-  'Glassmorphism', 'Bento Grid', 'Magazine', 'Minimal Dark',
-  'Luxury Dark', 'Neon Glow', 'Gradient Mesh', 'Editorial',
-  'Dashboard', 'Parallax', 'Card Grid', 'Full Screen Hero',
-  'Neumorphism', 'Aurora Background', 'Frosted Glass',
-  'Brutalism', 'Memphis Design', 'Claymorphism',
-  'Retro Futurism', 'Cyberpunk', 'Japandi', 'Swiss Style'
-]
 
+  useEffect(() => {
+    if (!previewRef.current) return
+    const observer = new ResizeObserver(([entry]) => {
+      setScale(entry.contentRect.width / 1280)
+    })
+    observer.observe(previewRef.current)
+    return () => observer.disconnect()
+  }, [previewMode])
 
-const techOptions = [
-  'React Hooks', 'useState Animation', 'CSS Transitions',
-  'Parallax Scroll', 'Intersection Observer', 'CSS Grid',
-  'Flexbox', 'SVG Animation', 'Canvas', 'WebGL',
-  'Framer Motion', 'GSAP', 'Scroll Animations',
-  'Micro-interactions', 'Loading Skeletons', 'CSS Variables',
-  'Dark Mode Toggle', 'Lazy Loading', 'Infinite Scroll',
-  'Debounce', 'Virtual List', 'Code Splitting',
-  'Web Animations API', 'CSS Custom Properties',
-  'ResizeObserver', 'MutationObserver'
-]
-useEffect(() => {
-  if (!previewRef.current) return
-  const observer = new ResizeObserver(([entry]) => {
-    setScale(entry.contentRect.width / 1280)
-  })
-  observer.observe(previewRef.current)
-  return () => observer.disconnect()
-}, [previewMode])
-
+  const blockedIds = getBlockedIds()
+  const selectedStyleCount = [...STYLES, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
+    .filter(s => selectedSnippets.includes(s.id)).length
+  const selectedTechCount = TECH.filter(s => selectedSnippets.includes(s.id)).length
 
   return (
     <div className="flex flex-col md:flex-row max-w-7xl mx-auto px-4 py-10 gap-6">
@@ -245,19 +284,18 @@ useEffect(() => {
                 {page.status === 'published' ? 'Published' : 'Draft'}
               </span>
               <button
-  onClick={async (e) => {
-    e.stopPropagation()
-    if (!confirm('Xóa page này?')) return
-    await fetch('/api/pages', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: page.id })
-    })
-    fetchPages()
-  }}
-  className="text-xs px-1.5 py-0.5 rounded bg-red-900/50 text-red-400 hover:bg-red-800"
->✕</button>
-
+                onClick={async (e) => {
+                  e.stopPropagation()
+                  if (!confirm('Xóa page này?')) return
+                  await fetch('/api/pages', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: page.id })
+                  })
+                  fetchPages()
+                }}
+                className="text-xs px-1.5 py-0.5 rounded bg-red-900/50 text-red-400 hover:bg-red-800"
+              >✕</button>
             </div>
             <p className="text-xs text-muted-foreground mt-1">/{page.slug}</p>
             {page.title_vi && <span className="text-xs text-blue-500">🌐 VI</span>}
@@ -276,11 +314,10 @@ useEffect(() => {
             <div className="flex items-center justify-between">
               <div>
                 <input
-  className="w-full bg-background border rounded px-3 py-1 text-xl font-bold mb-1"
-  value={selected.title_en}
-  onChange={e => setSelected({...selected, title_en: e.target.value})}
-/>
-
+                  className="w-full bg-background border rounded px-3 py-1 text-xl font-bold mb-1"
+                  value={selected.title_en}
+                  onChange={e => setSelected({ ...selected, title_en: e.target.value })}
+                />
                 <p className="text-sm text-muted-foreground">/{selected.slug}</p>
               </div>
               <div className="flex gap-2 flex-wrap">
@@ -305,146 +342,158 @@ useEffect(() => {
               </div>
             </div>
 
-           {showGenerate && (
-  <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
-    <p className="text-sm font-medium">✨ AI Generate Page Component</p>
+            {showGenerate && (
+              <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
+                <p className="text-sm font-medium">✨ AI Generate Page Component</p>
 
-    {/* Keywords */}
-    <input
-      className="w-full bg-background border rounded px-3 py-1.5 text-sm outline-none"
-      placeholder="Keywords (e.g. trading, minimal, dark...)"
-      value={keywords}
-      onChange={(e) => setKeywords(e.target.value)}
-    />
+                {/* Keywords */}
+                <input
+                  className="w-full bg-background border rounded px-3 py-1.5 text-sm outline-none"
+                  placeholder="Keywords (e.g. trading, minimal, dark...)"
+                  value={keywords}
+                  onChange={(e) => setKeywords(e.target.value)}
+                />
 
-    {/* Vibe - from lib */}
-    <div className="flex flex-wrap gap-2">
-      {VIBES.map((v) => (
-        <button key={v.id} onClick={() => setVibe(v.id)}
-          className={`px-3 py-1 text-xs rounded capitalize ${vibe === v.id ? 'bg-emerald-600 text-white' : 'border'}`}>
-          {v.label}
-        </button>
-      ))}
-    </div>
+                {/* Vibe */}
+                <div className="flex flex-wrap gap-2">
+                  {VIBES.map((v) => (
+                    <button key={v.id} onClick={() => setVibe(vibe === v.id ? '' : v.id)}
+                      className={`px-3 py-1 text-xs rounded capitalize ${vibe === v.id ? 'bg-emerald-600 text-white' : 'border'}`}>
+                      {v.label}
+                    </button>
+                  ))}
+                </div>
 
-    {/* Style + Tech */}
-    <div className="flex gap-2">
-      <button onClick={() => setShowStylePicker(!showStylePicker)}
-        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
-        🎨 Styles {selectedStyles.length > 0 && `(${selectedStyles.length})`}
-      </button>
-      <button onClick={() => setShowTechPicker(!showTechPicker)}
-        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
-        ⚡ Tech {selectedTechs.length > 0 && `(${selectedTechs.length})`}
-      </button>
-    </div>
+                {/* Style + Tech pickers */}
+                <div className="flex gap-2">
+                  <button onClick={() => setShowStylePicker(!showStylePicker)}
+                    className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
+                    🎨 Styles {selectedStyleCount > 0 && `(${selectedStyleCount})`}
+                  </button>
+                  <button onClick={() => setShowTechPicker(!showTechPicker)}
+                    className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
+                    ⚡ Tech {selectedTechCount > 0 && `(${selectedTechCount})`}
+                  </button>
+                </div>
 
-    {/* Style picker - from lib */}
-    {showStylePicker && (
-      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
-        <div className="flex justify-between mb-2">
-          <p className="text-xs text-gray-400">Select styles:</p>
-          <button onClick={() => setShowStylePicker(false)} className="text-xs text-gray-500">✕</button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {STYLES.map((s) => {
-            const conflicted = getConflicts(selectedStyles).includes(s.id)
-            return (
-              <button key={s.id}
-                disabled={conflicted}
-                onClick={() => setSelectedStyles(prev =>
-                  prev.includes(s.id) ? prev.filter(x => x !== s.id) : [...prev, s.id])}
-                className={`px-2 py-1 text-xs rounded transition-all ${
-                  selectedStyles.includes(s.id) ? 'bg-emerald-600 text-white' 
-                  : conflicted ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
-                  : 'border border-gray-600 text-gray-400 hover:border-emerald-500'}`}
-                title={conflicted ? 'Conflicts with selected styles' : ''}>
-                {s.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-    )}
+                {/* Style picker */}
+                {showStylePicker && (
+                  <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
+                    <div className="flex justify-between mb-2">
+                      <p className="text-xs text-gray-400">Select styles:</p>
+                      <button onClick={() => setShowStylePicker(false)} className="text-xs text-gray-500">✕</button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[...STYLES, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS].map((s) => {
+                        const isSelected = selectedSnippets.includes(s.id)
+                        const isBlocked = !isSelected && blockedIds.has(s.id)
+                        return (
+                          <button key={s.id}
+                            disabled={isBlocked}
+                            onClick={() => toggleSnippet(s.id)}
+                            className={`px-2 py-1 text-xs rounded transition-all ${
+                              isSelected ? 'bg-emerald-600 text-white'
+                              : isBlocked ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
+                              : 'border border-gray-600 text-gray-400 hover:border-emerald-500'
+                            }`}
+                            title={isBlocked ? 'Conflicts with current selection' : ''}>
+                            {s.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
 
-    {/* Tech picker - from lib */}
-    {showTechPicker && (
-      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
-        <div className="flex justify-between mb-2">
-          <p className="text-xs text-gray-400">Select tech:</p>
-          <button onClick={() => setShowTechPicker(false)} className="text-xs text-gray-500">✕</button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {TECH.map((t) => (
-            <button key={t.id}
-              onClick={() => setSelectedTechs(prev =>
-                prev.includes(t.id) ? prev.filter(x => x !== t.id) : [...prev, t.id])}
-              className={`px-2 py-1 text-xs rounded ${selectedTechs.includes(t.id) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    )}
+                {/* Tech picker */}
+                {showTechPicker && (
+                  <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
+                    <div className="flex justify-between mb-2">
+                      <p className="text-xs text-gray-400">Select tech:</p>
+                      <button onClick={() => setShowTechPicker(false)} className="text-xs text-gray-500">✕</button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {TECH.map((t) => {
+                        const isSelected = selectedSnippets.includes(t.id)
+                        const isBlocked = !isSelected && blockedIds.has(t.id)
+                        return (
+                          <button key={t.id}
+                            disabled={isBlocked}
+                            onClick={() => toggleSnippet(t.id)}
+                            className={`px-2 py-1 text-xs rounded transition-all ${
+                              isSelected ? 'bg-emerald-600 text-white'
+                              : isBlocked ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
+                              : 'border border-gray-600 text-gray-400 hover:border-emerald-500'
+                            }`}
+                            title={isBlocked ? 'Conflicts with current selection' : ''}>
+                            {t.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
 
-    {/* Active prompt preview */}
-    {(keywords || vibe || selectedStyles.length > 0) && (
-      <div className="p-2 rounded bg-black/40 border border-gray-800 text-xs text-gray-500 font-mono max-h-20 overflow-auto">
-        {buildPrompt(
-          [...VIBES.filter(v => v.id === vibe), ...STYLES.filter(s => selectedStyles.includes(s.id)), ...TECH.filter(t => selectedTechs.includes(t.id))],
-          description, keywords
-        ).slice(0, 200)}...
-      </div>
-    )}
+                {/* Validation warnings */}
+                {validationWarnings.length > 0 && (
+                  <div className="space-y-1">
+                    {validationWarnings.map((w, i) => (
+                      <p key={i} className="text-xs text-amber-400 bg-amber-900/20 px-3 py-1.5 rounded border border-amber-800">
+                        ⚠️ {w}
+                      </p>
+                    ))}
+                  </div>
+                )}
 
-    {/* Textarea */}
-    <textarea
-      className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
-      value={description}
-      onChange={(e) => setDescription(e.target.value)}
-      placeholder="Mô tả trang này..."
-    />
+                {/* Prompt preview */}
+                {(keywords || vibe || selectedSnippets.length > 0) && (
+                  <div className="p-2 rounded bg-black/40 border border-gray-800 text-xs text-gray-500 font-mono max-h-20 overflow-auto">
+                    {buildPromptClean(getSelectedSnippetObjs(), description || '...', keywords).slice(0, 200)}...
+                  </div>
+                )}
 
-    {/* Generate */}
-    <button onClick={handleGenerate}
-      disabled={loading || !description}
-      className="w-full px-4 py-2.5 text-sm bg-emerald-600 text-white rounded disabled:opacity-50 font-medium">
-      {loading ? 'Generating...' : '✨ Generate TSX'}
-    </button>
-  </div>
-)}
+                {/* Description */}
+                <textarea
+                  className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Mô tả trang này..."
+                />
 
+                {/* Generate */}
+                <button onClick={handleGenerate}
+                  disabled={loading || !description}
+                  className="w-full px-4 py-2.5 text-sm bg-emerald-600 text-white rounded disabled:opacity-50 font-medium">
+                  {loading ? 'Generating...' : '✨ Generate TSX'}
+                </button>
+              </div>
+            )}
 
-                {(generatedCode || selected?.tsx_content) && (
-  <div className="space-y-2">
-    <div className="flex gap-2 text-xs">
-      <button
-        onClick={() => setPreviewMode('code')}
-        className={`px-2 py-1 rounded border ${previewMode === 'code' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
-      >Code</button>
-      <button
-        onClick={() => setPreviewMode('live')}
-        className={`px-2 py-1 rounded border ${previewMode === 'live' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
-      >⚡ Live</button>
-    </div>
-    {previewMode === 'code'
-      ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} onChange={e => setGeneratedCode(e.target.value)} />
-
-      : <div ref={previewRef} className="border rounded overflow-y-auto" style={{height: '60vh'}}>
-    <div style={{
-      transform: `scale(${scale})`,
-      transformOrigin: 'top left',
-      width: `${100 / scale}%`,
-      height: `${100 / scale}%`,
-    }}>
-      <LivePageRenderer code={generatedCode} />
-    </div>
-  </div>
-
-    }
-  </div>
-)}
-
+            {(generatedCode || selected?.tsx_content) && (
+              <div className="space-y-2">
+                <div className="flex gap-2 text-xs">
+                  <button
+                    onClick={() => setPreviewMode('code')}
+                    className={`px-2 py-1 rounded border ${previewMode === 'code' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
+                  >Code</button>
+                  <button
+                    onClick={() => setPreviewMode('live')}
+                    className={`px-2 py-1 rounded border ${previewMode === 'live' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
+                  >⚡ Live</button>
+                </div>
+                {previewMode === 'code'
+                  ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} onChange={e => setGeneratedCode(e.target.value)} />
+                  : <div ref={previewRef} className="border rounded overflow-y-auto" style={{ height: '60vh' }}>
+                    <div style={{
+                      transform: `scale(${scale})`,
+                      transformOrigin: 'top left',
+                      width: `${100 / scale}%`,
+                      height: `${100 / scale}%`,
+                    }}>
+                      <LivePageRenderer code={generatedCode} />
+                    </div>
+                  </div>
+                }
               </div>
             )}
 
@@ -464,8 +513,8 @@ useEffect(() => {
               placeholder={tab === 'en' ? 'English content...' : 'Nội dung tiếng Việt...'}
             />
           </div>
-        )
+        )}
       </div>
-    
+    </div>
   )
 }
