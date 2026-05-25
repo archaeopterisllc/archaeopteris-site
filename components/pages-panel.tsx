@@ -115,22 +115,15 @@ export default function PagesPanel() {
 
   // Check if a snippet id is blocked by current selection
   const getBlockedIds = (): Set<string> => {
-    const objs = getSelectedSnippetObjs()
-    alert('objs length: ' + objs.length)
-    if (objs.length === 0) return new Set()
+  const objs = getSelectedSnippetObjs()
+  if (objs.length === 0) return new Set()
+  const blocked = new Set<string>()
+  objs.forEach(snippet => {
+    snippet.conflicts?.forEach(c => blocked.add(c))
+  })
+  return blocked
+}
 
-    const { valid } = validateSelection(objs)
-    const validIds = new Set(valid.map(v => v.id))
-    // blocked = not in valid AND not already selected
-    const allSnippets = [...STYLES, ...TECH, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
-    const blocked = new Set<string>()
-    allSnippets.forEach(s => {
-      if (!validIds.has(s.id) && !selectedSnippets.includes(s.id)) {
-        blocked.add(s.id)
-      }
-    })
-    return blocked
-  }
 
   const toggleSnippet = (id: string) => {
     const next = selectedSnippets.includes(id)
