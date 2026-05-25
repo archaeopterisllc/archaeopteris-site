@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     const { text } = await generateText({
       model: groq('llama-3.3-70b-versatile'),
-      maxTokens: 16000,
+      maxTokens: 8000,
       messages: [{ role: 'user', content: prompt }],
     })
 
