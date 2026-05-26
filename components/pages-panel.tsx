@@ -1,4 +1,6 @@
 'use client'
+import WebContainerComponent from './web-container'
+import type { FileSystemTree } from '@webcontainer/api'
 
 import { useState, useEffect, useRef } from 'react'
 import LivePageRenderer from '@/components/live-page-renderer'
@@ -35,6 +37,8 @@ const DIFFICULTY_DOT: Record<string, { dots: string; color: string }> = {
 }
 
 export default function PagesPanel() {
+  const [projectFiles, setProjectFiles] = useState<FileSystemTree | undefined>(undefined)
+
   const [pages, setPages] = useState<Page[]>([])
   const [selected, setSelected] = useState<Page | null>(null)
   const [loading, setLoading] = useState(false)
@@ -53,7 +57,7 @@ export default function PagesPanel() {
   const [templateSearch, setTemplateSearch] = useState('')
   const [activeCollection, setActiveCollection] = useState<string>('')
 
-  const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
+  const [previewMode, setPreviewMode] = useState<'code' | 'live' | 'project'>('code')
   const previewRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
 
@@ -665,10 +669,16 @@ export default function PagesPanel() {
                     onClick={() => setPreviewMode('live')}
                     className={`px-2 py-1 rounded border ${previewMode === 'live' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
                   >⚡ Live</button>
+                  <button
+                    onClick={() => setPreviewMode('project')}
+                    className={`px-2 py-1 rounded border ${previewMode === 'project' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
+                  >🏗️ Project</button>
                 </div>
-                {previewMode === 'code'
-                  ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} onChange={e => setGeneratedCode(e.target.value)} />
-                  : <div ref={previewRef} className="border rounded overflow-y-auto" style={{ height: '60vh' }}>
+
+                {previewMode === 'code' ? (
+                  <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} onChange={e => setGeneratedCode(e.target.value)} />
+                ) : previewMode === 'live' ? (
+                  <div ref={previewRef} className="border rounded overflow-y-auto" style={{ height: '60vh' }}>
                     <div style={{
                       transform: `scale(${scale})`,
                       transformOrigin: 'top left',
@@ -678,7 +688,9 @@ export default function PagesPanel() {
                       <LivePageRenderer code={generatedCode} />
                     </div>
                   </div>
-                }
+                ) : previewMode === 'project' ? (
+                  <WebContainerComponent files={projectFiles} />
+                ) : null}
               </div>
             )}
 
