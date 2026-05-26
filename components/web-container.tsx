@@ -1,4 +1,7 @@
 'use client'
+
+const stripAnsi = (str: string) => str.replace(/\x1B\[[0-9;]*[mGKHF]/g, '')
+
 import { useEffect, useRef, useState } from 'react'
 import type { FileSystemTree } from '@webcontainer/api'
 
@@ -68,7 +71,7 @@ export default function WebContainer({
 
       installProcess.output.pipeTo(
         new WritableStream({
-          write(data) { addLog(data) },
+          write(data) { addLog(stripAnsi(data)) },
         })
       )
 
@@ -81,7 +84,7 @@ export default function WebContainer({
 
       devProcess.output.pipeTo(
         new WritableStream({
-          write(data) { addLog(data) },
+          write(data) { addLog(stripAnsi(data)) },
         })
       )
 
