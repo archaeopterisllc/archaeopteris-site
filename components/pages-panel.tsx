@@ -674,12 +674,18 @@ export default function PagesPanel() {
                     className={`px-2 py-1 rounded border ${previewMode === 'project' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
                   >🏗️ Project</button>
                   <button onClick={() => setProjectFiles({
+  'package.json': {
+    file: { 
+      contents: '{"name":"test","scripts":{"dev":"npx serve ."},"dependencies":{}}' 
+    }
+  },
   'index.html': {
     file: { contents: '<h1>Hello WebContainer!</h1>' }
   }
 })}>
   Test Boot
 </button>
+
 
                 </div>
 
@@ -697,7 +703,11 @@ export default function PagesPanel() {
                     </div>
                   </div>
                 ) : previewMode === 'project' ? (
-                  <WebContainerComponent files={projectFiles} />
+                  <WebContainerComponent 
+  files={projectFiles} 
+  startCommand={['npx', 'serve', '.']}
+/>
+
                 ) : null}
               </div>
             )}
