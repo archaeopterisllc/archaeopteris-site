@@ -200,7 +200,7 @@ export default function ArchaeopterisBuilder() {
   `;
 
   // 3. Đổ trực tiếp vào srcDoc - Miễn nhiễm hoàn toàn với lỗi CORS và Blob URL bị chặn
-  iframeRef.current.srcDoc = htmlContent;
+  iframeRef.current.srcdoc = htmlContent;
 }, []);
 
   useEffect(() => {
