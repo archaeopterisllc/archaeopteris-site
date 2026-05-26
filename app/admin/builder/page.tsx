@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from 'next/dynamic'
 
 // Đây chính là hành động "IMPORT" (gọi file Builder ở Bước 1 vào đây)
