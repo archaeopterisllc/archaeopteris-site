@@ -673,6 +673,14 @@ export default function PagesPanel() {
                     onClick={() => setPreviewMode('project')}
                     className={`px-2 py-1 rounded border ${previewMode === 'project' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
                   >🏗️ Project</button>
+                  <button onClick={() => setProjectFiles({
+  'index.html': {
+    file: { contents: '<h1>Hello WebContainer!</h1>' }
+  }
+})}>
+  Test Boot
+</button>
+
                 </div>
 
                 {previewMode === 'code' ? (
