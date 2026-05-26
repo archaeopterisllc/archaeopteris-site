@@ -705,7 +705,8 @@ export default function PagesPanel() {
                 ) : previewMode === 'project' ? (
                   <WebContainerComponent 
   files={projectFiles} 
-  startCommand={['node', '-e', "require('http').createServer((req,res)=>res.end(require('fs').readFileSync('index.html','utf8'))).listen(3000)"]}
+  startCommand={['node', '-e', "const h=require('http'),f=require('fs');h.createServer((req,res)=>res.end(f.readFileSync('index.html','utf8'))).listen(3000)"]}
+
 
 />
 
