@@ -8,50 +8,12 @@ const groq = createOpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { slug, description, vibe, styles, techs } = await req.json()
-    const prompt = `You are an expert React/Next.js developer. Create a stunning, production-ready page component.
-
-Page: "${slug}"
-Description: ${description}
-Vibe: ${vibe || 'modern'}
-Style techniques: ${styles || 'glassmorphism dark'}
-Tech features: ${techs || 'CSS transitions, hover effects'}
-
-
-Requirements:
-- Tailwind CSS only, dark theme (bg-gray-950, bg-gray-900)
-- Hero: min-h-screen, flex center, large gradient heading (from-emerald-400 via-teal-300 to-blue-500), subtitle, CTA button
-- Glassmorphism cards: bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl
-- Animations: transition-all duration-300 hover:scale-105 hover:bg-white/10
-- Grid sections: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
-- Typography: text-5xl font-black tracking-tight for hero, text-xl for subtitles
-- Spacing: py-24 px-6 max-w-7xl mx-auto for sections
-- Bilingual VI/EN inline
-- Mobile first responsive
-- Hero: bg-gradient-to-br from-gray-950 via-emerald-950 to-gray-900, min-h-screen flex items-center justify-center text-center
-- Heading: text-6xl font-black bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent
-- Cards: bg-gray-800/50 backdrop-blur border border-gray-700 rounded-2xl p-6 hover:border-emerald-500 transition-all
-- CTA button: bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-8 py-4 rounded-full
-- Add emojis for visual interest
-- Return ONLY JSX, no imports, no explanation, no backticks
-- Use className NOT class (this is JSX not HTML)
-- Define a function component named App
-- End with: render(<App />)
-- Example structure:
-function App() {
-  return (
-    <div className="...">
-      ...
-    </div>
-  )
-}
-render(<App />) `
-
+    const body = await req.json()
+    const prompt = body.prompt ?? buildLegacyPrompt(body)
 
     const { text } = await generateText({
       model: groq('llama-3.3-70b-versatile'),
       maxTokens: 8000,
-
       messages: [{ role: 'user', content: prompt }],
     })
 
@@ -60,4 +22,29 @@ render(<App />) `
     console.error('Page generate error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })
   }
+}
+
+function buildLegacyPrompt({ slug, description, vibe, styles, techs }: {
+  slug: string
+  description: string
+  vibe?: string
+  styles?: string
+  techs?: string
+}) {
+  return `You are an expert React/Next.js developer. Create a stunning, production-ready page component.
+
+Page: "${slug}"
+Description: ${description}
+Vibe: ${vibe || 'modern'}
+Style techniques: ${styles || 'glassmorphism dark'}
+Tech features: ${techs || 'CSS transitions, hover effects'}
+
+Requirements:
+- Tailwind CSS only, dark theme
+- Hero: min-h-screen, flex center, large gradient heading
+- Bilingual VI/EN inline
+- Mobile first responsive
+- Return ONLY JSX, no imports, no explanation, no backticks
+- Use className NOT class
+- Define function App(), end with: render(<App />)`
 }

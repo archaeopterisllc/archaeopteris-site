@@ -1,7 +1,15 @@
 'use client'
 
-import { useState, useEffect , useRef} from 'react'
+import { useState, useEffect, useRef } from 'react'
 import LivePageRenderer from '@/components/live-page-renderer'
+import {
+  VIBES, STYLES, TECH, ANIMATIONS, COMPONENTS, INTERACTIONS,
+  buildPromptClean, validateSelection,
+  type Snippet,
+} from '@/lib/prompt-libraryn'
+import {
+  TEMPLATES, COLLECTIONS, resolveSnippets, type Template,
+} from '@/lib/templates'
 
 type Page = {
   id: string
@@ -15,6 +23,17 @@ type Page = {
   updated_at: string
 }
 
+const MOOD_EMOJI: Record<string, string> = {
+  bold: '⚡', elegant: '✦', playful: '🎉', technical: '⚙️',
+  warm: '🌿', edgy: '🔥', minimal: '◻️', immersive: '🌌',
+}
+
+const DIFFICULTY_DOT: Record<string, { dots: string; color: string }> = {
+  simple:  { dots: '●○○', color: 'text-emerald-400' },
+  medium:  { dots: '●●○', color: 'text-amber-400' },
+  complex: { dots: '●●●', color: 'text-rose-400' },
+}
+
 export default function PagesPanel() {
   const [pages, setPages] = useState<Page[]>([])
   const [selected, setSelected] = useState<Page | null>(null)
@@ -23,20 +42,28 @@ export default function PagesPanel() {
   const [contentVi, setContentVi] = useState('')
   const [tab, setTab] = useState<'en' | 'vi'>('en')
   const [description, setDescription] = useState('')
-  const [vibe, setVibe] = useState<'mystical' | 'modern' | 'classical'>('modern')
-const [showStylePicker, setShowStylePicker] = useState(false)
-const [selectedStyles, setSelectedStyles] = useState<string[]>([])
-const [showTechPicker, setShowTechPicker] = useState(false)
-const [selectedTechs, setSelectedTechs] = useState<string[]>([])
-const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
-const previewRef = useRef<HTMLDivElement>(null)
-const [scale, setScale] = useState(1)
+  const [vibe, setVibe] = useState<string>('')
+
+  const [showStylePicker, setShowStylePicker] = useState(false)
+  const [showTechPicker, setShowTechPicker] = useState(false)
+  const [selectedSnippets, setSelectedSnippets] = useState<string[]>([])
+
+  // Generator tabs
+  const [generatorTab, setGeneratorTab] = useState<'snippets' | 'templates'>('snippets')
+  const [templateSearch, setTemplateSearch] = useState('')
+  const [activeCollection, setActiveCollection] = useState<string>('')
+
+  const [previewMode, setPreviewMode] = useState<'code' | 'live'>('code')
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
 
   const [generatedCode, setGeneratedCode] = useState('')
   const [showGenerate, setShowGenerate] = useState(false)
   const [showNewPage, setShowNewPage] = useState(false)
   const [newSlug, setNewSlug] = useState('')
   const [newTitle, setNewTitle] = useState('')
+  const [keywords, setKeywords] = useState('')
+  const [validationWarnings, setValidationWarnings] = useState<string[]>([])
 
   useEffect(() => { fetchPages() }, [])
 
@@ -53,7 +80,6 @@ const [scale, setScale] = useState(1)
     setTab('en')
     setGeneratedCode(page.tsx_content || '')
     setShowGenerate(!!page.tsx_content)
-
   }
 
   const handleNewPage = async () => {
@@ -78,7 +104,6 @@ const [scale, setScale] = useState(1)
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: selected.id, content_en: contentEn, content_vi: contentVi, title_en: selected.title_en })
-
     })
     setLoading(false)
     fetchPages()
@@ -98,31 +123,100 @@ const [scale, setScale] = useState(1)
     setLoading(false)
   }
 
+  const getSelectedSnippetObjs = (): Snippet[] => {
+    const allSnippets = [...VIBES, ...STYLES, ...TECH, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
+    const vibeObj = VIBES.find(v => v.id === vibe)
+    const rest = allSnippets.filter(s => selectedSnippets.includes(s.id))
+    return vibeObj ? [vibeObj, ...rest.filter(s => s.id !== vibe)] : rest
+  }
+
+  const getBlockedIds = (): Set<string> => {
+    const objs = getSelectedSnippetObjs()
+    if (objs.length === 0) return new Set()
+    const blocked = new Set<string>()
+    objs.forEach(snippet => {
+      snippet.conflicts?.forEach(c => blocked.add(c))
+    })
+    return blocked
+  }
+
+  const toggleSnippet = (id: string) => {
+    const next = selectedSnippets.includes(id)
+      ? selectedSnippets.filter(x => x !== id)
+      : [...selectedSnippets, id]
+    setSelectedSnippets(next)
+    const allSnippets = [...VIBES, ...STYLES, ...TECH, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
+    const vibeObj = VIBES.find(v => v.id === vibe)
+    const objs = [
+      ...(vibeObj ? [vibeObj] : []),
+      ...allSnippets.filter(s => next.includes(s.id))
+    ]
+    const { warnings } = validateSelection(objs)
+    setValidationWarnings(warnings)
+  }
+
+  // Apply a full template preset
+  const applyTemplate = (template: Template) => {
+    const snippets = resolveSnippets(template.snippetIds)
+    const vibeSnippet = snippets.find(s => s.category === 'vibe')
+    const rest = snippets.filter(s => s.category !== 'vibe')
+    setVibe(vibeSnippet?.id ?? '')
+    setSelectedSnippets(rest.map(s => s.id))
+    setKeywords(template.defaultKeywords ?? '')
+    setDescription(template.examplePrompt)
+    const { warnings } = validateSelection(snippets)
+    setValidationWarnings(warnings)
+    // Switch to snippets tab so user sees what was applied
+    setGeneratorTab('snippets')
+  }
+
+  const filteredTemplates = (() => {
+    let list = activeCollection
+      ? TEMPLATES.filter(t => COLLECTIONS[activeCollection]?.includes(t.id))
+      : TEMPLATES
+    if (templateSearch.trim()) {
+      const q = templateSearch.toLowerCase()
+      list = list.filter(t =>
+        t.name.toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q) ||
+        t.tags?.some(tag => tag.includes(q)) ||
+        t.category.includes(q) ||
+        t.mood.includes(q)
+      )
+    }
+    return list
+  })()
+
   const handleGenerate = async () => {
     if (!selected || !description) return
     setLoading(true)
+    const snippetObjs = getSelectedSnippetObjs()
+    const { valid, removed } = validateSelection(snippetObjs)
+    const prompt = buildPromptClean(valid, description, keywords)
     const res = await fetch('/api/page-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: selected.slug, description, vibe, styles: selectedStyles.join(', '), techs: selectedTechs.join(', ') })
-
-
+      body: JSON.stringify({ slug: selected.slug, prompt })
     })
     const data = await res.json()
-    setGeneratedCode(data.code || '')
+    setGeneratedCode((data.code || '').replace(/```jsx|```tsx|```/g, '').trim())
     setPreviewMode('code')
     setLoading(false)
+    if (removed.length > 0) {
+      setValidationWarnings(prev => [
+        ...prev,
+        `Auto-removed conflicts: ${removed.map(r => r.snippet.label).join(', ')}`
+      ])
+    }
   }
 
   const handlePublish = async () => {
     if (!selected) return
     setLoading(true)
     const cleanCode = generatedCode
-  .replace(/```jsx|```tsx|```/g, '')
-  .replace(/^import.*$/gm, '')
-  .trim()
-
-
+      .replace(/```jsx|```tsx|```/g, '')
+      .replace(/^import.*$/gm, '')
+      .trim()
     await fetch('/api/pages', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -145,36 +239,20 @@ const [scale, setScale] = useState(1)
     setLoading(false)
     fetchPages()
   }
-const styleOptions = [
-  'Glassmorphism', 'Bento Grid', 'Magazine', 'Minimal Dark',
-  'Luxury Dark', 'Neon Glow', 'Gradient Mesh', 'Editorial',
-  'Dashboard', 'Parallax', 'Card Grid', 'Full Screen Hero',
-  'Neumorphism', 'Aurora Background', 'Frosted Glass',
-  'Brutalism', 'Memphis Design', 'Claymorphism',
-  'Retro Futurism', 'Cyberpunk', 'Japandi', 'Swiss Style'
-]
 
+  useEffect(() => {
+    if (!previewRef.current) return
+    const observer = new ResizeObserver(([entry]) => {
+      setScale(entry.contentRect.width / 1280)
+    })
+    observer.observe(previewRef.current)
+    return () => observer.disconnect()
+  }, [previewMode])
 
-const techOptions = [
-  'React Hooks', 'useState Animation', 'CSS Transitions',
-  'Parallax Scroll', 'Intersection Observer', 'CSS Grid',
-  'Flexbox', 'SVG Animation', 'Canvas', 'WebGL',
-  'Framer Motion', 'GSAP', 'Scroll Animations',
-  'Micro-interactions', 'Loading Skeletons', 'CSS Variables',
-  'Dark Mode Toggle', 'Lazy Loading', 'Infinite Scroll',
-  'Debounce', 'Virtual List', 'Code Splitting',
-  'Web Animations API', 'CSS Custom Properties',
-  'ResizeObserver', 'MutationObserver'
-]
-useEffect(() => {
-  if (!previewRef.current) return
-  const observer = new ResizeObserver(([entry]) => {
-    setScale(entry.contentRect.width / 1280)
-  })
-  observer.observe(previewRef.current)
-  return () => observer.disconnect()
-}, [previewMode])
-
+  const blockedIds = getBlockedIds()
+  const selectedStyleCount = [...STYLES, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS]
+    .filter(s => selectedSnippets.includes(s.id)).length
+  const selectedTechCount = TECH.filter(s => selectedSnippets.includes(s.id)).length
 
   return (
     <div className="flex flex-col md:flex-row max-w-7xl mx-auto px-4 py-10 gap-6">
@@ -242,19 +320,18 @@ useEffect(() => {
                 {page.status === 'published' ? 'Published' : 'Draft'}
               </span>
               <button
-  onClick={async (e) => {
-    e.stopPropagation()
-    if (!confirm('Xóa page này?')) return
-    await fetch('/api/pages', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: page.id })
-    })
-    fetchPages()
-  }}
-  className="text-xs px-1.5 py-0.5 rounded bg-red-900/50 text-red-400 hover:bg-red-800"
->✕</button>
-
+                onClick={async (e) => {
+                  e.stopPropagation()
+                  if (!confirm('Xóa page này?')) return
+                  await fetch('/api/pages', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: page.id })
+                  })
+                  fetchPages()
+                }}
+                className="text-xs px-1.5 py-0.5 rounded bg-red-900/50 text-red-400 hover:bg-red-800"
+              >✕</button>
             </div>
             <p className="text-xs text-muted-foreground mt-1">/{page.slug}</p>
             {page.title_vi && <span className="text-xs text-blue-500">🌐 VI</span>}
@@ -273,11 +350,10 @@ useEffect(() => {
             <div className="flex items-center justify-between">
               <div>
                 <input
-  className="w-full bg-background border rounded px-3 py-1 text-xl font-bold mb-1"
-  value={selected.title_en}
-  onChange={e => setSelected({...selected, title_en: e.target.value})}
-/>
-
+                  className="w-full bg-background border rounded px-3 py-1 text-xl font-bold mb-1"
+                  value={selected.title_en}
+                  onChange={e => setSelected({ ...selected, title_en: e.target.value })}
+                />
                 <p className="text-sm text-muted-foreground">/{selected.slug}</p>
               </div>
               <div className="flex gap-2 flex-wrap">
@@ -303,116 +379,306 @@ useEffect(() => {
             </div>
 
             {showGenerate && (
-  <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
-    <p className="text-sm font-medium">✨ AI Generate Page Component</p>
-    
-    {/* Vibe selector - full width row */}
-    <div className="flex gap-2 w-full">
-      {(['mystical', 'modern', 'classical'] as const).map((v) => (
-        <button key={v} onClick={() => setVibe(v)}
-          className={`flex-1 px-3 py-1.5 text-xs rounded capitalize ${vibe === v ? 'bg-emerald-600 text-white' : 'border'}`}>
-          {v}
-        </button>
-      ))}
-    </div>
+              <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
+                <p className="text-sm font-medium">✨ AI Generate Page Component</p>
 
-    {/* Style + Tech - same row */}
-    <div className="flex gap-2">
-      <button onClick={() => setShowStylePicker(!showStylePicker)}
-        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400 hover:border-emerald-500">
-        🎨 Styles {selectedStyles.length > 0 && `(${selectedStyles.length})`}
-      </button>
-      <button onClick={() => setShowTechPicker(!showTechPicker)}
-        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400 hover:border-emerald-500">
-        ⚡ Tech {selectedTechs.length > 0 && `(${selectedTechs.length})`}
-      </button>
-    </div>
+                {/* ── Generator Mode Tabs ── */}
+                <div className="flex gap-1 p-1 bg-black/30 rounded-lg">
+                  <button
+                    onClick={() => setGeneratorTab('snippets')}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-md transition-all font-medium ${
+                      generatorTab === 'snippets'
+                        ? 'bg-emerald-600 text-white shadow'
+                        : 'text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    🧩 Snippets
+                  </button>
+                  <button
+                    onClick={() => setGeneratorTab('templates')}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-md transition-all font-medium ${
+                      generatorTab === 'templates'
+                        ? 'bg-emerald-600 text-white shadow'
+                        : 'text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    🗂️ Templates <span className="opacity-60">({TEMPLATES.length})</span>
+                  </button>
+                </div>
 
-    {/* Style picker dropdown */}
-    {showStylePicker && (
-      <div className="border border-gray-700 rounded-xl p-4 mt-1 shadow-xl bg-gray-900">
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-xs text-gray-400">Select styles:</p>
-          <button onClick={() => setShowStylePicker(false)} className="text-xs text-gray-500">✕</button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {styleOptions.map((style) => (
-            <button key={style} onClick={() => setSelectedStyles(prev =>
-              prev.includes(style) ? prev.filter(s => s !== style) : [...prev, style])}
-              className={`px-2 py-1 text-xs rounded ${selectedStyles.includes(style) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
-              {style}
-            </button>
-          ))}
-        </div>
-      </div>
-    )}
+                {/* ══════════════════════════════════════════
+                    TEMPLATES TAB
+                ══════════════════════════════════════════ */}
+                {generatorTab === 'templates' && (
+                  <div className="space-y-3">
 
-    {/* Tech picker dropdown */}
-    {showTechPicker && (
-      <div className="border border-gray-700 rounded-xl p-4 mt-1 shadow-xl bg-gray-900">
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-xs text-gray-400">Select tech:</p>
-          <button onClick={() => setShowTechPicker(false)} className="text-xs text-gray-500">✕</button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {techOptions.map((tech) => (
-            <button key={tech} onClick={() => setSelectedTechs(prev =>
-              prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech])}
-              className={`px-2 py-1 text-xs rounded ${selectedTechs.includes(tech) ? 'bg-emerald-600 text-white' : 'border border-gray-600 text-gray-400'}`}>
-              {tech}
-            </button>
-          ))}
-        </div>
-      </div>
-    )}
+                    {/* Search */}
+                    <input
+                      className="w-full bg-background border rounded px-3 py-1.5 text-sm outline-none"
+                      placeholder="Search... (saas, dark, bilingual, trading, minimal...)"
+                      value={templateSearch}
+                      onChange={e => setTemplateSearch(e.target.value)}
+                    />
 
-    {/* Textarea - full width */}
-    <textarea
-      className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
-      value={description}
-      onChange={(e) => setDescription(e.target.value)}
-      placeholder="Mô tả trang này..."
-    />
+                    {/* Collection filter pills */}
+                    <div className="flex gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => setActiveCollection('')}
+                        className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
+                          activeCollection === ''
+                            ? 'bg-emerald-600 text-white border-emerald-600'
+                            : 'border-gray-700 text-gray-400 hover:border-emerald-500'
+                        }`}
+                      >
+                        All
+                      </button>
+                      {Object.keys(COLLECTIONS).map(col => (
+                        <button
+                          key={col}
+                          onClick={() => setActiveCollection(activeCollection === col ? '' : col)}
+                          className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
+                            activeCollection === col
+                              ? 'bg-emerald-600 text-white border-emerald-600'
+                              : 'border-gray-700 text-gray-400 hover:border-emerald-500'
+                          }`}
+                        >
+                          {col}
+                        </button>
+                      ))}
+                    </div>
 
-    {/* Generate button - full width */}
-    <button onClick={handleGenerate}
-      disabled={loading || !description}
-      className="w-full px-4 py-2.5 text-sm bg-emerald-600 text-white rounded disabled:opacity-50 font-medium">
-      {loading ? 'Generating...' : '✨ Generate TSX'}
-    </button>
-  </div>
-)}
+                    {/* Count */}
+                    <p className="text-xs text-gray-500">
+                      {filteredTemplates.length} templates
+                      {activeCollection && ` in "${activeCollection}"`}
+                    </p>
 
-                {(generatedCode || selected?.tsx_content) && (
-  <div className="space-y-2">
-    <div className="flex gap-2 text-xs">
-      <button
-        onClick={() => setPreviewMode('code')}
-        className={`px-2 py-1 rounded border ${previewMode === 'code' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
-      >Code</button>
-      <button
-        onClick={() => setPreviewMode('live')}
-        className={`px-2 py-1 rounded border ${previewMode === 'live' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
-      >⚡ Live</button>
-    </div>
-    {previewMode === 'code'
-      ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} onChange={e => setGeneratedCode(e.target.value)} />
+                    {/* Template list */}
+                    <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                      {filteredTemplates.map(template => (
+                        <button
+                          key={template.id}
+                          onClick={() => applyTemplate(template)}
+                          className="w-full text-left p-3 rounded-lg border border-gray-700
+                                     hover:border-emerald-500 bg-gray-900/60 hover:bg-gray-900
+                                     transition-all group"
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Color swatch */}
+                            <div
+                              className="w-8 h-8 rounded-md shrink-0 mt-0.5 border border-white/10"
+                              style={{ backgroundColor: template.previewColor ?? '#333' }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              {/* Name + mood */}
+                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                <span className="text-xs font-semibold text-gray-100 group-hover:text-emerald-400 transition-colors">
+                                  {template.name}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {MOOD_EMOJI[template.mood] ?? ''} {template.mood}
+                                </span>
+                              </div>
+                              {/* Description */}
+                              <p className="text-xs text-gray-400 leading-snug mb-1.5 line-clamp-2">
+                                {template.description}
+                              </p>
+                              {/* Meta row */}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 capitalize">
+                                  {template.category}
+                                </span>
+                                {template.difficulty && (
+                                  <span className={`text-xs font-mono ${DIFFICULTY_DOT[template.difficulty]?.color}`}>
+                                    {DIFFICULTY_DOT[template.difficulty]?.dots}
+                                  </span>
+                                )}
+                                {template.estimatedSections && (
+                                  <span className="text-xs text-gray-600">
+                                    ~{template.estimatedSections} sections
+                                  </span>
+                                )}
+                                {template.tags?.slice(0, 3).map(tag => (
+                                  <span key={tag} className="text-xs text-gray-600">#{tag}</span>
+                                ))}
+                              </div>
+                            </div>
+                            {/* Arrow */}
+                            <span className="text-gray-600 group-hover:text-emerald-400 transition-colors shrink-0">
+                              →
+                            </span>
+                          </div>
+                        </button>
+                      ))}
 
-      : <div ref={previewRef} className="border rounded overflow-y-auto" style={{height: '60vh'}}>
-    <div style={{
-      transform: `scale(${scale})`,
-      transformOrigin: 'top left',
-      width: `${100 / scale}%`,
-      height: `${100 / scale}%`,
-    }}>
-      <LivePageRenderer code={generatedCode} />
-    </div>
-  </div>
+                      {filteredTemplates.length === 0 && (
+                        <p className="text-xs text-gray-500 text-center py-8">
+                          Không tìm thấy template nào cho &ldquo;{templateSearch}&rdquo;
+                        </p>
+                      )}
+                    </div>
 
-    }
-  </div>
-)}
+                  </div>
+                )}
 
+                {/* ══════════════════════════════════════════
+                    SNIPPETS TAB (giữ nguyên logic cũ)
+                ══════════════════════════════════════════ */}
+                {generatorTab === 'snippets' && (
+                  <div className="space-y-3">
+
+                    {/* Keywords */}
+                    <input
+                      className="w-full bg-background border rounded px-3 py-1.5 text-sm outline-none"
+                      placeholder="Keywords (e.g. trading, minimal, dark...)"
+                      value={keywords}
+                      onChange={(e) => setKeywords(e.target.value)}
+                    />
+
+                    {/* Vibe */}
+                    <div className="flex flex-wrap gap-2">
+                      {VIBES.map((v) => (
+                        <button key={v.id} onClick={() => setVibe(vibe === v.id ? '' : v.id)}
+                          className={`px-3 py-1 text-xs rounded capitalize ${vibe === v.id ? 'bg-emerald-600 text-white' : 'border'}`}>
+                          {v.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Style + Tech pickers */}
+                    <div className="flex gap-2">
+                      <button onClick={() => setShowStylePicker(!showStylePicker)}
+                        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
+                        🎨 Styles {selectedStyleCount > 0 && `(${selectedStyleCount})`}
+                      </button>
+                      <button onClick={() => setShowTechPicker(!showTechPicker)}
+                        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-600 text-gray-400">
+                        ⚡ Tech {selectedTechCount > 0 && `(${selectedTechCount})`}
+                      </button>
+                    </div>
+
+                    {/* Style picker */}
+                    {showStylePicker && (
+                      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
+                        <div className="flex justify-between mb-2">
+                          <p className="text-xs text-gray-400">Select styles:</p>
+                          <button onClick={() => setShowStylePicker(false)} className="text-xs text-gray-500">✕</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {[...STYLES, ...ANIMATIONS, ...COMPONENTS, ...INTERACTIONS].map((s) => {
+                            const isSelected = selectedSnippets.includes(s.id)
+                            const isBlocked = !isSelected && blockedIds.has(s.id)
+                            return (
+                              <button key={s.id}
+                                disabled={isBlocked}
+                                onClick={() => toggleSnippet(s.id)}
+                                className={`px-2 py-1 text-xs rounded transition-all ${
+                                  isSelected ? 'bg-emerald-600 text-white'
+                                  : isBlocked ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
+                                  : 'border border-gray-600 text-gray-400 hover:border-emerald-500'
+                                }`}
+                                title={isBlocked ? 'Conflicts with current selection' : ''}>
+                                {s.label}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tech picker */}
+                    {showTechPicker && (
+                      <div className="border border-gray-700 rounded-xl p-4 bg-gray-900">
+                        <div className="flex justify-between mb-2">
+                          <p className="text-xs text-gray-400">Select tech:</p>
+                          <button onClick={() => setShowTechPicker(false)} className="text-xs text-gray-500">✕</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {TECH.map((t) => {
+                            const isSelected = selectedSnippets.includes(t.id)
+                            const isBlocked = !isSelected && blockedIds.has(t.id)
+                            return (
+                              <button key={t.id}
+                                disabled={isBlocked}
+                                onClick={() => toggleSnippet(t.id)}
+                                className={`px-2 py-1 text-xs rounded transition-all ${
+                                  isSelected ? 'bg-emerald-600 text-white'
+                                  : isBlocked ? 'opacity-30 cursor-not-allowed border border-gray-700 text-gray-600'
+                                  : 'border border-gray-600 text-gray-400 hover:border-emerald-500'
+                                }`}
+                                title={isBlocked ? 'Conflicts with current selection' : ''}>
+                                {t.label}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Prompt preview */}
+                    {(keywords || vibe || selectedSnippets.length > 0) && (
+                      <div className="p-2 rounded bg-black/40 border border-gray-800 text-xs text-gray-500 font-mono max-h-20 overflow-auto">
+                        {buildPromptClean(getSelectedSnippetObjs(), description || '...', keywords).slice(0, 200)}...
+                      </div>
+                    )}
+
+                  </div>
+                )}
+
+                {/* ── Validation warnings (chung cả 2 tab) ── */}
+                {validationWarnings.length > 0 && (
+                  <div className="space-y-1">
+                    {validationWarnings.map((w, i) => (
+                      <p key={i} className="text-xs text-amber-400 bg-amber-900/20 px-3 py-1.5 rounded border border-amber-800">
+                        ⚠️ {w}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {/* ── Description ── */}
+                <textarea
+                  className="w-full h-24 bg-background border rounded p-3 text-sm resize-none outline-none"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Mô tả trang này..."
+                />
+
+                {/* ── Generate button ── */}
+                <button onClick={handleGenerate}
+                  disabled={loading || !description}
+                  className="w-full px-4 py-2.5 text-sm bg-emerald-600 text-white rounded disabled:opacity-50 font-medium">
+                  {loading ? 'Generating...' : '✨ Generate TSX'}
+                </button>
+
+              </div>
+            )}
+
+            {(generatedCode || selected?.tsx_content) && (
+              <div className="space-y-2">
+                <div className="flex gap-2 text-xs">
+                  <button
+                    onClick={() => setPreviewMode('code')}
+                    className={`px-2 py-1 rounded border ${previewMode === 'code' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
+                  >Code</button>
+                  <button
+                    onClick={() => setPreviewMode('live')}
+                    className={`px-2 py-1 rounded border ${previewMode === 'live' ? 'bg-emerald-600 text-white' : 'hover:bg-muted'}`}
+                  >⚡ Live</button>
+                </div>
+                {previewMode === 'code'
+                  ? <textarea className="w-full h-64 bg-background border rounded p-3 text-xs font-mono" value={generatedCode} onChange={e => setGeneratedCode(e.target.value)} />
+                  : <div ref={previewRef} className="border rounded overflow-y-auto" style={{ height: '60vh' }}>
+                    <div style={{
+                      transform: `scale(${scale})`,
+                      transformOrigin: 'top left',
+                      width: `${100 / scale}%`,
+                      height: `${100 / scale}%`,
+                    }}>
+                      <LivePageRenderer code={generatedCode} />
+                    </div>
+                  </div>
+                }
               </div>
             )}
 
@@ -432,8 +698,8 @@ useEffect(() => {
               placeholder={tab === 'en' ? 'English content...' : 'Nội dung tiếng Việt...'}
             />
           </div>
-        )
+        )}
       </div>
-    
+    </div>
   )
 }
