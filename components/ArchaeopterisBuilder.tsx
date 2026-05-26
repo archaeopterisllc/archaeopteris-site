@@ -135,13 +135,15 @@ export default function ArchaeopterisBuilder() {
   }, [logs]);
 
   const runPreview = useCallback((src: string) => {
-    if (!iframeRef.current) return;
-    const html = makeBootstrapHTML(src);
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    iframeRef.current.src = url;
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-  }, []);
+  if (!iframeRef.current) return;
+  
+  // 1. Lấy chuỗi HTML được sinh ra từ hàm mẫu của Claude
+  const html = makeBootstrapHTML(src);
+  
+  // 2. Ghi thẳng nội dung HTML vào srcDoc thay vì tạo Blob URL
+  iframeRef.current.srcdoc = html;
+  
+}, []);
 
   useEffect(() => {
     if (activeTab === "Preview") runPreview(code);
