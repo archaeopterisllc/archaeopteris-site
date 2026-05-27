@@ -69,65 +69,35 @@ const STARTER = [
   "}",
 ].join("\n");
 
-async function generateWithClaude(
-  prompt: string,
-  currentCode: string,
-  onChunk: (chunk: string) => void
-): Promise<void> {
-  const system = [
-    "You are an expert React/TSX component generator for Archaeopteris LLC — a fintech/trading technology company.",
+async function generateCode(prompt: string, currentCode: string): Promise<string> {
+  const fullPrompt = [
+    "You are an expert React component generator for Archaeopteris LLC — fintech/trading technology.",
     "Brand: dark theme, emerald #10b981 and blue #3b82f6 accents.",
-    "STRICT RULES — follow exactly:",
-    "1. Output ONLY raw code. Zero markdown. Zero backticks. Zero explanation.",
-    "2. First line must be: export default function Page() {",
-    "3. No import statements at all. React, useState, useEffect are global.",
-    "4. Use React.useState() not useState() since there are no imports.",
-    "5. Tailwind CSS only for styling.",
-    "6. Self-contained. No props. No external dependencies.",
+    "STRICT OUTPUT RULES:",
+    "- Output ONLY raw JSX code. No markdown, no backticks, no explanation.",
+    "- No import statements. React, useState, useEffect are globals.",
+    "- Use React.useState(), React.useEffect() etc.",
+    "- Tailwind CSS only. Dark theme.",
+    "- Define function App(), end with: render(<App />)",
+    "- Self-contained, no props, no external deps.",
+    "",
+    currentCode && currentCode !== STARTER
+      ? `Current code:\n${currentCode}\n\nModify: ${prompt}`
+      : `Generate component: ${prompt}`,
   ].join("\n");
 
   const res = await fetch("/api/page-generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4000,
-      system,
-      messages: [{
-        role: "user",
-        content: currentCode && currentCode !== STARTER
-          ? `Current:\n${currentCode}\n\nModify: ${prompt}`
-          : `Generate component: ${prompt}`,
-      }],
-      stream: true,
-    }),
+    body: JSON.stringify({ prompt: fullPrompt }),
   });
 
   if (!res.ok) throw new Error(`API error ${res.status}`);
-  if (!res.body) throw new Error("No response body");
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (!line.startsWith("data: ")) continue;
-      const data = line.slice(6).trim();
-      if (data === "[DONE]") return;
-      try {
-        const json = JSON.parse(data);
-        const delta: string = json?.delta?.text ?? "";
-        if (delta) onChunk(delta);
-      } catch { /* ignore parse errors */ }
-    }
-  }
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.code as string;
 }
+
 
 export default function ArchaeopterisBuilder() {
   const [code, setCode] = useState<string>(STARTER);
@@ -136,7 +106,6 @@ export default function ArchaeopterisBuilder() {
   const [prompt, setPrompt] = useState<string>("");
   const [generating, setGenerating] = useState<boolean>(false);
   const [logs, setLogs] = useState<string[]>(["WebContainer ready \u2713", "Claude API connected \u2713"]);
-  const [streamingCode, setStreamingCode] = useState<string>("");
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
@@ -168,26 +137,14 @@ export default function ArchaeopterisBuilder() {
     setActiveTab("Code");
     addLog(`Generating: "${currentPrompt}"`);
 
-    let accumulated = "";
-    setStreamingCode("");
-    setCode(""); // clear editor so streaming is visible
-
     try {
-      await generateWithClaude(currentPrompt, code, (chunk: string) => {
-        accumulated += chunk;
-        setStreamingCode(accumulated);
-      });
-
-      // Clean up any accidental markdown fences
-      const clean = accumulated
-        .replace(/^```(?:tsx?|jsx?|typescript|javascript)?\n?/m, "")
+      const raw = await generateCode(currentPrompt, code);
+      const clean = raw
+        .replace(/^```(?:tsx?|jsx?|javascript)?\n?/m, "")
         .replace(/\n?```\s*$/m, "")
         .trim();
-
-      setStreamingCode("");
       setCode(clean);
       addLog("Generation complete \u2713");
-
       setTimeout(() => {
         setActiveTab("Preview");
         setPreviewKey((k) => k + 1);
@@ -195,14 +152,11 @@ export default function ArchaeopterisBuilder() {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       addLog(`Error: ${msg}`);
-      setCode(STARTER); // restore on error
-      setStreamingCode("");
     } finally {
       setGenerating(false);
     }
   };
 
-  const displayCode = streamingCode !== "" ? streamingCode : code;
 
   const btnBase: React.CSSProperties = {
     display: "block", width: "100%", padding: "7px 10px", marginBottom: 4,
@@ -305,10 +259,10 @@ export default function ArchaeopterisBuilder() {
           {activeTab === "Code" && (
             <div style={{ flex: 1, display: "flex", overflow: "auto" }}>
               <div style={{ minWidth: 40, paddingTop: 16, paddingRight: 10, textAlign: "right", color: "#2a4060", fontSize: 12, lineHeight: "21px", userSelect: "none", borderRight: "1px solid #1a2535", background: "#080c10", flexShrink: 0 }}>
-                {(displayCode || " ").split("\n").map((_, i) => <div key={i}>{i + 1}</div>)}
+                {(code || " ").split("\n").map((_, i) => <div key={i}>{i + 1}</div>)}
               </div>
               <textarea
-                value={displayCode}
+                value={code}
                 onChange={(e) => { setCode(e.target.value); setStreamingCode(""); }}
                 readOnly={generating}
                 spellCheck={false}
