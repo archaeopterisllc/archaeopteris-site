@@ -208,7 +208,7 @@ export default function ArchaeopterisBuilder() {
             <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
               {generating && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />}
               <WebContainer
-              key={previewKey}
+              
   files={{
   'package.json': {
     file: {
