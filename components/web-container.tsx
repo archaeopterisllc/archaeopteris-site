@@ -33,6 +33,8 @@ export default function WebContainer({
 }: WebContainerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<unknown>(null)
+  const devProcessRef = useRef<any>(null)
+
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
   const [url, setUrl] = useState<string | null>(null)
@@ -88,7 +90,13 @@ export default function WebContainer({
 
       setStatus('starting')
       addLog('Starting dev server...')
+      if (devProcessRef.current) {
+  devProcessRef.current.kill()
+}
+
       const devProcess = await wc.spawn(startCommand[0], startCommand.slice(1))
+      devProcessRef.current = devProcess
+
 
       devProcess.output.pipeTo(
         new WritableStream({
