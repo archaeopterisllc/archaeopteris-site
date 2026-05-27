@@ -9,7 +9,7 @@ type Tab = "Preview" | "Code" | "Console";
 const TABS: Tab[] = ["Preview", "Code", "Console"];
 
 const STARTER = [
-  "export default function Page() {",
+  "function App() {",
   "  return (",
   "    <div className=\"min-h-screen bg-gradient-to-br from-gray-950 via-emerald-950 to-gray-950 flex items-center justify-center\">",
   "      <div className=\"text-center space-y-4\">",
@@ -22,23 +22,36 @@ const STARTER = [
   "    </div>",
   "  );",
   "}",
+  "",
+  "render(<App />)",
 ].join("\n");
 
 async function generateCode(prompt: string, currentCode: string): Promise<string> {
   const fullPrompt = [
-    "You are an expert React component generator for Archaeopteris LLC — fintech/trading technology.",
-    "Brand: dark theme, emerald #10b981 and blue #3b82f6 accents.",
+    "You are an elite UI engineer for Archaeopteris LLC — a fintech/trading technology company.",
+    "Brand colors: emerald #10b981 (primary), blue #3b82f6 (accent), background #080c10 (near-black).",
+    "",
+    "VISUAL QUALITY REQUIREMENTS — every component must have:",
+    "- Rich dark backgrounds using bg-gray-900, bg-gray-950, or inline style with #080c10/#0d1420",
+    "- Gradient text: use style={{background:'linear-gradient(135deg,#10b981,#3b82f6)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}",
+    "- Glowing effects: box-shadow with emerald/blue rgba values via inline style",
+    "- Animated elements: CSS keyframes via <style> tag inside JSX, or Tailwind animate-pulse/animate-bounce",
+    "- Glass cards: bg-white/5 backdrop-blur border border-white/10",
+    "- Hover transitions: transition-all duration-300",
+    "- At least one gradient background section",
+    "- Realistic mock data (not empty placeholders)",
+    "",
     "STRICT OUTPUT RULES:",
-    "- Output ONLY raw JSX code. No markdown, no backticks, no explanation.",
-    "- No import statements. React, useState, useEffect are globals.",
+    "- Output ONLY raw JSX. Zero markdown, zero backticks, zero explanation.",
+    "- No import statements. React, useState, useEffect, useRef, useCallback are globals.",
     "- Use React.useState(), React.useEffect() etc.",
-    "- Tailwind CSS only. Dark theme.",
-    "- Define function App(), end with: render(<App />)",
+    "- Tailwind CSS + inline styles for effects Tailwind cannot do (gradients, glows, animations).",
+    "- Define function App(), last line must be: render(<App />)",
     "- Self-contained, no props, no external deps.",
     "",
     currentCode && currentCode !== STARTER
-      ? `Current code:\n${currentCode}\n\nModify: ${prompt}`
-      : `Generate component: ${prompt}`,
+      ? `Current code:\n${currentCode}\n\nModify/improve: ${prompt}`
+      : `Generate a visually stunning component: ${prompt}`,
   ].join("\n");
 
   const res = await fetch("/api/page-generate", {
