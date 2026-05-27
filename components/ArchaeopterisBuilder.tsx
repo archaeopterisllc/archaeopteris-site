@@ -152,17 +152,26 @@ export default function ArchaeopterisBuilder() {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
-  // Update iframe on code/tab/key change
+  const loadPreview = (src: string) => {
+    if (!iframeRef.current) return;
+    const blob = new Blob([makeHTML(src)], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    iframeRef.current.src = url;
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  };
+
   useEffect(() => {
-    if (activeTab === "Preview" && iframeRef.current) {
-      iframeRef.current.srcdoc = makeHTML(code);
-    }
+    if (activeTab === "Preview") loadPreview(code);
   }, [code, activeTab, previewKey]);
 
-  // Callback ref: set srcdoc immediately when iframe mounts
   const setIframeRef = (el: HTMLIFrameElement | null) => {
     (iframeRef as React.MutableRefObject<HTMLIFrameElement | null>).current = el;
-    if (el) el.srcdoc = makeHTML(code);
+    if (el) {
+      const blob = new Blob([makeHTML(code)], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      el.src = url;
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
   };
 
   const handleGenerate = async () => {
