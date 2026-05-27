@@ -79,7 +79,7 @@ Rules:
     },
   ];
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch("/api/page-generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -134,74 +134,14 @@ export default function ArchaeopterisBuilder() {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
- const runPreview = useCallback((src: string) => {
-  if (!iframeRef.current) return;
-
-  // 1. Làm sạch code: Loại bỏ import/export thừa để Babel Standalone không bị crash cú pháp
-  const cleanCode = src
-    .replace(/import\s+.*\s+from\s+['"].*['"];?/g, '')
-    .replace(/export\s+default\s+function/g, 'function')
-    .replace(/export\s+/g, '');
-
-  // 2. Tạo cấu trúc HTML Luxury tích hợp sẵn Tailwind và Babel Compiler
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com https://cdn.tailwindcss.com;">
-      <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-      <script src="https://cdn.tailwindcss.com"></script>
-      
-      <script>
-        // Cấu hình bảng màu Quiet Luxury cho thương hiệu Archaeopteris
-        tailwind.config = {
-          theme: {
-            extend: {
-              colors: {
-                brand: {
-                  dark: '#030712',
-                  emerald: '#10b981',
-                  slate: '#1f2937'
-                }
-              }
-            }
-          }
-        }
-      </script>
-
-      <style>
-        /* Tối ưu hóa giao diện hiển thị cho các bảng điều khiển trading */
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #030712; }
-        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 2px; }
-        body { background-color: #030712; color: #f3f4f6; margin: 0; padding: 0; font-family: ui-sans-serif, system-ui, sans-serif; overflow-x: hidden; }
-      </style>
-    </head>
-    <body>
-      <div id="root"></div>
-      <script type="text/babel">
-        // Bơm mã nguồn React vào đây
-        ${cleanCode}
-
-        // Nhận diện linh hoạt tên Component (Page, Component hoặc App)
-        const ComponentToRender = typeof Page !== 'undefined' ? Page : (typeof Component !== 'undefined' ? Component : (typeof App !== 'undefined' ? App : null));
-        
-        if (ComponentToRender) {
-          const container = document.getElementById('root');
-          const root = React.createRoot(container);
-          root.render(<ComponentToRender />);
-        } else {
-          document.getElementById('root').innerHTML = '<div class="p-6 text-red-500 font-mono">Error: Không tìm thấy Component hợp lệ (Page, Component, hoặc App) để render.</div>';
-        }
-      </script>
-    </body>
-    </html>
-  `;
-
-  // 3. Đổ trực tiếp vào srcDoc - Miễn nhiễm hoàn toàn với lỗi CORS và Blob URL bị chặn
-  iframeRef.current.srcdoc = htmlContent;
-}, []);
+  const runPreview = useCallback((src: string) => {
+    if (!iframeRef.current) return;
+    const html = makeBootstrapHTML(src);
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    iframeRef.current.src = url;
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }, []);
 
   useEffect(() => {
     if (activeTab === "Preview") runPreview(code);
