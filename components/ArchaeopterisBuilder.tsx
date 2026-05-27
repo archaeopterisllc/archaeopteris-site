@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import LivePageRenderer from "@/components/live-page-renderer";
+import BuilderPreview from "@/components/builder-preview";
 
 type Tab = "Preview" | "Code" | "Console";
 
@@ -207,7 +207,7 @@ export default function ArchaeopterisBuilder() {
           {activeTab === "Preview" && (
             <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
               {generating && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />}
-              <LivePageRenderer key={previewKey} code={code} />
+              <BuilderPreview key={previewKey} code={code} />
             </div>
           )}
 
