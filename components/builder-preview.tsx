@@ -10,9 +10,9 @@ export default function BuilderPreview({ code }: { code: string }) {
   console.log("Setting srcdoc...")
   if (iframeRef.current) {
     iframeRef.current.srcdoc = html
-    console.log("srcdoc set ✓")
+    alert("srcdoc set ✓")
   } else {
-    console.log("iframeRef is null!")
+    alert("iframeRef is null!")
   }
 }, [code])
 
