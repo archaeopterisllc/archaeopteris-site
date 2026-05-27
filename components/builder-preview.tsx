@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef } from 'react'
 
-export default function LivePageRenderer({ code }: { code: string }) {
+export default function BuilderPreview({ code }: { code: string }) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
