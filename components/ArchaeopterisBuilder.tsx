@@ -1,11 +1,71 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import LivePageRenderer from "@/components/live-page-renderer";
 
 type Tab = "Preview" | "Code" | "Console";
 const TABS: Tab[] = ["Preview", "Code", "Console"];
 
+// ─── iframe HTML wrapper ──────────────────────────────────────────────────────
+function makeHTML(code: string): string {
+  // Normalize: strip imports, convert export default function X -> function X
+  const nameMatch = code.match(/export\s+default\s+function\s+(\w+)/);
+  const componentName = nameMatch?.[1] ?? "App";
+  let src = code
+    .replace(/^import\s+[^\n]+\n?/gm, "")
+    .replace(/export\s+default\s+function\s+(\w+)/, "function $1");
+
+  // Encode for safe embedding
+  const encoded = src
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#080c10;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh}
+  #root{min-height:100vh}
+  .live-error{padding:24px;color:#f87171;font-family:monospace;font-size:13px;white-space:pre-wrap;background:#1a0a0a;border-left:3px solid #f87171;margin:16px}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#1e3050;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="raw-src" style="display:none">${encoded}</div>
+<script>
+  (function() {
+    var el = document.getElementById("raw-src");
+    var decoded = el.innerHTML
+      .replace(/&amp;/g,"&")
+      .replace(/&lt;/g,"<")
+      .replace(/&gt;/g,">")
+      .replace(/&quot;/g,"\"");
+
+    var componentName = "${componentName}";
+    var suffix = "\ntry{var C=typeof " + componentName + "!==\"undefined\"?" + componentName + ":App;ReactDOM.createRoot(document.getElementById(\"root\")).render(React.createElement(C));}catch(e){document.getElementById(\"root\").innerHTML=\"<div class=\\\"live-error\\\">\"+e.message+\"</div>\";}";
+
+    var script = document.createElement("script");
+    script.type = "text/babel";
+    script.setAttribute("data-presets","react,typescript");
+    script.textContent = decoded + suffix;
+    document.body.appendChild(script);
+    Babel.transformScriptTags();
+  })();
+</script>
+</body>
+</html>`;
+}
 
 // ─── STARTER ──────────────────────────────────────────────────────────────────
 const STARTER = `export default function Page() {
@@ -36,23 +96,21 @@ async function generate(prompt: string, currentCode: string): Promise<string> {
     "You are an elite UI engineer for Archaeopteris LLC — fintech/trading technology.",
     "Brand: bg #080c10, emerald #10b981 (primary), blue #3b82f6 (accent).",
     "",
-    "ENVIRONMENT: React 18 + Tailwind CSS. Globals: React, useState, useEffect, useRef, Math, setTimeout, setInterval.",
+    "ENVIRONMENT: Browser with React 18, Tailwind CSS, GSAP 3 — all loaded as globals.",
+    "Available globals: React, ReactDOM, gsap, window, document, fetch, Math, setTimeout, setInterval.",
     "",
     "VISUAL REQUIREMENTS:",
-    "- Dark bg: inline style background #080c10",
-    "- Gradient text: style={{background:'linear-gradient(135deg,#10b981,#3b82f6)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}",
-    "- Glow: style={{boxShadow:'0 0 30px rgba(16,185,129,0.3)'}}",
-    "- Glass: style={{background:'rgba(255,255,255,0.03)',backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.08)'}}",
-    "- Animation via React.useState ticker in React.useEffect (NO GSAP, NO <style> tags)",
-    "- Hover via onMouseEnter/onMouseLeave state, realistic mock data",
+    "- Dark bg #080c10, gradient text (WebkitBackgroundClip text), glow boxShadow",
+    "- Glass cards: background rgba(255,255,255,0.03) backdropFilter blur(12px)",
+    "- Animation via GSAP or React.useState ticker",
+    "- Hover via onMouseEnter/onMouseLeave, realistic mock data",
     "",
     "CODE RULES:",
+    "- export default function Page() { ... } — must use this signature",
     "- NO import statements",
-    "- React.useState / React.useEffect / React.useRef",
-    "- Inline styles for gradients/glows/animations, Tailwind for layout",
-    "- Define function App() { ... }, last line: render(<App />)",
-    "- NO <style> tags, NO GSAP, NO external libs",
-    "- Output ONLY raw JSX. Zero markdown. Zero backticks. Zero explanation.",
+    "- React.useState / React.useEffect / React.useRef / React.useCallback",
+    "- Inline styles for gradients/glows, Tailwind for layout/spacing",
+    "- Output ONLY raw TSX. Zero markdown. Zero backticks. Zero explanation.",
     "",
     currentCode && currentCode !== STARTER
       ? "Current code:\n" + currentCode + "\n\nModify/improve: " + prompt
@@ -82,8 +140,9 @@ export default function ArchaeopterisBuilder() {
   const [prompt, setPrompt] = useState<string>("");
   const [generating, setGenerating] = useState<boolean>(false);
   const [previewKey, setPreviewKey] = useState<number>(0);
-  const [logs, setLogs] = useState<string[]>(["LivePageRenderer ready ✓", "Claude API connected ✓"]);
+  const [logs, setLogs] = useState<string[]>(["iframe runtime ready ✓", "GSAP + Tailwind CDN loaded ✓", "Claude API connected ✓"]);
 
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const addLog = (msg: string) =>
@@ -93,7 +152,18 @@ export default function ArchaeopterisBuilder() {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
+  // Update iframe on code/tab/key change
+  useEffect(() => {
+    if (activeTab === "Preview" && iframeRef.current) {
+      iframeRef.current.srcdoc = makeHTML(code);
+    }
+  }, [code, activeTab, previewKey]);
 
+  // Callback ref: set srcdoc immediately when iframe mounts
+  const setIframeRef = (el: HTMLIFrameElement | null) => {
+    (iframeRef as React.MutableRefObject<HTMLIFrameElement | null>).current = el;
+    if (el) el.srcdoc = makeHTML(code);
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim() || generating) return;
@@ -207,13 +277,18 @@ export default function ArchaeopterisBuilder() {
             )}
           </div>
 
-          {/* Preview */}
+          {/* Preview — full isolated iframe */}
           {activeTab === "Preview" && (
-            <div style={{ flex: 1, position: "relative", overflow: "auto" }}>
+            <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
               {generating && (
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />
               )}
-              <LivePageRenderer key={previewKey} code={code} />
+              <iframe
+                ref={setIframeRef}
+                style={{ width: "100%", height: "100%", border: "none" }}
+                title="Preview"
+                sandbox="allow-scripts allow-same-origin"
+              />
             </div>
           )}
 
