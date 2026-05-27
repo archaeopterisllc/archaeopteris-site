@@ -204,8 +204,8 @@ export default function ArchaeopterisBuilder() {
           </div>
 
           {/* Preview */}
-          {activeTab === "Preview" && (
-            <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
+<div style={{ display: activeTab === "Preview" ? "flex" : "none", flex: 1, overflow: "hidden", position: "relative" }}>
+
               {generating && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />}
               <WebContainer
               
@@ -241,7 +241,7 @@ startCommand={['node', '-e', "const h=require('http'),f=require('fs');h.createSe
 
 />
             </div>
-          )}
+          
 
           {/* Code */}
           {activeTab === "Code" && (
