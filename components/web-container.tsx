@@ -134,19 +134,20 @@ export default function WebContainer({
       {/* Preview + Logs */}
       <div className="flex flex-1 overflow-hidden">
         {/* iframe preview */}
-        <div className="flex-1 bg-white">
-          {status === 'ready' ? (
-            <iframe
-              ref={iframeRef}
-              className="w-full h-full border-0"
-              title="WebContainer Preview"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full bg-gray-950 text-gray-500 text-sm">
-              {status === 'idle' ? 'Preview will appear here' : STATUS_MESSAGES[status]}
-            </div>
-          )}
-        </div>
+       <div className="flex-1 bg-white">
+  {status !== 'ready' && (
+    <div className="flex items-center justify-center h-full bg-gray-950 text-gray-500 text-sm">
+      {status === 'idle' ? 'Preview will appear here' : STATUS_MESSAGES[status]}
+    </div>
+  )}
+  <iframe
+    ref={iframeRef}
+    style={{ display: status === 'ready' ? 'block' : 'none' }}
+    className="w-full h-full border-0"
+    title="WebContainer Preview"
+  />
+</div>
+
 
         {/* Logs panel */}
         <div className="w-80 bg-gray-950 border-l border-gray-800 overflow-y-auto p-3 font-mono text-xs text-gray-400 flex flex-col gap-1">
