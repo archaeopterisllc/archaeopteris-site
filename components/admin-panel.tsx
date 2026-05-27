@@ -96,20 +96,27 @@ export default function AdminPanel() {
     <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-4 py-10 gap-6">
 
       {/* Tab switcher */}
-      <div className="flex gap-2 mb-6 border-b pb-2">
-        <button
-          onClick={() => setActiveTab('posts')}
-          className={`px-4 py-2 text-sm font-medium ${activeTab === 'posts' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
-        >
-          📝 Blog Posts
-        </button>
-        <button
-          onClick={() => setActiveTab('pages')}
-          className={`px-4 py-2 text-sm font-medium ${activeTab === 'pages' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
-        >
-          📄 Pages
-        </button>
-      </div>
+<div className="flex gap-2 mb-6 border-b pb-2">
+  <button
+    onClick={() => setActiveTab('posts')}
+    className={`px-4 py-2 text-sm font-medium ${activeTab === 'posts' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+  >
+    📝 Blog Posts
+  </button>
+  <button
+    onClick={() => setActiveTab('pages')}
+    className={`px-4 py-2 text-sm font-medium ${activeTab === 'pages' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
+  >
+    📄 Pages
+  </button>
+  <a
+    href="/admin/builder"
+    className="px-4 py-2 text-sm font-medium text-emerald-500 hover:text-emerald-400 transition-colors ml-auto"
+  >
+    ✨ Builder
+  </a>
+</div>
+
 
       {activeTab === 'pages' ? <PagesPanel /> : (
         <div className="flex flex-col lg:flex-row gap-6">
