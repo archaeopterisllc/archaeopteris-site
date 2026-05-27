@@ -99,15 +99,11 @@ async function generate(prompt: string, currentCode: string): Promise<string> {
     "ENVIRONMENT: Browser with React 18, Tailwind CSS, GSAP 3 — all loaded as globals.",
     "Available globals: React, ReactDOM, gsap, window, document, fetch, Math, setTimeout, setInterval.",
     "",
-    "VISUAL REQUIREMENTS — must have ALL of these:",
-    "1. Dark bg: inline style background #080c10 or #0d1420 or multi-stop gradient",
-    "2. Gradient text: style={{background:'linear-gradient(135deg,#10b981,#3b82f6)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}",
-    "3. Glow: style={{boxShadow:'0 0 30px #10b98140'}} or similar",
-    "4. Animation: GSAP gsap.from/gsap.to in React.useEffect, OR CSS via <style> tag, OR React.useState ticker",
-    "5. Glass cards: style={{background:'rgba(255,255,255,0.03)',backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.08)'}}",
-    "6. Realistic mock data — no empty placeholders",
-    "7. Hover effects via onMouseEnter/onMouseLeave state",
-    "8. At least one animated/dynamic element",
+    "VISUAL REQUIREMENTS:",
+    "- Dark bg #080c10, gradient text (WebkitBackgroundClip text), glow boxShadow",
+    "- Glass cards: background rgba(255,255,255,0.03) backdropFilter blur(12px)",
+    "- Animation via GSAP or React.useState ticker",
+    "- Hover via onMouseEnter/onMouseLeave, realistic mock data",
     "",
     "CODE RULES:",
     "- export default function Page() { ... } — must use this signature",
@@ -156,12 +152,18 @@ export default function ArchaeopterisBuilder() {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
-  // Update iframe whenever code or previewKey changes
+  // Update iframe on code/tab/key change
   useEffect(() => {
     if (activeTab === "Preview" && iframeRef.current) {
       iframeRef.current.srcdoc = makeHTML(code);
     }
   }, [code, activeTab, previewKey]);
+
+  // Callback ref: set srcdoc immediately when iframe mounts
+  const setIframeRef = (el: HTMLIFrameElement | null) => {
+    (iframeRef as React.MutableRefObject<HTMLIFrameElement | null>).current = el;
+    if (el) el.srcdoc = makeHTML(code);
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim() || generating) return;
@@ -282,7 +284,7 @@ export default function ArchaeopterisBuilder() {
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />
               )}
               <iframe
-                ref={iframeRef}
+                ref={setIframeRef}
                 style={{ width: "100%", height: "100%", border: "none" }}
                 title="Preview"
                 sandbox="allow-scripts allow-same-origin"
