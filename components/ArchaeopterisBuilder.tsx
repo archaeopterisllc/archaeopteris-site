@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import BuilderPreview from "@/components/builder-preview";
+import WebContainer from "@/components/web-container";
 
 type Tab = "Preview" | "Code" | "Console";
 
@@ -207,7 +207,32 @@ export default function ArchaeopterisBuilder() {
           {activeTab === "Preview" && (
             <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
               {generating && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />}
-              <BuilderPreview key={previewKey} code={code} />
+              <WebContainer
+  files={{
+    'index.html': {
+      file: {
+        contents: `<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    const render = (el) => ReactDOM.createRoot(document.getElementById('root')).render(el);
+    ${code}
+  </script>
+</body>
+</html>`
+      }
+    }
+  }}
+  startCommand={['npx', 'serve', '.']}
+/>
             </div>
           )}
 
