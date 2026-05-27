@@ -1,55 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
+import LivePageRenderer from "@/components/live-page-renderer";
 
 type Tab = "Preview" | "Code" | "Console";
 
-// Inject code vào iframe dùng srcdoc thay vì blob URL để tránh lỗi scope
-const makeHTML = (tsxCode: string): string => {
-  // 1. Strip imports
-  let code = tsxCode.replace(/^import\s+[^\n]+\n?/gm, "");
-  // 2. Strip export default → extract component name
-  const nameMatch = code.match(/export\s+default\s+function\s+(\w+)/);
-  const componentName = nameMatch?.[1] ?? "Page";
-  code = code.replace(/export\s+default\s+function\s+(\w+)/, "function $1");
-  // 3. Escape backticks & backslashes for embedding in JS string (not template literal)
-  // We'll pass code as a data attribute instead to avoid escaping issues
-  return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8"/>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<style>
-  body{margin:0;background:#0a0a0a;color:#fff;font-family:sans-serif}
-  #root{min-height:100vh}
-  .err{padding:24px;color:#f87171;font-family:monospace;font-size:13px;white-space:pre-wrap}
-</style>
-</head>
-<body>
-<div id="root"></div>
-<script id="src" type="text/plain">${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</script>
-<script>
-  var raw = document.getElementById('src').textContent;
-  var script = document.createElement('script');
-  script.type = 'text/babel';
-  script.setAttribute('data-presets','react,typescript');
-  script.textContent = raw + '\\n' +
-    'try{' +
-      'var C = typeof ${componentName} !== "undefined" ? ${componentName} : null;' +
-      'if(!C) throw new Error("Component ${componentName} not found");' +
-      'ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(C));' +
-    '}catch(e){' +
-      'document.getElementById("root").innerHTML = "<div class=\\"err\\">⚠ "+e.message+"</div>";' +
-    '}';
-  document.body.appendChild(script);
-  Babel.transformScriptTags();
-</script>
-</body>
-</html>`;
-};
 
 const TABS: Tab[] = ["Preview", "Code", "Console"];
 
@@ -107,7 +62,6 @@ export default function ArchaeopterisBuilder() {
   const [generating, setGenerating] = useState<boolean>(false);
   const [logs, setLogs] = useState<string[]>(["WebContainer ready \u2713", "Claude API connected \u2713"]);
 
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const addLog = (msg: string) =>
@@ -117,17 +71,6 @@ export default function ArchaeopterisBuilder() {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
-  const runPreview = useCallback((src: string) => {
-    if (!iframeRef.current) return;
-    iframeRef.current.srcdoc = makeHTML(src);
-  }, []);
-
-  // Run preview when tab switches to Preview or code/key changes
-  useEffect(() => {
-    if (activeTab === "Preview") {
-      runPreview(code);
-    }
-  }, [activeTab, code, previewKey, runPreview]);
 
   const handleGenerate = async () => {
     if (!prompt.trim() || generating) return;
@@ -217,7 +160,7 @@ export default function ArchaeopterisBuilder() {
           <div style={{ padding: 14, borderBottom: "1px solid #1a2535" }}>
             <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>ACTIONS</div>
             <button onClick={() => { navigator.clipboard?.writeText(code); addLog("Copied \u2713"); }} style={btnBase}>⎘ Copy TSX</button>
-            <button onClick={() => { setCode(STARTER); setStreamingCode(""); addLog("Reset \u2713"); setActiveTab("Preview"); setPreviewKey(k => k + 1); }} style={btnBase}>↺ Reset</button>
+            <button onClick={() => { setCode(STARTER); addLog("Reset \u2713"); setActiveTab("Preview"); setPreviewKey(k => k + 1); }} style={btnBase}>↺ Reset</button>
           </div>
 
           {/* Logs */}
@@ -249,9 +192,9 @@ export default function ArchaeopterisBuilder() {
 
           {/* Preview */}
           {activeTab === "Preview" && (
-            <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+            <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
               {generating && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />}
-              <iframe ref={iframeRef} style={{ width: "100%", height: "100%", border: "none" }} title="Preview" sandbox="allow-scripts" />
+              <LivePageRenderer key={previewKey} code={code} />
             </div>
           )}
 
@@ -263,7 +206,7 @@ export default function ArchaeopterisBuilder() {
               </div>
               <textarea
                 value={code}
-                onChange={(e) => { setCode(e.target.value); setStreamingCode(""); }}
+                onChange={(e) => { setCode(e.target.value); }}
                 readOnly={generating}
                 spellCheck={false}
                 style={{ flex: 1, background: "#080c10", border: "none", color: generating ? "#4a8060" : "#a8c8e8", fontSize: 12, lineHeight: "21px", padding: "16px", fontFamily: "monospace", resize: "none", outline: "none", whiteSpace: "pre", overflowWrap: "normal", minHeight: "100%" }}
