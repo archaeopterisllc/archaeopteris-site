@@ -47,12 +47,7 @@ export default function WebContainer({
     bootContainer(files)
   }, [files])
 
-  useEffect(() => {
-  if (!files || !containerRef.current) return
-  // Chỉ update file, không boot lại
-  const wc = containerRef.current as any
-  wc.mount(files) // re-mount files mới vào container cũ
-}, [files])
+  
 
 
   async function bootContainer(fileTree: FileSystemTree) {
