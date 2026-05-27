@@ -209,9 +209,14 @@ export default function ArchaeopterisBuilder() {
               {generating && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />}
               <WebContainer
   files={{
-    'index.html': {
-      file: {
-        contents: `<!DOCTYPE html>
+  'package.json': {
+    file: {
+      contents: '{"name":"test","scripts":{"dev":"npx serve ."},"dependencies":{}}'
+    }
+  },
+  'index.html': {
+    file: {
+      contents: `<!DOCTYPE html>
 <html>
 <head>
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -228,10 +233,11 @@ export default function ArchaeopterisBuilder() {
   </script>
 </body>
 </html>`
-      }
     }
-  }}
-  startCommand={['npx', 'serve', '.']}
+  }
+}}
+startCommand={['node', '-e', "const h=require('http'),f=require('fs');h.createServer((req,res)=>res.end(f.readFileSync('index.html'))).listen(3000)"]}
+
 />
             </div>
           )}
