@@ -4,59 +4,54 @@ import { useState, useRef, useEffect } from "react";
 import LivePageRenderer from "@/components/live-page-renderer";
 
 type Tab = "Preview" | "Code" | "Console";
+
+
 const TABS: Tab[] = ["Preview", "Code", "Console"];
 
+const STARTER = [
+  "function App() {",
+  "  return (",
+  "    <div className=\"min-h-screen bg-gradient-to-br from-gray-950 via-emerald-950 to-gray-950 flex items-center justify-center\">",
+  "      <div className=\"text-center space-y-4\">",
+  "        <div className=\"text-6xl font-bold text-emerald-400\">Archaeopteris</div>",
+  "        <div className=\"text-gray-400 text-lg\">Where Trading Meets Technology</div>",
+  "        <div className=\"mt-8 px-6 py-3 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-300 text-sm inline-block\">",
+  "          Ready to build \u2726",
+  "        </div>",
+  "      </div>",
+  "    </div>",
+  "  );",
+  "}",
+  "",
+  "render(<App />)",
+].join("\n");
 
-// ─── STARTER ──────────────────────────────────────────────────────────────────
-const STARTER = `export default function Page() {
-  const [tick, setTick] = React.useState(0);
-  React.useEffect(() => {
-    const t = setInterval(() => setTick(n => n + 1), 50);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#080c10 0%,#0d1f15 50%,#080c10 100%)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24}}>
-      <div style={{fontSize:64,fontWeight:900,background:"linear-gradient(135deg,#10b981,#3b82f6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-2px"}}>
-        Archaeopteris
-      </div>
-      <div style={{color:"#4a9070",fontSize:18,letterSpacing:"0.2em",textTransform:"uppercase"}}>
-        Where Trading Meets Technology
-      </div>
-      <div style={{width:200,height:2,background:"linear-gradient(90deg,transparent,#10b981,transparent)",marginTop:8,opacity: 0.5 + 0.5 * Math.sin(tick * 0.1)}} />
-      <div style={{padding:"12px 28px",borderRadius:100,border:"1px solid #10b98140",color:"#10b981",fontSize:13,letterSpacing:"0.1em",background:"#10b98108",marginTop:8}}>
-        Ready to build ✦
-      </div>
-    </div>
-  );
-}`;
-
-// ─── API call ─────────────────────────────────────────────────────────────────
-async function generate(prompt: string, currentCode: string): Promise<string> {
+async function generateCode(prompt: string, currentCode: string): Promise<string> {
   const fullPrompt = [
-    "You are an elite UI engineer for Archaeopteris LLC — fintech/trading technology.",
-    "Brand: bg #080c10, emerald #10b981 (primary), blue #3b82f6 (accent).",
+    "You are an elite UI engineer for Archaeopteris LLC — a fintech/trading technology company.",
+    "Brand colors: emerald #10b981 (primary), blue #3b82f6 (accent), background #080c10 (near-black).",
     "",
-    "ENVIRONMENT: React 18 + Tailwind CSS. Globals: React, useState, useEffect, useRef, Math, setTimeout, setInterval.",
+    "VISUAL QUALITY REQUIREMENTS — every component must have:",
+    "- Rich dark backgrounds using bg-gray-900, bg-gray-950, or inline style with #080c10/#0d1420",
+    "- Gradient text: use style={{background:'linear-gradient(135deg,#10b981,#3b82f6)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}",
+    "- Glowing effects: box-shadow with emerald/blue rgba values via inline style",
+    "- Animated elements: CSS keyframes via <style> tag inside JSX, or Tailwind animate-pulse/animate-bounce",
+    "- Glass cards: bg-white/5 backdrop-blur border border-white/10",
+    "- Hover transitions: transition-all duration-300",
+    "- At least one gradient background section",
+    "- Realistic mock data (not empty placeholders)",
     "",
-    "VISUAL REQUIREMENTS:",
-    "- Dark bg: inline style background #080c10",
-    "- Gradient text: style={{background:'linear-gradient(135deg,#10b981,#3b82f6)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}",
-    "- Glow: style={{boxShadow:'0 0 30px rgba(16,185,129,0.3)'}}",
-    "- Glass: style={{background:'rgba(255,255,255,0.03)',backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.08)'}}",
-    "- Animation via React.useState ticker in React.useEffect (NO GSAP, NO <style> tags)",
-    "- Hover via onMouseEnter/onMouseLeave state, realistic mock data",
-    "",
-    "CODE RULES:",
-    "- NO import statements",
-    "- React.useState / React.useEffect / React.useRef",
-    "- Inline styles for gradients/glows/animations, Tailwind for layout",
-    "- Define function App() { ... }, last line: render(<App />)",
-    "- NO <style> tags, NO GSAP, NO external libs",
-    "- Output ONLY raw JSX. Zero markdown. Zero backticks. Zero explanation.",
+    "STRICT OUTPUT RULES:",
+    "- Output ONLY raw JSX. Zero markdown, zero backticks, zero explanation.",
+    "- No import statements. React, useState, useEffect, useRef, useCallback are globals.",
+    "- Use React.useState(), React.useEffect() etc.",
+    "- Tailwind CSS + inline styles for effects Tailwind cannot do (gradients, glows, animations).",
+    "- Define function App(), last line must be: render(<App />)",
+    "- Self-contained, no props, no external deps.",
     "",
     currentCode && currentCode !== STARTER
-      ? "Current code:\n" + currentCode + "\n\nModify/improve: " + prompt
-      : "Generate visually stunning component: " + prompt,
+      ? `Current code:\n${currentCode}\n\nModify/improve: ${prompt}`
+      : `Generate a visually stunning component: ${prompt}`,
   ].join("\n");
 
   const res = await fetch("/api/page-generate", {
@@ -65,58 +60,65 @@ async function generate(prompt: string, currentCode: string): Promise<string> {
     body: JSON.stringify({ prompt: fullPrompt }),
   });
 
-  if (!res.ok) throw new Error("API error " + res.status);
+  if (!res.ok) throw new Error(`API error ${res.status}`);
   const data = await res.json();
   if (data.error) throw new Error(data.error);
-
-  let code: string = data.code ?? "";
-  // Strip accidental markdown fences
-  code = code.replace(/^```[\w]*\n?/m, "").replace(/\n?```\s*$/m, "").trim();
-  return code;
+  return data.code as string;
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+
 export default function ArchaeopterisBuilder() {
   const [code, setCode] = useState<string>(STARTER);
+  const [previewKey, setPreviewKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<Tab>("Preview");
   const [prompt, setPrompt] = useState<string>("");
   const [generating, setGenerating] = useState<boolean>(false);
-  const [previewKey, setPreviewKey] = useState<number>(0);
-  const [logs, setLogs] = useState<string[]>(["LivePageRenderer ready ✓", "Claude API connected ✓"]);
+  const [logs, setLogs] = useState<string[]>(["WebContainer ready \u2713", "Claude API connected \u2713"]);
 
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const addLog = (msg: string) =>
-    setLogs(p => [...p.slice(-99), "[" + new Date().toLocaleTimeString() + "] " + msg]);
+    setLogs((p) => [...p.slice(-99), `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
 
-
   const handleGenerate = async () => {
     if (!prompt.trim() || generating) return;
-    const p = prompt;
-    setPrompt("");
+    const currentPrompt = prompt;
     setGenerating(true);
-    addLog("Generating: \"" + p + "\"");
+    setPrompt("");
+    setActiveTab("Code");
+    addLog(`Generating: "${currentPrompt}"`);
+
     try {
-      const result = await generate(p, code);
-      setCode(result);
-      addLog("Complete ✓ — " + result.split("\n").length + " lines");
-      setTimeout(() => { setActiveTab("Preview"); setPreviewKey(k => k + 1); }, 100);
+      const raw = await generateCode(currentPrompt, code);
+      const clean = raw
+        .replace(/^```(?:tsx?|jsx?|javascript)?\n?/m, "")
+        .replace(/\n?```\s*$/m, "")
+        .trim();
+      setCode(clean);
+      addLog("Generation complete \u2713");
+      setTimeout(() => {
+        setActiveTab("Preview");
+        setPreviewKey((k) => k + 1);
+      }, 150);
     } catch (e: unknown) {
-      addLog("Error: " + (e instanceof Error ? e.message : String(e)));
+      const msg = e instanceof Error ? e.message : String(e);
+      addLog(`Error: ${msg}`);
     } finally {
       setGenerating(false);
     }
   };
 
-  const b: React.CSSProperties = {
+
+  const btnBase: React.CSSProperties = {
     display: "block", width: "100%", padding: "7px 10px", marginBottom: 4,
     background: "transparent", border: "1px solid #1a2535", borderRadius: 6,
-    color: "#5a7090", fontSize: 11, cursor: "pointer", textAlign: "left", fontFamily: "inherit",
+    color: "#5a7090", fontSize: 11, cursor: "pointer",
+    textAlign: "left", fontFamily: "inherit",
   };
 
   return (
@@ -124,7 +126,7 @@ export default function ArchaeopterisBuilder() {
 
       {/* Header */}
       <header style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderBottom: "1px solid #1a2535", background: "#0d1420", flexShrink: 0 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 6, background: "linear-gradient(135deg,#10b981,#3b82f6)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#000", fontSize: 14 }}>A</div>
+        <div style={{ width: 28, height: 28, borderRadius: 6, background: "linear-gradient(135deg,#10b981,#3b82f6)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#000" }}>A</div>
         <span style={{ fontWeight: 700, fontSize: 13, color: "#10b981", letterSpacing: "0.05em" }}>ARCHAEOPTERIS BUILDER</span>
         <div style={{ flex: 1 }} />
         <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 4, background: "#10b98115", border: "1px solid #10b98140", color: "#10b981" }}>BETA</span>
@@ -133,16 +135,16 @@ export default function ArchaeopterisBuilder() {
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
 
         {/* Left panel */}
-        <div style={{ width: 280, borderRight: "1px solid #1a2535", display: "flex", flexDirection: "column", background: "#0a0f1a", flexShrink: 0, overflow: "hidden" }}>
+        <div style={{ width: 280, borderRight: "1px solid #1a2535", display: "flex", flexDirection: "column", background: "#0a0f1a", flexShrink: 0 }}>
 
           {/* Prompt */}
           <div style={{ padding: 14, borderBottom: "1px solid #1a2535" }}>
             <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>✦ DESCRIBE YOUR COMPONENT</div>
             <textarea
               value={prompt}
-              onChange={e => setPrompt(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleGenerate(); }}
-              placeholder="e.g. XAUUSD live trading dashboard with animations..."
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleGenerate(); }}
+              placeholder="e.g. XAUUSD trading dashboard..."
               style={{ width: "100%", height: 90, background: "#0d1420", border: "1px solid #1e3050", borderRadius: 8, color: "#c8d8e8", fontSize: 12, padding: "10px 12px", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.6, boxSizing: "border-box" }}
             />
             <button
@@ -159,15 +161,9 @@ export default function ArchaeopterisBuilder() {
           {/* Quick prompts */}
           <div style={{ padding: 14, borderBottom: "1px solid #1a2535" }}>
             <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>QUICK PROMPTS</div>
-            {[
-              "XAUUSD trading dashboard",
-              "Hero section dark luxury",
-              "Pricing table fintech",
-              "EA performance stats",
-              "Admin sidebar navigation",
-            ].map(q => (
+            {["XAUUSD trading dashboard", "Hero section dark luxury", "Pricing table fintech", "EA performance stats", "Admin sidebar navigation"].map((q) => (
               <button key={q} onClick={() => setPrompt(q)}
-                style={{ ...b, color: prompt === q ? "#10b981" : "#5a7090", border: "1px solid " + (prompt === q ? "#10b98140" : "#1a2535"), background: prompt === q ? "#10b98115" : "transparent" }}>
+                style={{ ...btnBase, color: prompt === q ? "#10b981" : "#5a7090", border: `1px solid ${prompt === q ? "#10b98140" : "#1a2535"}`, background: prompt === q ? "#10b98115" : "transparent" }}>
                 {q}
               </button>
             ))}
@@ -176,15 +172,15 @@ export default function ArchaeopterisBuilder() {
           {/* Actions */}
           <div style={{ padding: 14, borderBottom: "1px solid #1a2535" }}>
             <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>ACTIONS</div>
-            <button onClick={() => { navigator.clipboard?.writeText(code); addLog("Copied ✓"); }} style={b}>⎘ Copy TSX</button>
-            <button onClick={() => { setCode(STARTER); addLog("Reset ✓"); setActiveTab("Preview"); setPreviewKey(k => k + 1); }} style={b}>↺ Reset</button>
+            <button onClick={() => { navigator.clipboard?.writeText(code); addLog("Copied \u2713"); }} style={btnBase}>⎘ Copy TSX</button>
+            <button onClick={() => { setCode(STARTER); addLog("Reset \u2713"); setActiveTab("Preview"); setPreviewKey(k => k + 1); }} style={btnBase}>↺ Reset</button>
           </div>
 
           {/* Logs */}
           <div style={{ flex: 1, overflow: "auto", padding: 14 }}>
             <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>CONSOLE</div>
             {logs.map((log, i) => (
-              <div key={i} style={{ fontSize: 10, lineHeight: 1.8, color: log.includes("Error") ? "#f87171" : log.includes("✓") ? "#10b981" : "#4a6080" }}>{log}</div>
+              <div key={i} style={{ fontSize: 10, lineHeight: 1.7, color: log.includes("Error") ? "#f87171" : log.includes("\u2713") ? "#10b981" : "#4a6080" }}>{log}</div>
             ))}
             <div ref={logsEndRef} />
           </div>
@@ -193,9 +189,9 @@ export default function ArchaeopterisBuilder() {
         {/* Right panel */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
-          {/* Tabs */}
+          {/* Tab bar */}
           <div style={{ display: "flex", borderBottom: "1px solid #1a2535", background: "#0a0f1a", flexShrink: 0 }}>
-            {TABS.map(tab => (
+            {TABS.map((tab) => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 style={{ padding: "10px 20px", background: "transparent", border: "none", borderBottom: activeTab === tab ? "2px solid #10b981" : "2px solid transparent", color: activeTab === tab ? "#10b981" : "#4a6080", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>
                 {tab}
@@ -203,21 +199,19 @@ export default function ArchaeopterisBuilder() {
             ))}
             <div style={{ flex: 1 }} />
             {activeTab === "Preview" && (
-              <button onClick={() => setPreviewKey(k => k + 1)} style={{ padding: "10px 16px", background: "transparent", border: "none", color: "#4a6080", fontSize: 14, cursor: "pointer" }} title="Refresh">↻</button>
+              <button onClick={() => setPreviewKey(k => k + 1)} style={{ padding: "10px 16px", background: "transparent", border: "none", color: "#4a6080", fontSize: 14, cursor: "pointer" }}>↻</button>
             )}
           </div>
 
           {/* Preview */}
           {activeTab === "Preview" && (
-            <div style={{ flex: 1, position: "relative", overflow: "auto" }}>
-              {generating && (
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />
-              )}
+            <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
+              {generating && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />}
               <LivePageRenderer key={previewKey} code={code} />
             </div>
           )}
 
-          {/* Code editor */}
+          {/* Code */}
           {activeTab === "Code" && (
             <div style={{ flex: 1, display: "flex", overflow: "auto" }}>
               <div style={{ minWidth: 40, paddingTop: 16, paddingRight: 10, textAlign: "right", color: "#2a4060", fontSize: 12, lineHeight: "21px", userSelect: "none", borderRight: "1px solid #1a2535", background: "#080c10", flexShrink: 0 }}>
@@ -225,9 +219,10 @@ export default function ArchaeopterisBuilder() {
               </div>
               <textarea
                 value={code}
-                onChange={e => setCode(e.target.value)}
+                onChange={(e) => { setCode(e.target.value); }}
+                readOnly={generating}
                 spellCheck={false}
-                style={{ flex: 1, background: "#080c10", border: "none", color: "#a8c8e8", fontSize: 12, lineHeight: "21px", padding: "16px", fontFamily: "monospace", resize: "none", outline: "none", whiteSpace: "pre", overflowWrap: "normal" }}
+                style={{ flex: 1, background: "#080c10", border: "none", color: generating ? "#4a8060" : "#a8c8e8", fontSize: 12, lineHeight: "21px", padding: "16px", fontFamily: "monospace", resize: "none", outline: "none", whiteSpace: "pre", overflowWrap: "normal", minHeight: "100%" }}
               />
             </div>
           )}
@@ -236,7 +231,7 @@ export default function ArchaeopterisBuilder() {
           {activeTab === "Console" && (
             <div style={{ flex: 1, overflow: "auto", padding: 20, fontFamily: "monospace", fontSize: 12, lineHeight: 1.8 }}>
               {logs.map((log, i) => (
-                <div key={i} style={{ color: log.includes("Error") ? "#f87171" : log.includes("✓") ? "#10b981" : "#4a7090" }}>
+                <div key={i} style={{ color: log.includes("Error") ? "#f87171" : log.includes("\u2713") ? "#10b981" : "#4a7090" }}>
                   <span style={{ color: "#2a4060", marginRight: 12 }}>$</span>{log}
                 </div>
               ))}
