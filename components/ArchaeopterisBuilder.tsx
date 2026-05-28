@@ -230,8 +230,8 @@ export default function ArchaeopterisBuilder() {
           "tailwindcss": "latest",
           "autoprefixer": "latest",
           "postcss": "latest"
-        }
-        "optionalDependencies": {
+        },
+        optionalDependencies: {
   "@rollup/rollup-linux-x64-gnu": "latest"
 }
 
