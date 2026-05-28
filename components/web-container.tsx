@@ -110,14 +110,7 @@ wc.on('server-ready', (_port: number, serverUrl: string) => {
   }
 })
 
-      wc.on('server-ready', (_port: number, serverUrl: string) => {
-        addLog(`Server ready at ${serverUrl}`)
-        setUrl(serverUrl)
-        setStatus('ready')
-        if (iframeRef.current) {
-          iframeRef.current.src = serverUrl
-        }
-      })
+     
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error'
       setError(msg)
