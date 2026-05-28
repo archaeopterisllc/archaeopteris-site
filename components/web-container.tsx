@@ -98,7 +98,7 @@ export default function WebContainer({
           write(data) { addLog(stripAnsi(data)) },
         })
       )
-
+wc.off('server-ready')
       wc.on('server-ready', (_port: number, serverUrl: string) => {
         addLog(`Server ready at ${serverUrl}`)
         setUrl(serverUrl)
