@@ -225,6 +225,11 @@ export default function ArchaeopterisBuilder() {
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Wait for Tailwind then render
+  tailwind.config = { darkMode: 'class' }
+</script>
+
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
 </head>
