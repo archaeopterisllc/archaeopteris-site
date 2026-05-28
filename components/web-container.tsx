@@ -70,18 +70,18 @@ export default function WebContainer({
       addLog('Mounting files...')
       await wc.mount(fileTree)
 
-      //setStatus('installing')
-      //addLog('Installing dependencies...')
-      //const installProcess = await wc.spawn('npm', ['install'])
+      setStatus('installing')
+      addLog('Installing dependencies...')
+      const installProcess = await wc.spawn('npm', ['install'])
 
-      //installProcess.output.pipeTo(
-        //new WritableStream({
-          //write(data) { addLog(stripAnsi(data)) },
-       // })
-      //)
+      installProcess.output.pipeTo(
+        new WritableStream({
+          write(data) { addLog(stripAnsi(data)) },
+        })
+      )
 
-      //const installExit = await installProcess.exit
-      //if (installExit !== 0) throw new Error('npm install failed')
+      const installExit = await installProcess.exit
+      if (installExit !== 0) throw new Error('npm install failed')
 
       setStatus('starting')
       addLog('Starting dev server...')
@@ -89,7 +89,9 @@ export default function WebContainer({
   devProcessRef.current.kill()
 }
 
-      const devProcess = await wc.spawn(startCommand[0], startCommand.slice(1))
+      const devProcess = await wc.spawn('npm', ['run', 'dev'])
+        
+      
       devProcessRef.current = devProcess
 
 

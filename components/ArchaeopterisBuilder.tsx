@@ -214,38 +214,71 @@ export default function ArchaeopterisBuilder() {
   files={{
   'package.json': {
     file: {
-      contents: '{"name":"test","scripts":{"dev":"npx serve ."},"dependencies":{}}'
+      contents: JSON.stringify({
+        name: "archaeopteris-builder",
+        scripts: { dev: "vite --port 3000" },
+        dependencies: {
+          "react": "^18",
+          "react-dom": "^18",
+          "lucide-react": "latest",
+          "clsx": "latest",
+          "tailwind-merge": "latest"
+        },
+        devDependencies: {
+          "vite": "latest",
+          "@vitejs/plugin-react": "latest",
+          "tailwindcss": "latest",
+          "autoprefixer": "latest",
+          "postcss": "latest"
+        }
+      })
     }
   },
   'index.html': {
     file: {
       contents: `<!DOCTYPE html>
 <html>
-<head>
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-<script>
-  // Wait for Tailwind then render
-  tailwind.config = { darkMode: 'class' }
-</script>
-
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-</head>
+<head><meta charset="utf-8"/></head>
 <body>
   <div id="root"></div>
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
-    const render = (el) => ReactDOM.createRoot(document.getElementById('root')).render(el);
-    ${code}
-  </script>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>`
     }
+  },
+  'src': {
+    directory: {
+      'main.jsx': {
+        file: { contents: `import React from 'react'
+import ReactDOM from 'react-dom/client'
+import './index.css'
+${code}` }
+      },
+      'index.css': {
+        file: { contents: `@tailwind base;\n@tailwind components;\n@tailwind utilities;` }
+      }
+    }
+  },
+  'vite.config.js': {
+    file: {
+      contents: `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+export default defineConfig({ plugins: [react()] })`
+    }
+  },
+  'tailwind.config.js': {
+    file: {
+      contents: `export default { content: ['./src/**/*.{js,jsx}'], theme: { extend: {} }, plugins: [] }`
+    }
+  },
+  'postcss.config.js': {
+    file: {
+      contents: `export default { plugins: { tailwindcss: {}, autoprefixer: {} } }`
+    }
   }
 }}
-startCommand={['node', '-e', "const h=require('http'),f=require('fs');h.createServer((req,res)=>res.end(f.readFileSync('index.html'))).listen(3000)"]}
+startCommand={['npm', 'install']}
+
 
 />
             </div>
