@@ -227,7 +227,7 @@ export default function ArchaeopterisBuilder() {
         devDependencies: {
           "vite": "5.2.0",
           "@vitejs/plugin-react": "4.2.0",
-          "tailwindcss": "latest",
+          "@tailwindcss/postcss": "latest",
           "autoprefixer": "latest",
           "postcss": "latest"
         }
@@ -282,7 +282,7 @@ export default defineConfig({ plugins: [react()] })`
   },
   'postcss.config.js': {
     file: {
-      contents: `export default { plugins: { tailwindcss: {}, autoprefixer: {} } }`
+      contents: `export default { plugins: { 'tailwindcss/postcss': {}, autoprefixer: {} } }`
     }
   }
 }}
