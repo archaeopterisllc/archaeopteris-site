@@ -232,8 +232,9 @@ export default function ArchaeopterisBuilder() {
           "postcss": "latest"
         },
         optionalDependencies: {
-  "@rollup/rollup-linux-x64-gnu": "latest"
+  "@rolldown/binding-wasm32-wasi": "latest"
 }
+
 
       })
     }
