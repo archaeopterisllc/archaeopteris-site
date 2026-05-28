@@ -234,6 +234,12 @@ export default function ArchaeopterisBuilder() {
       })
     }
   },
+  '.npmrc': {
+  file: {
+    contents: 'registry=http://registry.npmjs.org/'
+  }
+},
+
   'index.html': {
     file: {
       contents: `<!DOCTYPE html>
