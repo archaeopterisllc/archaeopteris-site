@@ -45,6 +45,8 @@ async function generateCode(prompt: string, currentCode: string): Promise<string
     "- Output ONLY raw JSX. Zero markdown, zero backticks, zero explanation.",
     "- No import statements. React, useState, useEffect, useRef, useCallback are globals.",
     "- Use React.useState(), React.useEffect() etc.",
+    "- React hooks: const { useState, useEffect, useRef } = React; at top of App function",
+
     "- Tailwind CSS + inline styles for effects Tailwind cannot do (gradients, glows, animations).",
     "- Define function App(), last line must be: render(<App />)",
     "- Self-contained, no props, no external deps.",
