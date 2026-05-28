@@ -98,7 +98,18 @@ export default function WebContainer({
           write(data) { addLog(stripAnsi(data)) },
         })
       )
-wc.off('server-ready')
+let serverReadyFired = false
+wc.on('server-ready', (_port: number, serverUrl: string) => {
+  if (serverReadyFired) return
+  serverReadyFired = true
+  addLog(`Server ready at ${serverUrl}`)
+  setUrl(serverUrl)
+  setStatus('ready')
+  if (iframeRef.current) {
+    iframeRef.current.src = serverUrl
+  }
+})
+
       wc.on('server-ready', (_port: number, serverUrl: string) => {
         addLog(`Server ready at ${serverUrl}`)
         setUrl(serverUrl)
