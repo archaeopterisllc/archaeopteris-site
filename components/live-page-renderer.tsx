@@ -7,15 +7,20 @@ export default function LivePageRenderer({ code }: { code: string }) {
     <LiveProvider 
       code={code} 
       noInline={true}
-      enableTypeScript={false}
-      scope={{ 
-  React: ReactLib, 
-  useState: ReactLib.useState, 
-  useEffect: ReactLib.useEffect, 
+      enableTypeScript={true}
+      scope={{
+  React: ReactLib,
+  useState: ReactLib.useState,
+  useEffect: ReactLib.useEffect,
   useRef: ReactLib.useRef,
+  useCallback: ReactLib.useCallback,
+  useMemo: ReactLib.useMemo,
+  useReducer: ReactLib.useReducer,
   Math,
   setTimeout,
-  clearTimeout
+  clearTimeout,
+  setInterval,
+  clearInterval,
 }}
 
       //scope={{ React: ReactLib, useState: ReactLib.useState, useEffect: ReactLib.useEffect, useRef: ReactLib.useRef }}
