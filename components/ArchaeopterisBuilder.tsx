@@ -273,6 +273,7 @@ ${code}
   }
 
       },
+      'index.css': { file: { contents: '@tailwind base;\n@tailwind components;\n@tailwind utilities;' } }
       
     }
   },
@@ -308,18 +309,6 @@ ${code}
     ].join('\n')
   }
 },
-'index.css': {
-  file: {
-    contents: [
-      "@tailwind base;",
-      "@tailwind components;",
-      "@tailwind utilities;",
-    ].join('\n')
-  }
-},
-
-
-
 
 }}
 startCommand={['npm', 'install']}
