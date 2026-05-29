@@ -261,7 +261,11 @@ export default function ArchaeopterisBuilder() {
         file: { contents: `import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
-${code}` }
+
+${code}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App))` }
+
       },
       'index.css': {
         file: { contents: `@tailwind base;\n@tailwind components;\n@tailwind utilities;` }
