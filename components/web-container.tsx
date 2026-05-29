@@ -69,10 +69,11 @@ const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
 "",
 "const { useState, useEffect, useRef, useCallback } = React",
 "const __root = ReactDOM.createRoot(document.getElementById('root'))",
+"const render = (el) => __root.render(el)",
 "",
 newCode,
 "",
-"__root.render(React.createElement(Theme, { appearance: 'dark', accentColor: 'green', radius: 'medium' }, React.createElement(App)))",
+//"__root.render(React.createElement(Theme, { appearance: 'dark', accentColor: 'green', radius: 'medium' }, React.createElement(App)))",
 
       ].join('\n')
       await wc.fs.writeFile('/src/main.jsx', content)
