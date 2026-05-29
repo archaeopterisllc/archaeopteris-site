@@ -278,15 +278,25 @@ newCode,
           flexShrink: 0,
         }}>
           <div style={{
-            padding: '8px 12px',
-            fontSize: 10,
-            color: '#2a4060',
-            letterSpacing: '0.1em',
-            borderBottom: '1px solid #1a2535',
-            flexShrink: 0,
-          }}>
-            — LOGS —
-          </div>
+  padding: '8px 12px',
+  fontSize: 10,
+  color: '#2a4060',
+  letterSpacing: '0.1em',
+  borderBottom: '1px solid #1a2535',
+  flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+}}>
+  <span>— LOGS —</span>
+  <button
+    onClick={() => navigator.clipboard?.writeText(logs.join('\n'))}
+    style={{ background: 'transparent', border: '1px solid #1a2535', borderRadius: 4, color: '#4a6080', fontSize: 10, padding: '2px 8px', cursor: 'pointer' }}
+  >
+    Copy
+  </button>
+</div>
+
           <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px' }}>
             {logs.map((log, i) => (
               <div key={i} style={{
