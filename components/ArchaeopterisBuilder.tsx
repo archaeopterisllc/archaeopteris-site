@@ -226,8 +226,8 @@ export default function ArchaeopterisBuilder() {
           "tailwind-merge": "latest"
         },
         devDependencies: {
-          "vite": "6.3.5",
-          "@vitejs/plugin-react": "4.5.2",
+          "vite": "8.0.0",
+          "@vitejs/plugin-react": "6.0.2",
          // "@tailwindcss/postcss": "latest",
           "autoprefixer": "latest",
           //"postcss": "latest"
