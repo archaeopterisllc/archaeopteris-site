@@ -75,8 +75,16 @@ const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
     devProcess.output.pipeTo(
       new WritableStream({ write(data) { addLog(stripAnsi(data)) } })
     )
+        
+    setTimeout(() => {
+      if (iframeRef.current) {
+        iframeRef.current.src = iframeRef.current.src
+      }
+    }, 3000)
   }
 }))
+
+  
 
 
 
