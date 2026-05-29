@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import WebContainer from "@/components/web-container";
+//import WebContainer from "@/components/web-container";
+import WebContainer, { WebContainerHandle } from "@/components/web-container"
+
 
 type Tab = "Preview" | "Code" | "Console";
 
@@ -78,6 +80,8 @@ export default function ArchaeopterisBuilder() {
   const [logs, setLogs] = useState<string[]>(["WebContainer ready \u2713", "Claude API connected \u2713"]);
 
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const wcRef = useRef<WebContainerHandle>(null)
+
 
   const addLog = (msg: string) =>
     setLogs((p) => [...p.slice(-99), `[${new Date().toLocaleTimeString()}] ${msg}`]);
@@ -101,7 +105,11 @@ export default function ArchaeopterisBuilder() {
         .replace(/^```(?:tsx?|jsx?|javascript)?\n?/m, "")
         .replace(/\n?```\s*$/m, "")
         .trim();
-      setCode(clean);
+      setCode(clean)
+addLog("Generation complete ✓")
+await wcRef.current?.restartDev(clean)
+setTimeout(() => setActiveTab("Preview"), 150)
+
       addLog("Generation complete \u2713");
       setTimeout(() => {
         setActiveTab("Preview");
@@ -210,6 +218,7 @@ export default function ArchaeopterisBuilder() {
 
               {generating && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />}
               <WebContainer
+              ref={wcRef}
               
   files={{
   'package.json': {
