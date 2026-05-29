@@ -280,7 +280,7 @@ ${code}
       }
     }
   },
-  'vite.config.js': {
+  'vite.config.mjs': {
     file: {
       contents: `import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
