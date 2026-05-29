@@ -41,6 +41,7 @@ async function generateCode(prompt: string, currentCode: string): Promise<string
     "- Realistic mock data (not empty placeholders)",
     "",
     "STRICT OUTPUT RULES:",
+    "- Do NOT use <style> tags inside JSX. Use inline styles only for animations. For keyframes, inject via document.head in useEffect.",
     "- Output ONLY raw JSX. Zero markdown, zero backticks, zero explanation.",
     "- No import statements. React, useState, useEffect, useRef, useCallback are globals.",
     "- Use React.useState(), React.useEffect() etc.",
