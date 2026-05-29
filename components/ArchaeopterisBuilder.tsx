@@ -216,6 +216,7 @@ export default function ArchaeopterisBuilder() {
     file: {
       contents: JSON.stringify({
         name: "archaeopteris-builder",
+        type: "module",
         scripts: { dev: "vite --port 3000" },
         dependencies: {
           "react": "^18",
