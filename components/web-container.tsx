@@ -159,7 +159,7 @@ wc.on('server-ready', (_port: number, serverUrl: string) => {
 
 
         {/* Logs panel */}
-        <div className="w-80 bg-gray-950 border-l border-gray-800 overflow-y-auto p-3 font-mono text-xs text-gray-400 flex flex-col gap-1" style={{ maxHeight: '100%' }}>
+        <div className="w-80 bg-gray-950 border-l border-gray-800 overflow-y-auto p-3 font-mono text-xs text-gray-400 flex flex-col gap-1" style={{ maxHeight: '100%', overflowY: 'scroll' }}>
 
           <div className="text-gray-600 mb-2">— LOGS —</div>
           {logs.map((log, i) => (
