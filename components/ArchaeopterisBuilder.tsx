@@ -316,7 +316,7 @@ ${code}
   file: {
     contents: [
       "export default {",
-      "  content: ['.src/**/*.{js,jsx}'],",
+      "  content: ['.src/**/*.{js,jsx}', './index.html'],",
       "  theme: { extend: {} },",
       "  plugins: []",
       "}",
