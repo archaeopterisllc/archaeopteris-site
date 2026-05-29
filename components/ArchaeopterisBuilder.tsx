@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import WebContainer from "@/components/web-container";
+import WebContainer, { WebContainerHandle } from "@/components/web-container";
 
 type Tab = "Preview" | "Code" | "Console";
-
 
 const TABS: Tab[] = ["Preview", "Code", "Console"];
 
@@ -42,11 +41,13 @@ async function generateCode(prompt: string, currentCode: string): Promise<string
     "- Realistic mock data (not empty placeholders)",
     "",
     "STRICT OUTPUT RULES:",
+    "- @radix-ui/themes is available. Import components: Button, Card, Flex, Box, Text, Badge, Heading, Table, Dialog, TextField, Select, Switch from '@radix-ui/themes'",
+    "- Do NOT use <style> tags inside JSX. Use inline styles only for animations. For keyframes, inject via document.head in useEffect.",
     "- Output ONLY raw JSX. Zero markdown, zero backticks, zero explanation.",
     "- No import statements. React, useState, useEffect, useRef, useCallback are globals.",
     "- Use React.useState(), React.useEffect() etc.",
+    "- Do NOT declare: const { useState, useEffect, useRef, useCallback } = React — already declared globally",
     "- React hooks: const { useState, useEffect, useRef } = React; at top of App function",
-
     "- Tailwind CSS + inline styles for effects Tailwind cannot do (gradients, glows, animations).",
     "- Define function App(), last line must be: render(<App />)",
     "- Self-contained, no props, no external deps.",
@@ -68,16 +69,15 @@ async function generateCode(prompt: string, currentCode: string): Promise<string
   return data.code as string;
 }
 
-
 export default function ArchaeopterisBuilder() {
   const [code, setCode] = useState<string>(STARTER);
-  const [previewKey, setPreviewKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<Tab>("Preview");
   const [prompt, setPrompt] = useState<string>("");
   const [generating, setGenerating] = useState<boolean>(false);
   const [logs, setLogs] = useState<string[]>(["WebContainer ready \u2713", "Claude API connected \u2713"]);
 
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const wcRef = useRef<WebContainerHandle>(null);
 
   const addLog = (msg: string) =>
     setLogs((p) => [...p.slice(-99), `[${new Date().toLocaleTimeString()}] ${msg}`]);
@@ -85,7 +85,6 @@ export default function ArchaeopterisBuilder() {
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
-
 
   const handleGenerate = async () => {
     if (!prompt.trim() || generating) return;
@@ -103,10 +102,8 @@ export default function ArchaeopterisBuilder() {
         .trim();
       setCode(clean);
       addLog("Generation complete \u2713");
-      setTimeout(() => {
-        setActiveTab("Preview");
-        setPreviewKey((k) => k + 1);
-      }, 150);
+      await wcRef.current?.restartDev(clean);
+      setTimeout(() => setActiveTab("Preview"), 150);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       addLog(`Error: ${msg}`);
@@ -115,7 +112,6 @@ export default function ArchaeopterisBuilder() {
     }
   };
 
-
   const btnBase: React.CSSProperties = {
     display: "block", width: "100%", padding: "7px 10px", marginBottom: 4,
     background: "transparent", border: "1px solid #1a2535", borderRadius: 6,
@@ -123,146 +119,52 @@ export default function ArchaeopterisBuilder() {
     textAlign: "left", fontFamily: "inherit",
   };
 
-  return (
-    <div style={{ fontFamily: "monospace", background: "#080c10", color: "#e2e8f0", height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+  // Files object for WebContainer — memoized so it doesn't re-trigger boot
+  const wcFiles = {
+    'package.json': {
+      file: {
+        contents: JSON.stringify({
+          name: "archaeopteris-builder",
+          scripts: { dev: "vite --port 3000" },
+          dependencies: {
+            "react": "^18",
+            "react-dom": "^18",
+            "lucide-react": "latest",
+            "clsx": "latest",
+            "tailwind-merge": "latest",
+            "@radix-ui/themes": "3.1.6",
 
-      {/* Header */}
-      <header style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderBottom: "1px solid #1a2535", background: "#0d1420", flexShrink: 0 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 6, background: "linear-gradient(135deg,#10b981,#3b82f6)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#000" }}>A</div>
-        <span style={{ fontWeight: 700, fontSize: 13, color: "#10b981", letterSpacing: "0.05em" }}>ARCHAEOPTERIS BUILDER</span>
-        <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 4, background: "#10b98115", border: "1px solid #10b98140", color: "#10b981" }}>BETA</span>
-      </header>
-
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-
-        {/* Left panel */}
-        <div style={{ width: 280, borderRight: "1px solid #1a2535", display: "flex", flexDirection: "column", background: "#0a0f1a", flexShrink: 0 }}>
-
-          {/* Prompt */}
-          <div style={{ padding: 14, borderBottom: "1px solid #1a2535" }}>
-            <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>✦ DESCRIBE YOUR COMPONENT</div>
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleGenerate(); }}
-              placeholder="e.g. XAUUSD trading dashboard..."
-              style={{ width: "100%", height: 90, background: "#0d1420", border: "1px solid #1e3050", borderRadius: 8, color: "#c8d8e8", fontSize: 12, padding: "10px 12px", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.6, boxSizing: "border-box" }}
-            />
-            <button
-              onClick={handleGenerate}
-              disabled={generating || !prompt.trim()}
-              style={{ width: "100%", marginTop: 8, padding: "10px 0", borderRadius: 8, border: "none", background: generating ? "#1a3020" : "linear-gradient(135deg,#10b981,#059669)", color: generating ? "#4a8060" : "#000", fontWeight: 700, fontSize: 12, cursor: generating ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
-            >
-              {generating
-                ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>◌</span> Generating...</>
-                : <>✦ Generate <span style={{ opacity: 0.5, fontSize: 10 }}>⌘↵</span></>}
-            </button>
-          </div>
-
-          {/* Quick prompts */}
-          <div style={{ padding: 14, borderBottom: "1px solid #1a2535" }}>
-            <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>QUICK PROMPTS</div>
-            {["XAUUSD trading dashboard", "Hero section dark luxury", "Pricing table fintech", "EA performance stats", "Admin sidebar navigation"].map((q) => (
-              <button key={q} onClick={() => setPrompt(q)}
-                style={{ ...btnBase, color: prompt === q ? "#10b981" : "#5a7090", border: `1px solid ${prompt === q ? "#10b98140" : "#1a2535"}`, background: prompt === q ? "#10b98115" : "transparent" }}>
-                {q}
-              </button>
-            ))}
-          </div>
-
-          {/* Actions */}
-          <div style={{ padding: 14, borderBottom: "1px solid #1a2535" }}>
-            <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>ACTIONS</div>
-            <button onClick={() => { navigator.clipboard?.writeText(code); addLog("Copied \u2713"); }} style={btnBase}>⎘ Copy TSX</button>
-            <button onClick={() => { setCode(STARTER); addLog("Reset \u2713"); setActiveTab("Preview"); setPreviewKey(k => k + 1); }} style={btnBase}>↺ Reset</button>
-          </div>
-
-          {/* Logs */}
-          <div style={{ flex: 1, overflow: "auto", padding: 14 }}>
-            <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>CONSOLE</div>
-            {logs.map((log, i) => (
-              <div key={i} style={{ fontSize: 10, lineHeight: 1.7, color: log.includes("Error") ? "#f87171" : log.includes("\u2713") ? "#10b981" : "#4a6080" }}>{log}</div>
-            ))}
-            <div ref={logsEndRef} />
-          </div>
-        </div>
-
-        {/* Right panel */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-
-          {/* Tab bar */}
-          <div style={{ display: "flex", borderBottom: "1px solid #1a2535", background: "#0a0f1a", flexShrink: 0 }}>
-            {TABS.map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                style={{ padding: "10px 20px", background: "transparent", border: "none", borderBottom: activeTab === tab ? "2px solid #10b981" : "2px solid transparent", color: activeTab === tab ? "#10b981" : "#4a6080", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>
-                {tab}
-              </button>
-            ))}
-            <div style={{ flex: 1 }} />
-            {activeTab === "Preview" && (
-              <button onClick={() => setPreviewKey(k => k + 1)} style={{ padding: "10px 16px", background: "transparent", border: "none", color: "#4a6080", fontSize: 14, cursor: "pointer" }}>↻</button>
-            )}
-          </div>
-
-          {/* Preview */}
-<div style={{ display: activeTab === "Preview" ? "flex" : "none", flex: 1, overflow: "hidden", position: "relative" }}>
-
-              {generating && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#10b981,transparent)", animation: "slide 1.5s linear infinite", zIndex: 10 }} />}
-              <WebContainer
-              
-  files={{
-  'package.json': {
-    file: {
-      contents: JSON.stringify({
-        name: "archaeopteris-builder",
-        type: "module",
-        scripts: { dev: "vite --port 3000" },
-        dependencies: {
-          "react": "^18",
-          "react-dom": "^18",
-          "lucide-react": "latest",
-          "clsx": "latest",
-          "tailwind-merge": "latest"
-        },
-        devDependencies: {
-          "vite": "5.2.0",
-          "@vitejs/plugin-react-swc": "latest",
-          "@tailwindcss/postcss": "latest",
-          "autoprefixer": "latest",
-          "postcss": "latest"
-        },
-        overrides: {
-           "esbuild": "0.19.12"
-        }
-
-
-      })
-    }
-  },
-  '.npmrc': {
-  file: {
-    contents: 'registry=http://registry.npmjs.org/'
-  }
-},
-
-  'index.html': {
-    file: {
-      contents: `<!DOCTYPE html>
+          },
+          devDependencies: {
+            "vite": "6.3.5",
+            "@vitejs/plugin-react": "4.5.2",
+            "tailwindcss": "3.4.1",
+            "autoprefixer": "10.4.17",
+            "postcss": "8.4.35",
+          },
+        }),
+      },
+    },
+    '.npmrc': {
+      file: { contents: 'registry=http://registry.npmjs.org/' },
+    },
+    'index.html': {
+      file: {
+        contents: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"/></head>
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
-</html>`
-    }
-  },
-  'src': {
-    directory: {
-      'main.jsx': {
-        file: {
-    contents: `import React from 'react'
+</html>`,
+      },
+    },
+    'src': {
+      directory: {
+        'main.jsx': {
+          file: {
+            contents: `import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 
@@ -271,78 +173,296 @@ const { useState, useEffect, useRef, useCallback } = React
 const __root = ReactDOM.createRoot(document.getElementById('root'))
 const render = (el) => __root.render(el)
 
-${code}
-`
-  }
-
+${STARTER}
+`,
+          },
+        },
+        'index.css': {
+          file: {
+            contents: [
+              "@tailwind base;",
+              "@tailwind components;",
+              "@tailwind utilities;",
+              "html, body, #root {",
+              "  background: #080c10;",
+              "  min-height: 100vh;",
+              "  margin: 0;",
+              "}",
+            ].join('\n'),
+          },
+        },
       },
-      'index.css': {
-        file: { contents: `@tailwind base;\n@tailwind components;\n@tailwind utilities;` }
-      }
-    }
-  },
-  'vite.config.mjs': {
-    file: {
-      contents: `import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-export default defineConfig({ plugins: [react()], esbuild: { minify: false é })`
-    }
-  },
-  'tailwind.config.js': {
-    file: {
-      contents: `export default { content: ['./src/**/*.{js,jsx}'], theme: { extend: {} }, plugins: [] }`
-    }
-  },
-  'postcss.config.js': {
-    file: {
-      contents: `export default { plugins: { 'tailwindcss/postcss': {}, autoprefixer: {} } }`
-    }
-  }
-}}
-startCommand={['npm', 'install']}
+    },
+    'vite.config.js': {
+      file: {
+        contents: [
+          "import { defineConfig } from 'vite'",
+          "import react from '@vitejs/plugin-react'",
+          "export default defineConfig({ plugins: [react()] })",
+        ].join('\n'),
+      },
+    },
+    'postcss.config.js': {
+      file: {
+        contents: [
+          "export default {",
+          "  plugins: {",
+          "    tailwindcss: {},",
+          "    autoprefixer: {},",
+          "  }",
+          "}",
+        ].join('\n'),
+      },
+    },
+    'tailwind.config.js': {
+      file: {
+        contents: [
+          "export default {",
+          "  content: ['./src/**/*.{js,jsx}', './index.html'],",
+          "  theme: { extend: {} },",
+          "  plugins: []",
+          "}",
+        ].join('\n'),
+      },
+    },
+  };
 
+  return (
+    <div style={{
+      fontFamily: "monospace",
+      background: "#080c10",
+      color: "#e2e8f0",
+      height: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+    }}>
 
-/>
+      {/* Header */}
+      <header style={{
+        display: "flex", alignItems: "center", gap: 12,
+        padding: "10px 16px", borderBottom: "1px solid #1a2535",
+        background: "#0d1420", flexShrink: 0,
+      }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: 6,
+          background: "linear-gradient(135deg,#10b981,#3b82f6)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontWeight: 700, color: "#000",
+        }}>A</div>
+        <span style={{ fontWeight: 700, fontSize: 13, color: "#10b981", letterSpacing: "0.05em" }}>
+          ARCHAEOPTERIS BUILDER
+        </span>
+        <div style={{ flex: 1 }} />
+        <span style={{
+          fontSize: 10, padding: "3px 8px", borderRadius: 4,
+          background: "#10b98115", border: "1px solid #10b98140", color: "#10b981",
+        }}>BETA</span>
+      </header>
+
+      <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+
+        {/* Left panel */}
+        <div style={{
+          width: 280, borderRight: "1px solid #1a2535",
+          display: "flex", flexDirection: "column",
+          background: "#0a0f1a", flexShrink: 0, overflow: "hidden",
+        }}>
+
+          {/* Prompt */}
+          <div style={{ padding: 14, borderBottom: "1px solid #1a2535", flexShrink: 0 }}>
+            <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>
+              ✦ DESCRIBE YOUR COMPONENT
             </div>
-          
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleGenerate(); }}
+              placeholder="e.g. XAUUSD trading dashboard..."
+              style={{
+                width: "100%", height: 90, background: "#0d1420",
+                border: "1px solid #1e3050", borderRadius: 8,
+                color: "#c8d8e8", fontSize: 12, padding: "10px 12px",
+                resize: "none", outline: "none", fontFamily: "inherit",
+                lineHeight: 1.6, boxSizing: "border-box",
+              }}
+            />
+            <button
+              onClick={handleGenerate}
+              disabled={generating || !prompt.trim()}
+              style={{
+                width: "100%", marginTop: 8, padding: "10px 0", borderRadius: 8,
+                border: "none",
+                background: generating ? "#1a3020" : "linear-gradient(135deg,#10b981,#059669)",
+                color: generating ? "#4a8060" : "#000",
+                fontWeight: 700, fontSize: 12,
+                cursor: generating ? "not-allowed" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              }}
+            >
+              {generating
+                ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>◌</span> Generating...</>
+                : <>✦ Generate <span style={{ opacity: 0.5, fontSize: 10 }}>⌘↵</span></>}
+            </button>
+          </div>
 
-          {/* Code */}
-          {activeTab === "Code" && (
-            <div style={{ flex: 1, display: "flex", overflow: "auto" }}>
-              <div style={{ minWidth: 40, paddingTop: 16, paddingRight: 10, textAlign: "right", color: "#2a4060", fontSize: 12, lineHeight: "21px", userSelect: "none", borderRight: "1px solid #1a2535", background: "#080c10", flexShrink: 0 }}>
-                {(code || " ").split("\n").map((_, i) => <div key={i}>{i + 1}</div>)}
+          {/* Quick prompts */}
+          <div style={{ padding: 14, borderBottom: "1px solid #1a2535", flexShrink: 0 }}>
+            <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>
+              QUICK PROMPTS
+            </div>
+            {["XAUUSD trading dashboard", "Hero section dark luxury", "Pricing table fintech", "EA performance stats", "Admin sidebar navigation"].map((q) => (
+              <button key={q} onClick={() => setPrompt(q)} style={{
+                ...btnBase,
+                color: prompt === q ? "#10b981" : "#5a7090",
+                border: `1px solid ${prompt === q ? "#10b98140" : "#1a2535"}`,
+                background: prompt === q ? "#10b98115" : "transparent",
+              }}>
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div style={{ padding: 14, borderBottom: "1px solid #1a2535", flexShrink: 0 }}>
+            <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>
+              ACTIONS
+            </div>
+            <button onClick={() => { navigator.clipboard?.writeText(code); addLog("Copied \u2713"); }} style={btnBase}>
+              ⎘ Copy TSX
+            </button>
+            <button onClick={() => {
+              setCode(STARTER);
+              addLog("Reset \u2713");
+              setActiveTab("Preview");
+            }} style={btnBase}>
+              ↺ Reset
+            </button>
+          </div>
+
+          {/* Logs */}
+          <div style={{ flex: 1, overflow: "auto", padding: 14, minHeight: 0 }}>
+            <div style={{ fontSize: 10, color: "#4a6080", letterSpacing: "0.1em", marginBottom: 8 }}>
+              CONSOLE
+            </div>
+            {logs.map((log, i) => (
+              <div key={i} style={{
+                fontSize: 10, lineHeight: 1.7,
+                color: log.includes("Error") ? "#f87171"
+                  : log.includes("\u2713") ? "#10b981"
+                  : "#4a6080",
+              }}>
+                {log}
               </div>
-              <textarea
-                value={code}
-                onChange={(e) => { setCode(e.target.value); }}
-                readOnly={generating}
-                spellCheck={false}
-                style={{ flex: 1, background: "#080c10", border: "none", color: generating ? "#4a8060" : "#a8c8e8", fontSize: 12, lineHeight: "21px", padding: "16px", fontFamily: "monospace", resize: "none", outline: "none", whiteSpace: "pre", overflowWrap: "normal", minHeight: "100%" }}
+            ))}
+            <div ref={logsEndRef} />
+          </div>
+        </div>
+
+        {/* Right panel */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+
+          {/* Tab bar */}
+          <div style={{
+            display: "flex", borderBottom: "1px solid #1a2535",
+            background: "#0a0f1a", flexShrink: 0,
+          }}>
+            {TABS.map((tab) => (
+              <button key={tab} onClick={() => setActiveTab(tab)} style={{
+                padding: "10px 20px", background: "transparent", border: "none",
+                borderBottom: activeTab === tab ? "2px solid #10b981" : "2px solid transparent",
+                color: activeTab === tab ? "#10b981" : "#4a6080",
+                fontSize: 11, cursor: "pointer", fontFamily: "inherit",
+              }}>
+                {tab}
+              </button>
+            ))}
+            <div style={{ flex: 1 }} />
+          </div>
+
+          {/* Content area — all 3 tabs share same space */}
+          <div style={{ flex: 1, minHeight: 0, position: "relative", overflow: "hidden" }}>
+
+            {/* Preview — always mounted, visibility toggled via CSS */}
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              display: activeTab === "Preview" ? "flex" : "none",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}>
+              {generating && (
+                <div style={{
+                  position: "absolute", top: 0, left: 0, right: 0, height: 2,
+                  background: "linear-gradient(90deg,transparent,#10b981,transparent)",
+                  animation: "slide 1.5s linear infinite", zIndex: 10,
+                }} />
+              )}
+              <WebContainer
+                ref={wcRef}
+                files={wcFiles}
+                startCommand={['npm', 'install']}
+                style={{ flex: 1, minHeight: 0 }}
               />
             </div>
-          )}
 
-          {/* Console */}
-          {activeTab === "Console" && (
-            <div style={{ flex: 1, overflow: "auto", padding: 20, fontFamily: "monospace", fontSize: 12, lineHeight: 1.8 }}>
-              {logs.map((log, i) => (
-                <div key={i} style={{ color: log.includes("Error") ? "#f87171" : log.includes("\u2713") ? "#10b981" : "#4a7090" }}>
-                  <span style={{ color: "#2a4060", marginRight: 12 }}>$</span>{log}
+            {/* Code editor */}
+            {activeTab === "Code" && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", overflow: "auto" }}>
+                <div style={{
+                  minWidth: 40, paddingTop: 16, paddingRight: 10,
+                  textAlign: "right", color: "#2a4060", fontSize: 12,
+                  lineHeight: "21px", userSelect: "none",
+                  borderRight: "1px solid #1a2535", background: "#080c10", flexShrink: 0,
+                }}>
+                  {(code || " ").split("\n").map((_, i) => <div key={i}>{i + 1}</div>)}
                 </div>
-              ))}
-            </div>
-          )}
+                <textarea
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  readOnly={generating}
+                  spellCheck={false}
+                  style={{
+                    flex: 1, background: "#080c10", border: "none",
+                    color: generating ? "#4a8060" : "#a8c8e8",
+                    fontSize: 12, lineHeight: "21px", padding: "16px",
+                    fontFamily: "monospace", resize: "none", outline: "none",
+                    whiteSpace: "pre", overflowWrap: "normal", minHeight: "100%",
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Console */}
+            {activeTab === "Console" && (
+              <div style={{
+                position: "absolute", inset: 0,
+                overflow: "auto", padding: 20,
+                fontFamily: "monospace", fontSize: 12, lineHeight: 1.8,
+              }}>
+                {logs.map((log, i) => (
+                  <div key={i} style={{
+                    color: log.includes("Error") ? "#f87171"
+                      : log.includes("\u2713") ? "#10b981"
+                      : "#4a7090",
+                  }}>
+                    <span style={{ color: "#2a4060", marginRight: 12 }}>$</span>{log}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <style>{`
-        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        @keyframes slide{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-        *{box-sizing:border-box}
-        ::-webkit-scrollbar{width:4px;height:4px}
-        ::-webkit-scrollbar-thumb{background:#1e3050;border-radius:2px}
-        textarea::placeholder{color:#2a4060}
-        button:hover:not(:disabled){opacity:0.8}
+        @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+        @keyframes slide { from { transform: translateX(-100%) } to { transform: translateX(100%) } }
+        * { box-sizing: border-box }
+        ::-webkit-scrollbar { width: 4px; height: 4px }
+        ::-webkit-scrollbar-thumb { background: #1e3050; border-radius: 2px }
+        textarea::placeholder { color: #2a4060 }
+        button:hover:not(:disabled) { opacity: 0.8 }
       `}</style>
     </div>
   );
