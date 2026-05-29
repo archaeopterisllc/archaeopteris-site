@@ -41,6 +41,7 @@ async function generateCode(prompt: string, currentCode: string): Promise<string
     "- Realistic mock data (not empty placeholders)",
     "",
     "STRICT OUTPUT RULES:",
+    "- @radix-ui/themes is available. Import components: Button, Card, Flex, Box, Text, Badge, Heading, Table, Dialog, TextField, Select, Switch from '@radix-ui/themes'",
     "- Do NOT use <style> tags inside JSX. Use inline styles only for animations. For keyframes, inject via document.head in useEffect.",
     "- Output ONLY raw JSX. Zero markdown, zero backticks, zero explanation.",
     "- No import statements. React, useState, useEffect, useRef, useCallback are globals.",
@@ -131,6 +132,8 @@ export default function ArchaeopterisBuilder() {
             "lucide-react": "latest",
             "clsx": "latest",
             "tailwind-merge": "latest",
+            "@radix-ui/themes": "3.1.6",
+
           },
           devDependencies: {
             "vite": "6.3.5",

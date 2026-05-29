@@ -62,12 +62,18 @@ const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
       if (!wc) return
       const content = [
         "import React from 'react'",
-        "import ReactDOM from 'react-dom/client'",
-        "import './index.css'",
-        "const { useState, useEffect, useRef, useCallback } = React",
-        "const __root = ReactDOM.createRoot(document.getElementById('root'))",
-        "const render = (el) => __root.render(el)",
-        newCode,
+"import ReactDOM from 'react-dom/client'",
+"import '@radix-ui/themes/styles.css'",
+"import './index.css'",
+"import { Theme } from '@radix-ui/themes'",
+"",
+"const { useState, useEffect, useRef, useCallback } = React",
+"const __root = ReactDOM.createRoot(document.getElementById('root'))",
+"",
+newCode,
+"",
+"__root.render(React.createElement(Theme, { appearance: 'dark', accentColor: 'green', radius: 'medium' }, React.createElement(App)))",
+
       ].join('\n')
       await wc.fs.writeFile('/src/main.jsx', content)
       devProcessRef.current?.kill()
