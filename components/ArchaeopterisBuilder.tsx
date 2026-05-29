@@ -230,10 +230,10 @@ export default function ArchaeopterisBuilder() {
           "@tailwindcss/postcss": "latest",
           "autoprefixer": "latest",
           "postcss": "latest"
-        },
-        overrides: {
-            "esbuild": "0.19.12"
         }
+        //overrides: {
+           // "esbuild": "0.19.12"
+        //}
 
 
       })
