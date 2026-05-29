@@ -2,8 +2,10 @@
 
 const stripAnsi = (str: string) => str.replace(/\x1B\[[0-9;]*[mGKHF]/g, '')
 
-import { useEffect, useRef, useState } from 'react'
+//import { useEffect, useRef, useState } from 'react'
 import type { FileSystemTree } from '@webcontainer/api'
+import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react'
+
 
 //import { useEffect, useRef, useState } from 'react'
 
@@ -26,11 +28,17 @@ const STATUS_MESSAGES: Record<Status, string> = {
   error: '❌ Error',
 }
 
-export default function WebContainer({
-  files,
-  startCommand = ['npx', 'serve', '.'],
-  className = '',
-}: WebContainerProps) {
+export interface WebContainerHandle {
+  restartDev: (code: string) => Promise<void>
+}
+
+const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
+  function WebContainer({
+    files,
+    startCommand = ['npx', 'serve', '.'],
+    className = '',
+  }, ref) {
+
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<unknown>(null)
   const devProcessRef = useRef<any>(null)
@@ -47,7 +55,29 @@ export default function WebContainer({
     bootContainer(files)
   }, [files])
 
-  
+  useImperativeHandle(ref, () => ({
+  async restartDev(newCode: string) {
+    const wc = containerRef.current as any
+    if (!wc) return
+    const content = [
+      "import React from 'react'",
+      "import ReactDOM from 'react-dom/client'",
+      "import './index.css'",
+      "const { useState, useEffect, useRef, useCallback } = React",
+      "const __root = ReactDOM.createRoot(document.getElementById('root'))",
+      "const render = (el) => __root.render(el)",
+      newCode,
+    ].join('\n')
+    await wc.fs.writeFile('/src/main.jsx', content)
+    devProcessRef.current?.kill()
+    const devProcess = await wc.spawn('npm', ['run', 'dev'])
+    devProcessRef.current = devProcess
+    devProcess.output.pipeTo(
+      new WritableStream({ write(data) { addLog(stripAnsi(data)) } })
+    )
+  }
+}))
+
 
 
   async function bootContainer(fileTree: FileSystemTree) {
@@ -175,3 +205,7 @@ wc.on('server-ready', (_port: number, serverUrl: string) => {
     </div>
   )
 }
+)
+
+export default WebContainerComponent
+
