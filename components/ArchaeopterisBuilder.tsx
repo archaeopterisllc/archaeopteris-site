@@ -225,8 +225,8 @@ export default function ArchaeopterisBuilder() {
           "tailwind-merge": "latest"
         },
         devDependencies: {
-          "vite": "4.5.3",
-          "@vitejs/plugin-react": "4.2.0",
+          "vite": "5.2.0",
+          "@vitejs/plugin-react-swc": "latest",
           "@tailwindcss/postcss": "latest",
           "autoprefixer": "latest",
           "postcss": "latest"
@@ -280,10 +280,10 @@ ${code}
       }
     }
   },
-  'vite.config.js': {
+  'vite.config.mjs': {
     file: {
       contents: `import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
 export default defineConfig({ plugins: [react()] })`
     }
   },
