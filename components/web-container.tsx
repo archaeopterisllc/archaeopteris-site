@@ -45,7 +45,7 @@ const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
   const [logs, setLogs] = useState<string[]>([])
   const logsEndRef = useRef<HTMLDivElement>(null)
 
-  const addLog = (msg: string) => setLogs(prev => [...prev.slice(-50), msg])
+  const addLog = (msg: string) => setLogs(prev => [...prev, msg])
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
