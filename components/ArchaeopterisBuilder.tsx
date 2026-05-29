@@ -216,7 +216,7 @@ export default function ArchaeopterisBuilder() {
     file: {
       contents: JSON.stringify({
         name: "archaeopteris-builder",
-        type: "module",
+        
         scripts: { dev: "vite --port 3000" },
         dependencies: {
           "react": "^18",
@@ -226,14 +226,11 @@ export default function ArchaeopterisBuilder() {
           "tailwind-merge": "latest"
         },
         devDependencies: {
-          "vite": "5.2.0",
-          "@vitejs/plugin-react-swc": "latest",
-          "@tailwindcss/postcss": "latest",
+          "vite": "latest",
+          "@vitejs/plugin-react": "latest",
+         // "@tailwindcss/postcss": "latest",
           "autoprefixer": "latest",
-          "postcss": "latest"
-        },
-        overrides: {
-           "esbuild": "0.19.12"
+          //"postcss": "latest"
         }
 
 
@@ -277,27 +274,21 @@ ${code}
 
       },
       'index.css': {
-        file: { contents: `@tailwind base;\n@tailwind components;\n@tailwind utilities;` }
+       file: { contents: `* { box-sizing: border-box; margin: 0; }` }
+        //file: { contents: `@tailwind base;\n@tailwind components;\n@tailwind utilities;` }
       }
     }
   },
-  'vite.config.mjs': {
-    file: {
-      contents: `import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-export default defineConfig({ plugins: [react()], esbuild: { minify: false é })`
-    }
-  },
-  'tailwind.config.js': {
-    file: {
-      contents: `export default { content: ['./src/**/*.{js,jsx}'], theme: { extend: {} }, plugins: [] }`
-    }
-  },
-  'postcss.config.js': {
-    file: {
-      contents: `export default { plugins: { 'tailwindcss/postcss': {}, autoprefixer: {} } }`
-    }
+  'vite.config.js': {
+  file: {
+    contents: [
+      "import { defineConfig } from 'vite'",
+      "import react from '@vitejs/plugin-react'",
+      "export default defineConfig({ plugins: [react()] })",
+    ].join('\n')
   }
+},
+
 }}
 startCommand={['npm', 'install']}
 
