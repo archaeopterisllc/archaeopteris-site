@@ -279,6 +279,11 @@ ${code}
       "@tailwind base;",
       "@tailwind components;",
       "@tailwind utilities;",
+      "html, body, #root {",
+      "  background: #080c10;",
+      "  min-height: 100vh;",
+      "  margin: 0;",
+      "}",
     ].join('\n')
   }
 }
