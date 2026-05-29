@@ -87,7 +87,7 @@ newCode,
         if (iframeRef.current && url) {
           iframeRef.current.src = url
         }
-      }, 2500)
+      }, 5000)
     }
   }))
 
