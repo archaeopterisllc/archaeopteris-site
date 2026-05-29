@@ -258,13 +258,19 @@ export default function ArchaeopterisBuilder() {
   'src': {
     directory: {
       'main.jsx': {
-        file: { contents: `import React from 'react'
+        file: {
+    contents: `import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 
-${code}
+const { useState, useEffect, useRef, useCallback } = React
 
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App))` }
+const __root = ReactDOM.createRoot(document.getElementById('root'))
+const render = (el) => __root.render(el)
+
+${code}
+`
+  }
 
       },
       'index.css': {
