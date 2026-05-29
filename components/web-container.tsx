@@ -205,7 +205,7 @@ const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
       </div>
 
       {/* Preview + Logs */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
         {/* iframe container — always in DOM so it can load */}
         <div style={{ flex: 1, position: 'relative', background: '#080c10', minHeight: 0 }}>
@@ -261,9 +261,11 @@ const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
 
         {/* Logs panel */}
         <div style={{
-          width: 280,
+         // width: 280,
+          height: 120,
           background: '#040810',
-          borderLeft: '1px solid #1a2535',
+          //borderLeft: '1px solid #1a2535',
+          borderTop: '1px solid #1a2535',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
