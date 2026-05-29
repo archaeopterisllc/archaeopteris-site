@@ -226,11 +226,11 @@ export default function ArchaeopterisBuilder() {
           "tailwind-merge": "latest"
         },
         devDependencies: {
-          "vite": "8.0.0",
-          "@vitejs/plugin-react": "6.0.2",
-         // "@tailwindcss/postcss": "latest",
-          "autoprefixer": "latest",
-          //"postcss": "latest"
+          "vite": "6.3.5",
+          "@vitejs/plugin-react": "4.5.2",
+          "@tailwindcss/postcss": "3.4.1",
+          "autoprefixer": "10.4.17",
+          "postcss": "8.4.35"
         }
 
 
@@ -273,10 +273,7 @@ ${code}
   }
 
       },
-      'index.css': {
-       file: { contents: `* { box-sizing: border-box; margin: 0; }` }
-        //file: { contents: `@tailwind base;\n@tailwind components;\n@tailwind utilities;` }
-      }
+      
     }
   },
   'vite.config.js': {
@@ -288,6 +285,41 @@ ${code}
     ].join('\n')
   }
 },
+'postcss.config.js': {
+  file: {
+    contents: [
+      "export default {",
+      "  plugins: {",
+      "    tailwindcss: {},",
+      "    autoprefixer: {},",
+      "  }",
+      "}",
+    ].join('\n')
+  }
+},
+'tailwind.config.js': {
+  file: {
+    contents: [
+      "export default {",
+      "  content: ['.src/**/*.{js,jsx}'],",
+      "  theme: { extend: {} },",
+      "  plugins: []",
+      "}",
+    ].join('\n')
+  }
+},
+'index.css': {
+  file: {
+    contents: [
+      "@tailwind base;",
+      "@tailwind components;",
+      "@tailwind utilities;",
+    ].join('\n')
+  }
+},
+
+
+
 
 }}
 startCommand={['npm', 'install']}
