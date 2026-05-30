@@ -666,10 +666,11 @@ useEffect(() => {
         <div style={{
   width: isPortrait ? "100%" : 280,
   maxHeight: isPortrait ? "45vh" : "100%",
+  overflow: isPortrait ? "auto" :"hidden",
   borderRight: isPortrait ? "none" : "1px solid #1a2535",
   borderBottom: isPortrait ? "1px solid #1a2535" : "none",
   display: "flex", flexDirection: "column",
-  background: "#0a0f1a", flexShrink: 0, overflow: "hidden",
+  background: "#0a0f1a", flexShrink: 0,
 }}>
 
 
