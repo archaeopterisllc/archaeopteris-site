@@ -91,8 +91,8 @@ export default function ArchaeopterisBuilder() {
   const wcRef = useRef<WebContainerHandle>(null);
   
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [files, setFiles] = useState<Record<string, string>>({'src/App.jsx': STARTER});
-const [activeFile, setActiveFile] = useState<string>('src/App.jsx')
+  const [files, setFiles] = useState<Record<string, string>>({'App.jsx': STARTER});
+const [activeFile, setActiveFile] = useState<string>('App.jsx')
 
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
@@ -836,6 +836,8 @@ borderBottom: isMobile ? "none" : isPortrait ? "1px solid #1a2535" : "none",
       const parsed = JSON.parse(trimmed)
       const flatted = flattenFiles(parsed.files)
       addLog(`Files: ${Object.keys(flatted).join(', ')}`)
+addLog(`Keys: ${Object.keys(flatted).join(', ')}`)
+addLog(`First: ${Object.keys(flatted)[0]}`)
 
       setFiles(flatted)
       setActiveFile(Object.keys(flatted)[0])
