@@ -76,7 +76,7 @@ async function generateProject(prompt: string): Promise<Record<string, string>> 
   const raw = data.code as string
   const clean = raw.replace(/^```json\n?/m, '').replace(/\n?```\s*$/m, '').trim()
   const parsed = JSON.parse(clean)
-  return parsed.files as Record<string, string>
+  return flattenFiles(parsed.files) as Record<string, string>
 }
 
 
@@ -835,6 +835,8 @@ borderBottom: isMobile ? "none" : isPortrait ? "1px solid #1a2535" : "none",
     try {
       const parsed = JSON.parse(trimmed)
       const flatted = flattenFiles(parsed.files)
+      addLog(`Files: ${Object.keys(flatted).join(', ')}`)
+
       setFiles(flatted)
       setActiveFile(Object.keys(flatted)[0])
       await wcRef.current?.mountFiles(parsed.files)
