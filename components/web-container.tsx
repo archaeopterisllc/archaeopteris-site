@@ -84,11 +84,11 @@ newCode,
         new WritableStream({ write(data) { addLog(stripAnsi(data)) } })
       )
       // Reload iframe after vite restarts
-      setTimeout(() => {
-        if (iframeRef.current && url) {
-          iframeRef.current.src = url
-        }
-      }, 5000)
+      //setTimeout(() => {
+        //if (iframeRef.current && url) {
+          //iframeRef.current.src = url
+        //}
+      //}, 5000)
     }
   }))
 
