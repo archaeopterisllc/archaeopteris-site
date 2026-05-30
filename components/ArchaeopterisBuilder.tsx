@@ -76,15 +76,24 @@ export default function ArchaeopterisBuilder() {
 
   const logsEndRef = useRef<HTMLDivElement>(null);
   const wcRef = useRef<WebContainerHandle>(null);
-  const [isPortrait, setIsPortrait] = useState(
-  window.innerHeight > window.innerWidth
+  
+  const isMobile = window.innerWidth < 768  // iPad > 768px
+
+const [isPortrait, setIsPortrait] = useState(
+  typeof window !== 'undefined' 
+    ? isMobile && window.innerHeight > window.innerWidth 
+    : false
 )
 
 useEffect(() => {
-  const handler = () => setIsPortrait(window.innerHeight > window.innerWidth)
+  const handler = () => {
+    const mobile = window.innerWidth < 768
+    setIsPortrait(mobile && window.innerHeight > window.innerWidth)
+  }
   window.addEventListener('resize', handler)
   return () => window.removeEventListener('resize', handler)
 }, [])
+
 
 
   const addLog = (msg: string) =>
