@@ -77,7 +77,10 @@ export default function ArchaeopterisBuilder() {
   const logsEndRef = useRef<HTMLDivElement>(null);
   const wcRef = useRef<WebContainerHandle>(null);
   
-  const isMobile = window.innerWidth < 768  // iPad > 768px
+  const [drawerOpen, setDrawerOpen] = useState(false)
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+
+  //const isMobile = window.innerWidth < 768  // iPad > 768px
 
 const [isPortrait, setIsPortrait] = useState(
   typeof window !== 'undefined' 
@@ -651,7 +654,15 @@ useEffect(() => {
         <span style={{ fontWeight: 700, fontSize: 13, color: "#10b981", letterSpacing: "0.05em" }}>
           ARCHAEOPTERIS BUILDER
         </span>
+       
         <div style={{ flex: 1 }} />
+{isMobile && (
+  <button onClick={() => setDrawerOpen(true)} style={{
+    background: 'transparent', border: 'none',
+    color: '#10b981', fontSize: 18, cursor: 'pointer', padding: '4px 8px',
+    marginRight: 8
+  }}>☰</button>
+)}
         <span style={{
           fontSize: 10, padding: "3px 8px", borderRadius: 4,
           background: "#10b98115", border: "1px solid #10b98140", color: "#10b981",
@@ -662,13 +673,28 @@ useEffect(() => {
       flexDirection: isPortrait ? "column" : "row",
        }}>
 
-        {/* Left panel */}
-        <div style={{
-  width: isPortrait ? "100%" : 280,
-  maxHeight: isPortrait ? "45vh" : "100%",
-  overflow: isPortrait ? "auto" :"hidden",
-  borderRight: isPortrait ? "none" : "1px solid #1a2535",
-  borderBottom: isPortrait ? "1px solid #1a2535" : "none",
+        {/* Overlay */}
+{isMobile && drawerOpen && (
+  <div onClick={() => setDrawerOpen(false)} style={{
+    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 40
+  }} />
+)}
+
+{/* Left panel */}
+<div style={{
+  position: isMobile ? 'fixed' : 'relative',
+  left: isMobile ? (drawerOpen ? 0 : -300) : 'auto',
+  top: isMobile ? 0 : 'auto',
+  height: isMobile ? '100vh' : '100%',
+  zIndex: isMobile ? 50 : 'auto',
+  transition: 'left 0.3s ease',
+  //width: 280,
+  width: isMobile ? 280 : isPortrait ? "100%" : 280,
+maxHeight: isMobile ? "100vh" : isPortrait ? "45vh" : "100%",
+overflow: isMobile ? "auto" : isPortrait ? "auto" : "hidden",
+borderRight: isMobile ? "none" : isPortrait ? "none" : "1px solid #1a2535",
+borderBottom: isMobile ? "none" : isPortrait ? "1px solid #1a2535" : "none",
+
   display: "flex", flexDirection: "column",
   background: "#0a0f1a", flexShrink: 0,
 }}>
