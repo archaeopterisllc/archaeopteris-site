@@ -78,25 +78,6 @@ export default function ArchaeopterisBuilder() {
 
   const logsEndRef = useRef<HTMLDivElement>(null);
   const wcRef = useRef<WebContainerHandle>(null);
-  const codeUpdateTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-useEffect(() => {
-  if (!wcRef.current) return
-
-  if (codeUpdateTimeout.current) {
-    clearTimeout(codeUpdateTimeout.current)
-  }
-
-  codeUpdateTimeout.current = setTimeout(async () => {
-    await wcRef.current?.updateCode(code)
-  }, 500)
-
-  return () => {
-    if (codeUpdateTimeout.current) {
-      clearTimeout(codeUpdateTimeout.current)
-    }
-  }
-}, [code])
 
   const addLog = (msg: string) =>
     setLogs((p) => [...p.slice(-99), `[${new Date().toLocaleTimeString()}] ${msg}`]);
@@ -121,7 +102,7 @@ useEffect(() => {
         .trim();
       setCode(clean);
       addLog("Generation complete \u2713");
-      await wcRef.current?.updateCode(clean);
+      await wcRef.current?.restartDev(clean);
       setTimeout(() => setActiveTab("Preview"), 150);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -144,7 +125,6 @@ useEffect(() => {
       file: {
         contents: JSON.stringify({
           name: "archaeopteris-builder",
-          type: "module",
           scripts: { dev: "vite --port 3000" },
           dependencies: {
             "react": "^18",
@@ -421,7 +401,7 @@ ${STARTER}
               <WebContainer
                 ref={wcRef}
                 files={wcFiles}
-                //startCommand={['npm', 'install']}
+                startCommand={['npm', 'install']}
                 style={{ flex: 1, minHeight: 0 }}
               />
             </div>
