@@ -150,6 +150,142 @@ export default function ArchaeopterisBuilder() {
     },
     'src': {
       directory: {
+        'components': {
+  directory: {
+    'ui': {
+      directory: {
+        'button.jsx': {
+          file: {
+            contents: [
+              "import { clsx } from 'clsx'",
+              "import { twMerge } from 'tailwind-merge'",
+              "const cn = (...c) => twMerge(clsx(c))",
+              "const variants = {",
+              "  default: 'bg-emerald-500 text-black hover:bg-emerald-400',",
+              "  destructive: 'bg-red-500 text-white hover:bg-red-400',",
+              "  outline: 'border border-gray-700 hover:bg-gray-800 text-gray-100',",
+              "  secondary: 'bg-gray-800 text-gray-100 hover:bg-gray-700',",
+              "  ghost: 'hover:bg-gray-800 text-gray-100',",
+              "  link: 'text-emerald-400 underline-offset-4 hover:underline',",
+              "}",
+              "const sizes = {",
+              "  default: 'h-9 px-4 py-2',",
+              "  sm: 'h-7 px-3 text-xs',",
+              "  lg: 'h-11 px-8',",
+              "  icon: 'h-9 w-9',",
+              "}",
+              "export function Button({ className, variant='default', size='default', ...props }) {",
+              "  return <button className={cn('inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none disabled:opacity-50', variants[variant], sizes[size], className)} {...props} />",
+              "}",
+            ].join('\n')
+          }
+        },
+        'card.jsx': {
+          file: {
+            contents: [
+              "import { clsx } from 'clsx'",
+              "import { twMerge } from 'tailwind-merge'",
+              "const cn = (...c) => twMerge(clsx(c))",
+              "export function Card({ className, ...props }) {",
+              "  return <div className={cn('rounded-xl border border-gray-800 bg-gray-900 text-gray-100', className)} {...props} />",
+              "}",
+              "export function CardHeader({ className, ...props }) {",
+              "  return <div className={cn('flex flex-col space-y-1.5 p-4', className)} {...props} />",
+              "}",
+              "export function CardTitle({ className, ...props }) {",
+              "  return <h3 className={cn('font-semibold leading-none tracking-tight', className)} {...props} />",
+              "}",
+              "export function CardContent({ className, ...props }) {",
+              "  return <div className={cn('p-4 pt-0', className)} {...props} />",
+              "}",
+              "export function CardFooter({ className, ...props }) {",
+              "  return <div className={cn('flex items-center p-4 pt-0', className)} {...props} />",
+              "}",
+            ].join('\n')
+          }
+        },
+        'badge.jsx': {
+          file: {
+            contents: [
+              "import { clsx } from 'clsx'",
+              "import { twMerge } from 'tailwind-merge'",
+              "const cn = (...c) => twMerge(clsx(c))",
+              "const variants = {",
+              "  default: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',",
+              "  secondary: 'bg-gray-800 text-gray-400 border border-gray-700',",
+              "  destructive: 'bg-red-500/20 text-red-400 border border-red-500/30',",
+              "  outline: 'border border-gray-700 text-gray-300',",
+              "  high: 'bg-red-500/20 text-red-400 border border-red-500/30',",
+              "  medium: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',",
+              "  low: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',",
+              "  breaking: 'bg-red-500/20 text-red-400 border border-red-500/30 font-bold',",
+              "  crypto: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',",
+              "  markets: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',",
+              "  forex: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',",
+              "  macro: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',",
+              "}",
+              "export function Badge({ className, variant='default', ...props }) {",
+              "  return <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium', variants[variant] || variants.default, className)} {...props} />",
+              "}",
+            ].join('\n')
+          }
+        },
+        'separator.jsx': {
+          file: {
+            contents: [
+              "import { clsx } from 'clsx'",
+              "import { twMerge } from 'tailwind-merge'",
+              "const cn = (...c) => twMerge(clsx(c))",
+              "export function Separator({ className, orientation='horizontal', ...props }) {",
+              "  return <div className={cn('shrink-0 bg-gray-800', orientation === 'horizontal' ? 'h-px w-full' : 'h-full w-px', className)} {...props} />",
+              "}",
+            ].join('\n')
+          }
+        },
+        'scroll-area.jsx': {
+          file: {
+            contents: [
+              "import { clsx } from 'clsx'",
+              "import { twMerge } from 'tailwind-merge'",
+              "const cn = (...c) => twMerge(clsx(c))",
+              "export function ScrollArea({ className, children, ...props }) {",
+              "  return <div className={cn('overflow-auto', className)} {...props}>{children}</div>",
+              "}",
+            ].join('\n')
+          }
+        },
+        'input.jsx': {
+          file: {
+            contents: [
+              "import { clsx } from 'clsx'",
+              "import { twMerge } from 'tailwind-merge'",
+              "const cn = (...c) => twMerge(clsx(c))",
+              "export function Input({ className, ...props }) {",
+              "  return <input className={cn('flex h-9 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-emerald-500', className)} {...props} />",
+              "}",
+            ].join('\n')
+          }
+        },
+      }
+    }
+  }
+},
+'lib': {
+  directory: {
+    'utils.js': {
+      file: {
+        contents: [
+          "import { clsx } from 'clsx'",
+          "import { twMerge } from 'tailwind-merge'",
+          "export function cn(...inputs) {",
+          "  return twMerge(clsx(inputs))",
+          "}",
+        ].join('\n')
+      }
+    }
+  }
+},
+
         'main.jsx': {
   file: {
     contents: [
