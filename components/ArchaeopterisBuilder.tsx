@@ -387,7 +387,22 @@ export default function ArchaeopterisBuilder() {
             <div style={{ flex: 1 }} />
             {activeTab === "Code" && (
   <button
-    onClick={() => wcRef.current?.restartDev(code)}
+    onClick={() => {
+  const trimmed = code.trim()
+  if (trimmed.startsWith('{')) {
+    // JSON mode
+    try {
+      const parsed = JSON.parse(trimmed)
+      wcRef.current?.mountFiles(parsed.files)
+    } catch(e) {
+      addLog('Error: Invalid JSON')
+    }
+  } else {
+    // JSX mode
+    wcRef.current?.restartDev(code)
+  }
+}}
+
     style={{ padding: "10px 16px", background: "transparent", border: "none", color: "#10b981", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
   >
     ▶ Run
