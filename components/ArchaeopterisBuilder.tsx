@@ -91,7 +91,7 @@ export default function ArchaeopterisBuilder() {
   const wcRef = useRef<WebContainerHandle>(null);
   
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [files, setFiles] = useState<Record<string, string>>({})
+  const [files, setFiles] = useState<Record<string, string>>({'src/App.jsx': STARTER});
 const [activeFile, setActiveFile] = useState<string>('src/App.jsx')
 
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
@@ -828,24 +828,28 @@ borderBottom: isMobile ? "none" : isPortrait ? "1px solid #1a2535" : "none",
             <div style={{ flex: 1 }} />
             {activeTab === "Code" && (
   <button
-    onClick={() => {
+    onClick={async () => {
   // Multi-file mode (đã có files state)
-  if (Object.keys(files).length > 0) {
+  if (Object.keys(files).length > 1) {
     wcRef.current?.mountFiles(files)
-    return
+  } else {
+    wcRef.current?.restartDev(files['src/App.jsx'] || '')
+  
   }
   
   // JSON mode
   const trimmed = code.trim()
   if (trimmed.startsWith('{')) {
-    try {
-      const parsed = JSON.parse(trimmed)
-      wcRef.current?.mountFiles(parsed.files)
-    } catch(e) {
-      addLog('Error: Invalid JSON')
-    }
-    return
+  try {
+    const parsed = JSON.parse(trimmed)
+    const flatted = flattenFiles(parsed.files)
+    setFiles(flatted)
+    setActiveFile(Object.keys(flatted)[0])
+    await wcRef.current?.mountFiles(parsed.files)
+  } catch(e) {
+    addLog('Error: Invalid JSON')
   }
+}
   
   // JSX mode
   wcRef.current?.restartDev(code)
