@@ -25,6 +25,19 @@ const STARTER = [
   "render(<App />)",
 ].join("\n");
 
+function flattenFiles(tree: any, prefix = ''): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [key, value] of Object.entries(tree)) {
+    const path = prefix ? `${prefix}/${key}` : key
+    if ((value as any).file) {
+      result[path] = (value as any).file.contents
+    } else if ((value as any).directory) {
+      Object.assign(result, flattenFiles((value as any).directory, path))
+    }
+  }
+  return result
+}
+
 async function generateProject(prompt: string): Promise<Record<string, string>> {
   const systemPrompt = [
     "You are an elite UI engineer for Archaeopteris LLC.",
@@ -118,10 +131,10 @@ useEffect(() => {
     addLog(`Generating: "${currentPrompt}"`);
 
     try {
-  const files = await generateProject(currentPrompt);
+  const rawfiles = await generateProject(currentPrompt);
   addLog("Generation complete \u2713");
-  setFiles(files)
-  await wcRef.current?.mountFiles(files);
+  setFiles(flattenFiles(rawfiles))
+  await wcRef.current?.mountFiles(rawfiles);
   setTimeout(() => setActiveTab("Preview"), 150);
 
     } catch (e: unknown) {
