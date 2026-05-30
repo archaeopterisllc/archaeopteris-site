@@ -830,7 +830,7 @@ borderBottom: isMobile ? "none" : isPortrait ? "1px solid #1a2535" : "none",
   <button
     onClick={async () => {
   // JSON mode trước
-  const trimmed = code.trim()
+  const trimmed = (files[activeFile] || code).trim()
   if (trimmed.startsWith('{')) {
     try {
       const parsed = JSON.parse(trimmed)
