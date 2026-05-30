@@ -114,20 +114,20 @@ if (hasPackageJson) {
   addLog('Dependencies installed ✓')
 }
 
-//devProcessRef.current?.kill()
+devProcessRef.current?.kill()
 
-  //const devProcess = await wc.spawn('npm', ['run', 'dev'])
-  //devProcessRef.current = devProcess
-  //devProcess.output.pipeTo(
-    //new WritableStream({
-      //write(data) {
-        //addLog(stripAnsi(data))
-        //if (data.includes('ready in') && iframeRef.current && url) {
-          //iframeRef.current.src = url
-        //}
-      //}
-    //})
-  //
+  const devProcess = await wc.spawn('npm', ['run', 'dev'])
+  devProcessRef.current = devProcess
+  devProcess.output.pipeTo(
+    new WritableStream({
+      write(data) {
+        addLog(stripAnsi(data))
+        if (data.includes('ready in') && iframeRef.current && url) {
+        iframeRef.current.src = url
+        }
+      }
+    })
+  )
   //setTimeout(() => {
     //if (iframeRef.current && url) iframeRef.current.src = url
   //}, 4000)
