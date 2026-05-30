@@ -379,6 +379,15 @@ ${STARTER}
               </button>
             ))}
             <div style={{ flex: 1 }} />
+            {activeTab === "Code" && (
+  <button
+    onClick={() => wcRef.current?.restartDev(code)}
+    style={{ padding: "10px 16px", background: "transparent", border: "none", color: "#10b981", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
+  >
+    ▶ Run
+  </button>
+)}
+
           </div>
 
           {/* Content area — all 3 tabs share same space */}
