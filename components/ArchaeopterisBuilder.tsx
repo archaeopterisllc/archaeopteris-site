@@ -78,6 +78,9 @@ export default function ArchaeopterisBuilder() {
   const wcRef = useRef<WebContainerHandle>(null);
   
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [files, setFiles] = useState<Record<string, string>>({})
+const [activeFile, setActiveFile] = useState<string>('src/App.jsx')
+
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   //const isMobile = window.innerWidth < 768  // iPad > 768px
@@ -117,6 +120,7 @@ useEffect(() => {
     try {
   const files = await generateProject(currentPrompt);
   addLog("Generation complete \u2713");
+  setFiles(files)
   await wcRef.current?.mountFiles(files);
   setTimeout(() => setActiveTab("Preview"), 150);
 
@@ -812,20 +816,28 @@ borderBottom: isMobile ? "none" : isPortrait ? "1px solid #1a2535" : "none",
             {activeTab === "Code" && (
   <button
     onClick={() => {
+  // Multi-file mode (đã có files state)
+  if (Object.keys(files).length > 0) {
+    wcRef.current?.mountFiles(files)
+    return
+  }
+  
+  // JSON mode
   const trimmed = code.trim()
   if (trimmed.startsWith('{')) {
-    // JSON mode
     try {
       const parsed = JSON.parse(trimmed)
       wcRef.current?.mountFiles(parsed.files)
     } catch(e) {
       addLog('Error: Invalid JSON')
     }
-  } else {
-    // JSX mode
-    wcRef.current?.restartDev(code)
+    return
   }
+  
+  // JSX mode
+  wcRef.current?.restartDev(code)
 }}
+
 
     style={{ padding: "10px 16px", background: "transparent", border: "none", color: "#10b981", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
   >
@@ -863,30 +875,55 @@ borderBottom: isMobile ? "none" : isPortrait ? "1px solid #1a2535" : "none",
 
             {/* Code editor */}
             {activeTab === "Code" && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", overflow: "auto" }}>
-                <div style={{
-                  minWidth: 40, paddingTop: 16, paddingRight: 10,
-                  textAlign: "right", color: "#2a4060", fontSize: 12,
-                  lineHeight: "21px", userSelect: "none",
-                  borderRight: "1px solid #1a2535", background: "#080c10", flexShrink: 0,
-                }}>
-                  {(code || " ").split("\n").map((_, i) => <div key={i}>{i + 1}</div>)}
-                </div>
-                <textarea
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  readOnly={generating}
-                  spellCheck={false}
-                  style={{
-                    flex: 1, background: "#080c10", border: "none",
-                    color: generating ? "#4a8060" : "#a8c8e8",
-                    fontSize: 12, lineHeight: "21px", padding: "16px",
-                    fontFamily: "monospace", resize: "none", outline: "none",
-                    whiteSpace: "pre", overflowWrap: "normal", minHeight: "100%",
-                  }}
-                />
-              </div>
-            )}
+  <div style={{ position: "absolute", inset: 0, display: "flex" }}>
+    
+    {/* File tree */}
+    <div style={{
+      width: 160, background: "#040810", borderRight: "1px solid #1a2535",
+      overflowY: "auto", flexShrink: 0,
+    }}>
+      <div style={{ fontSize: 10, color: "#2a4060", padding: "8px 12px", letterSpacing: "0.1em" }}>FILES</div>
+      {Object.keys(files).map(path => (
+        <div key={path} onClick={() => setActiveFile(path)}
+          style={{
+            padding: "6px 12px", fontSize: 11, cursor: "pointer",
+            color: activeFile === path ? "#10b981" : "#4a6080",
+            background: activeFile === path ? "#10b98115" : "transparent",
+            borderLeft: activeFile === path ? "2px solid #10b981" : "2px solid transparent",
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+          {path.split('/').pop()}
+        </div>
+      ))}
+    </div>
+
+    {/* Editor */}
+    <div style={{ flex: 1, display: "flex", overflow: "auto" }}>
+      <div style={{
+        minWidth: 40, paddingTop: 16, paddingRight: 10,
+        textAlign: "right", color: "#2a4060", fontSize: 12,
+        lineHeight: "21px", userSelect: "none",
+        borderRight: "1px solid #1a2535", background: "#080c10", flexShrink: 0,
+      }}>
+        {(files[activeFile] || " ").split("\n").map((_, i) => <div key={i}>{i + 1}</div>)}
+      </div>
+      <textarea
+        value={files[activeFile] || ""}
+        onChange={(e) => setFiles(prev => ({ ...prev, [activeFile]: e.target.value }))}
+        readOnly={generating}
+        spellCheck={false}
+        style={{
+          flex: 1, background: "#080c10", border: "none",
+          color: generating ? "#4a8060" : "#a8c8e8",
+          fontSize: 12, lineHeight: "21px", padding: "16px",
+          fontFamily: "monospace", resize: "none", outline: "none",
+          whiteSpace: "pre", overflowWrap: "normal", minHeight: "100%",
+        }}
+      />
+    </div>
+  </div>
+)}
+
 
             {/* Console */}
             {activeTab === "Console" && (
