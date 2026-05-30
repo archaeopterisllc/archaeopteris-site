@@ -25,6 +25,7 @@ const STATUS_MESSAGES: Record<Status, string> = {
 
 export interface WebContainerHandle {
   restartDev: (code: string) => Promise<void>
+  mountFiles: (files: Record<string, string>) => Promise<void>
 }
 
 const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
@@ -76,7 +77,39 @@ const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
           //iframeRef.current.src = url
         //}
       //}, 5000)
+    },
+    
+  async mountFiles(files: Record<string, string>) {
+    const wc = containerRef.current as any
+    if (!wc) return
+    for (const [path, content] of Object.entries(files)) {
+      const dir = path.split('/').slice(0, -1).join('/')
+      if (dir) {
+        try { await wc.fs.mkdir(dir, { recursive: true }) } catch {}
+      }
+      await wc.fs.writeFile(path, content)
+      addLog(`Written: ${path}`)
     }
+    devProcessRef.current?.kill()
+    const devProcess = await wc.spawn('npm', ['run', 'dev'])
+    devProcessRef.current = devProcess
+    devProcess.output.pipeTo(
+      new WritableStream({
+        write(data) {
+          addLog(stripAnsi(data))
+          if (data.includes('ready in') && iframeRef.current && url) {
+            iframeRef.current.src = url
+          }
+        }
+      }))
+    
+    setTimeout(() => {
+      if (iframeRef.current && url) {
+        iframeRef.current.src = url
+      }
+    }, 4000)
+  }
+
   }))
 
   async function bootContainer(fileTree: FileSystemTree) {

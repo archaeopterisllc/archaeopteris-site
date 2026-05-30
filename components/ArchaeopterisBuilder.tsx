@@ -25,45 +25,40 @@ const STARTER = [
   "render(<App />)",
 ].join("\n");
 
-async function generateCode(prompt: string, currentCode: string): Promise<string> {
-  const fullPrompt = [
-    "You are an elite UI engineer for Archaeopteris LLC — a fintech/trading technology company.",
-    "Brand colors: emerald #10b981 (primary), blue #3b82f6 (accent), background #080c10 (near-black).",
-    "",
-    "VISUAL QUALITY REQUIREMENTS — every component must have:",
-    "- Rich dark backgrounds using bg-gray-900, bg-gray-950, or inline style with #080c10/#0d1420",
-    "- Gradient text: use style={{background:'linear-gradient(135deg,#10b981,#3b82f6)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}",
-    "- Glowing effects: box-shadow with emerald/blue rgba values via inline style",
-    "- Animated elements: CSS keyframes via <style> tag inside JSX, or Tailwind animate-pulse/animate-bounce",
-    "- Glass cards: bg-white/5 backdrop-blur border border-white/10",
-    "- Hover transitions: transition-all duration-300",
-    "- At least one gradient background section",
-    "- Realistic mock data (not empty placeholders)",
-    "",
-    "STRICT OUTPUT RULES:",
-    "- Output ONLY raw JSX/JS code",
-"- Always start with imports: import { useState, useEffect } from 'react'",
-"- Import Radix Themes if needed: import { Button, Card, ... } from '@radix-ui/themes'",
-"- Always export default function App()",
-"- NO render(), NO ReactDOM, NO inline styles unless necessary",
-"- Use Tailwind classes for styling",
-    "",
-    currentCode && currentCode !== STARTER
-      ? `Current code:\n${currentCode}\n\nModify/improve: ${prompt}`
-      : `Generate a visually stunning component: ${prompt}`,
-  ].join("\n");
+async function generateProject(prompt: string): Promise<Record<string, string>> {
+  const systemPrompt = [
+    "You are an elite UI engineer for Archaeopteris LLC.",
+    "Generate a React project as JSON. Response must be ONLY valid JSON, no markdown, no backticks.",
+    "Schema: { \"name\": string, \"files\": { \"src/App.jsx\": string, ... } }",
+    "Rules:",
+    "- All files under src/",
+    "- App.jsx must export default function App()",
+    "- Use Tailwind classes for styling",
+    "- Import from 'react' and '@radix-ui/themes' only",
+    "- NO inline styles unless necessary",
+    "- NO <style> tags",
+    "- Each file is a complete valid JS/JSX module",
+    "- Keep it simple, max 5 files",
+  ].join('\n')
 
   const res = await fetch("/api/page-generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: fullPrompt }),
-  });
+    body: JSON.stringify({ 
+      prompt: `${systemPrompt}\n\nGenerate project: ${prompt}` 
+    }),
+  })
 
-  if (!res.ok) throw new Error(`API error ${res.status}`);
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data.code as string;
+  if (!res.ok) throw new Error(`API error ${res.status}`)
+  const data = await res.json()
+  if (data.error) throw new Error(data.error)
+
+  const raw = data.code as string
+  const clean = raw.replace(/^```json\n?/m, '').replace(/\n?```\s*$/m, '').trim()
+  const parsed = JSON.parse(clean)
+  return parsed.files as Record<string, string>
 }
+
 
 export default function ArchaeopterisBuilder() {
   const [code, setCode] = useState<string>(STARTER);
@@ -91,15 +86,11 @@ export default function ArchaeopterisBuilder() {
     addLog(`Generating: "${currentPrompt}"`);
 
     try {
-      const raw = await generateCode(currentPrompt, code);
-      const clean = raw
-        .replace(/^```(?:tsx?|jsx?|javascript)?\n?/m, "")
-        .replace(/\n?```\s*$/m, "")
-        .trim();
-      setCode(clean);
-      addLog("Generation complete \u2713");
-      await wcRef.current?.restartDev(clean);
-      setTimeout(() => setActiveTab("Preview"), 150);
+  const files = await generateProject(currentPrompt);
+  addLog("Generation complete \u2713");
+  await wcRef.current?.mountFiles(files);
+  setTimeout(() => setActiveTab("Preview"), 150);
+
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       addLog(`Error: ${msg}`);
