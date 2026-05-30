@@ -39,6 +39,13 @@ async function generateProject(prompt: string): Promise<Record<string, string>> 
     "- NO <style> tags",
     "- Each file is a complete valid JS/JSX module",
     "- Keep it simple, max 5 files",
+    "- Import shadcn components từ '@/components/ui/button', '@/components/ui/card', '@/components/ui/badge', '@/components/ui/tabs', '@/components/ui/dialog', '@/components/ui/select', '@/components/ui/switch', '@/components/ui/avatar', '@/components/ui/progress', '@/components/ui/table', '@/components/ui/tooltip', '@/components/ui/dropdown-menu', '@/components/ui/toast'",
+"- Ưu tiên dùng shadcn components thay vì tự viết HTML",
+
+"CRITICAL: Only generate files inside src/ directory.",
+"DO NOT generate: package.json, vite.config.js, postcss.config.js, tailwind.config.js, index.html, .npmrc",
+"These config files are already set up in the environment.",
+
   ].join('\n')
 
   const res = await fetch("/api/page-generate", {
@@ -69,6 +76,16 @@ export default function ArchaeopterisBuilder() {
 
   const logsEndRef = useRef<HTMLDivElement>(null);
   const wcRef = useRef<WebContainerHandle>(null);
+  const [isPortrait, setIsPortrait] = useState(
+  window.innerHeight > window.innerWidth
+)
+
+useEffect(() => {
+  const handler = () => setIsPortrait(window.innerHeight > window.innerWidth)
+  window.addEventListener('resize', handler)
+  return () => window.removeEventListener('resize', handler)
+}, [])
+
 
   const addLog = (msg: string) =>
     setLogs((p) => [...p.slice(-99), `[${new Date().toLocaleTimeString()}] ${msg}`]);
@@ -632,7 +649,9 @@ export default function ArchaeopterisBuilder() {
         }}>BETA</span>
       </header>
 
-      <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+      <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden",
+      flexDirection: isPortrait ? "column" : "row",
+       }}>
 
         {/* Left panel */}
         <div style={{
