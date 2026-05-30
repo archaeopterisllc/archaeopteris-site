@@ -838,9 +838,11 @@ borderBottom: isMobile ? "none" : isPortrait ? "1px solid #1a2535" : "none",
       addLog(`Files: ${Object.keys(flatted).join(', ')}`)
 addLog(`Keys: ${Object.keys(flatted).join(', ')}`)
 addLog(`First: ${Object.keys(flatted)[0]}`)
+const appFile = Object.keys(flatted).find(k => k.includes('App.jsx')) || Object.keys(flatted)[0]
+setActiveFile(appFile)
 
       setFiles(flatted)
-      setActiveFile(Object.keys(flatted)[0])
+      //setActiveFile(Object.keys(flatted)[0])
       await wcRef.current?.mountFiles(parsed.files)
     } catch(e) {
       addLog('Error: Invalid JSON')
