@@ -84,11 +84,11 @@ newCode,
         new WritableStream({ write(data) { addLog(stripAnsi(data)) } })
       )
       // Reload iframe after vite restarts
-      setTimeout(() => {
-        if (iframeRef.current && url) {
-          iframeRef.current.src = url
-        }
-      }, 5000)
+      //setTimeout(() => {
+        //if (iframeRef.current && url) {
+          //iframeRef.current.src = url
+        //}
+      //}, 5000)
     }
   }))
 
@@ -135,10 +135,16 @@ newCode,
       devProcessRef.current = devProcess
 
       devProcess.output.pipeTo(
-        new WritableStream({
-          write(data) { addLog(stripAnsi(data)) },
-        })
-      )
+  new WritableStream({
+    write(data) {
+      addLog(stripAnsi(data))
+      if (data.includes('ready in') && iframeRef.current && url) {
+        iframeRef.current.src = url
+      }
+    }
+  })
+)
+
 
       let serverReadyFired = false
       wc.on('server-ready', (_port: number, serverUrl: string) => {
