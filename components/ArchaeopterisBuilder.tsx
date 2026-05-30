@@ -829,31 +829,31 @@ borderBottom: isMobile ? "none" : isPortrait ? "1px solid #1a2535" : "none",
             {activeTab === "Code" && (
   <button
     onClick={async () => {
-  // Multi-file mode (đã có files state)
-  if (Object.keys(files).length > 1) {
-    wcRef.current?.mountFiles(files)
-  } else {
-    wcRef.current?.restartDev(files['src/App.jsx'] || '')
-  
-  }
-  
-  // JSON mode
+  // JSON mode trước
   const trimmed = code.trim()
   if (trimmed.startsWith('{')) {
-  try {
-    const parsed = JSON.parse(trimmed)
-    const flatted = flattenFiles(parsed.files)
-    setFiles(flatted)
-    setActiveFile(Object.keys(flatted)[0])
-    await wcRef.current?.mountFiles(parsed.files)
-  } catch(e) {
-    addLog('Error: Invalid JSON')
+    try {
+      const parsed = JSON.parse(trimmed)
+      const flatted = flattenFiles(parsed.files)
+      setFiles(flatted)
+      setActiveFile(Object.keys(flatted)[0])
+      await wcRef.current?.mountFiles(parsed.files)
+    } catch(e) {
+      addLog('Error: Invalid JSON')
+    }
+    return  // ← return sau JSON mode
   }
-}
-  
+
+  // Multi-file mode
+  if (Object.keys(files).length > 1) {
+    await wcRef.current?.mountFiles(files)
+    return
+  }
+
   // JSX mode
-  wcRef.current?.restartDev(code)
+  wcRef.current?.restartDev(files['src/App.jsx'] || '')
 }}
+
 
 
     style={{ padding: "10px 16px", background: "transparent", border: "none", color: "#10b981", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
