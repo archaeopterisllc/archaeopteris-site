@@ -79,36 +79,60 @@ const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
       //}, 5000)
     },
     
-  async mountFiles(files: Record<string, string>) {
-    const wc = containerRef.current as any
-    if (!wc) return
+  async mountFiles(files: Record<string, any>) {
+  const wc = containerRef.current as any
+  if (!wc) return
+
+  const firstValue = Object.values(files)[0]
+
+  if (typeof firstValue === 'string') {
     for (const [path, content] of Object.entries(files)) {
       const dir = path.split('/').slice(0, -1).join('/')
       if (dir) {
         try { await wc.fs.mkdir(dir, { recursive: true }) } catch {}
       }
-      await wc.fs.writeFile(path, content)
+      await wc.fs.writeFile(path, content as string)
       addLog(`Written: ${path}`)
     }
-    devProcessRef.current?.kill()
-    const devProcess = await wc.spawn('npm', ['run', 'dev'])
-    devProcessRef.current = devProcess
-    devProcess.output.pipeTo(
-      new WritableStream({
-        write(data) {
-          addLog(stripAnsi(data))
-          if (data.includes('ready in') && iframeRef.current && url) {
-            iframeRef.current.src = url
-          }
+  } else {
+  await wc.mount(files)
+  addLog('Mounted FileSystemTree ✓')
+}
+
+// npm install nếu có package.json mới
+const hasPackageJson = typeof firstValue === 'string'
+  ? false
+  : 'package.json' in files
+
+if (hasPackageJson) {
+  addLog('Installing dependencies...')
+  const install = await wc.spawn('npm', ['install'])
+  install.output.pipeTo(
+    new WritableStream({ write(data) { addLog(stripAnsi(data)) } })
+  )
+  await install.exit
+  addLog('Dependencies installed ✓')
+}
+
+devProcessRef.current?.kill()
+
+  const devProcess = await wc.spawn('npm', ['run', 'dev'])
+  devProcessRef.current = devProcess
+  devProcess.output.pipeTo(
+    new WritableStream({
+      write(data) {
+        addLog(stripAnsi(data))
+        if (data.includes('ready in') && iframeRef.current && url) {
+          iframeRef.current.src = url
         }
-      }))
-    
-    setTimeout(() => {
-      if (iframeRef.current && url) {
-        iframeRef.current.src = url
       }
-    }, 4000)
-  }
+    })
+  )
+  setTimeout(() => {
+    if (iframeRef.current && url) iframeRef.current.src = url
+  }, 4000)
+}
+
 
   }))
 
