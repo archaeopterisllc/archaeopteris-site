@@ -655,10 +655,14 @@ useEffect(() => {
 
         {/* Left panel */}
         <div style={{
-          width: 280, borderRight: "1px solid #1a2535",
-          display: "flex", flexDirection: "column",
-          background: "#0a0f1a", flexShrink: 0, overflow: "hidden",
-        }}>
+  width: isPortrait ? "100%" : 280,
+  maxHeight: isPortrait ? "45vh" : "100%",
+  borderRight: isPortrait ? "none" : "1px solid #1a2535",
+  borderBottom: isPortrait ? "1px solid #1a2535" : "none",
+  display: "flex", flexDirection: "column",
+  background: "#0a0f1a", flexShrink: 0, overflow: "hidden",
+}}>
+
 
           {/* Prompt */}
           <div style={{ padding: 14, borderBottom: "1px solid #1a2535", flexShrink: 0 }}>
