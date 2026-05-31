@@ -29,6 +29,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ previewUrl })
   } catch (err) {
+    console.error('Error in /api/e2b/start:', err)
     const msg = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: msg }, { status: 500 })
   }
