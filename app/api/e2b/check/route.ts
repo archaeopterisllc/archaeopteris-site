@@ -23,16 +23,9 @@ export async function POST(req: Request) {
     ).catch(() => {})
 
     await new Promise(r => setTimeout(r, 3000))
-    const host = sandbox.getHost(5173)
+    // Thay getHost bằng:
+const previewUrl = `https://${sandboxId}-5173.e2b.app`
 
-if (!host) {
-  return NextResponse.json({ ready: false })
-}
-
-return NextResponse.json({ 
-  ready: true, 
-  previewUrl: `https://${host}` 
-})
 
   }
 
