@@ -23,7 +23,8 @@ export async function POST(req: Request) {
     ).catch(() => {})
 
     await new Promise(r => setTimeout(r, 3000))
-    const host = sandbox.getHost(5173)
+    const host = sandbox.getHost(3000)
+    
     return NextResponse.json({ ready: true, previewUrl: `https://${host}` })
   }
 
