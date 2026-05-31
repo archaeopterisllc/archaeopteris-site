@@ -28,12 +28,6 @@ export async function POST(req: Request) {
       await sandbox.files.write(`/home/user/app/${path}`, content)
     }
 
-    // npm install sau khi write xong
-    await sandbox.commands.run('npm install', {
-      cwd: '/home/user/app',
-      timeoutMs: 120_000,
-    })
-
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('WRITE ERROR:', err)
