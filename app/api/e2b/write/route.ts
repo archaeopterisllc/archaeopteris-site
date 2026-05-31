@@ -22,7 +22,9 @@ export async function POST(req: Request) {
     const sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
 
     const flatFiles = flattenFiles(files)
+    console.log('flat files:', Object.keys(flatFiles))
     for (const [path, content] of Object.entries(flatFiles)) {
+      if (!path || !content || typeof content !== 'string') continue
       await sandbox.files.write(`/home/user/app/${path}`, content)
     }
 
