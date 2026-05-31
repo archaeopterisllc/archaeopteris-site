@@ -9,8 +9,8 @@ export async function POST(req: Request) {
   // Check node_modules exists = install done
   const check = await sandbox.commands.run(
     'test -d /home/user/app/node_modules && echo "ready" || echo "pending"',
-    { cwd: '/home/user/app' }
-  )
+    { cwd: '/home/user/app', timeoutMs: 5000 }
+  ).catch(() => ({ stdout: 'pending' }))
 
   const ready = check.stdout.trim() === 'ready'
 
