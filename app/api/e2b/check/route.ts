@@ -24,8 +24,7 @@ export async function POST(req: Request) {
 
     await new Promise(r => setTimeout(r, 3000))
     // Thay getHost bằng:
-const previewUrl = `https://${sandboxId}-5173.e2b.app`
-
+const previewUrl = `https://${sandboxId}-5173.e2b.dev`
 
   }
 
