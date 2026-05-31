@@ -10,9 +10,14 @@ export async function POST(req: Request) {
     // Kill any existing dev server
     await sandbox.commands.run('pkill -f vite || true', { cwd: '/home/user/app' })
 
+    // npm install first
+    const install = await sandbox.commands.run('npm install', { cwd: '/home/user/app', timeoutMs: 3000_000 })
+    console.log(install.stdout)
+    console.log(install.stderr)
+
     // Start vite in background
-    await sandbox.commands.run('nohup npm run dev > /tmp/vite.log 2>&1 &', {
-      cwd: '/home/user/app',
+    const log =await sandbox.commands.run('cat /tmp/vite.log', {
+      cwd: '/home/user/app'
     })
 
     // Wait for vite to be ready (~3s)
