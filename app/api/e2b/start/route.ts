@@ -11,17 +11,6 @@ export async function POST(req: Request) {
     timeoutMs: 300_000
   }).catch(() => {})
 
-  // Start vite
-await sandbox.commands.run(
-  'nohup npm run dev > /tmp/vite.log 2>&1 &',
-  { cwd: '/home/user/app' }
-).catch(() => {})
-
-// Đợi vite bind port
-await new Promise(r => setTimeout(r, 4000))
-
-
-
-
   return NextResponse.json({ ok: true })
 }
+
