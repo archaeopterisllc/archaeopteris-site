@@ -164,11 +164,16 @@ export default function ArchaeopterisBuilderE2B() {
 
     try {
       const generated = await generateProject(p, s);
+      //const generated = await generateProject(p, s)
+const flatted = flattenFiles(generated) // ← thêm dòng này
+setFiles(flatted)
+await e2bRef.current?.mountFiles(flatted) // ← dùng flatted
+
       addLog(`Generated ${Object.keys(generated).length} files ✓`);
-      setFiles(generated);
+      //setFiles(generated);
       const firstFile = Object.keys(generated)[0] ?? "";
       setActiveFile(firstFile);
-      await e2bRef.current?.mountFiles(generated);
+      //await e2bRef.current?.mountFiles(generated);
       setTimeout(() => setActiveTab("Preview"), 200);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
