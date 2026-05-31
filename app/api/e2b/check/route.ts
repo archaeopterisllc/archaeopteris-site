@@ -24,10 +24,9 @@ export async function POST(req: Request) {
 
     await new Promise(r => setTimeout(r, 3000))
     const host = sandbox.getHost(5173)
-    //const host = sandbox.getHost(5173)
-console.log('host result:', host, typeof host)
+const previewUrl = `https://${host}`
+return NextResponse.json({ ready: true, previewUrl })
 
-    return NextResponse.json({ ready: true, previewUrl: `https://${host}` })
   }
 
   return NextResponse.json({ ready: false })
