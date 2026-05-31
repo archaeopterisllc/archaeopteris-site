@@ -14,6 +14,10 @@ export async function POST(req: Request) {
       await sandbox.files.write(fullPath, content as string)
     }
 
+    await sandbox.commands.run('npm install', {
+  cwd: '/home/user/app',
+  timeoutMs: 120_000,
+})
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('Error in /api/e2b/write:', err)

@@ -76,11 +76,11 @@ export async function POST(req: Request) {
     )
 
     // Sau khi write tất cả base files xong, thêm:
-    console.log('Installing base dependencies...')
-const install = await sandbox.commands.run('npm install', {
-  cwd: '/home/user/app',
-  timeoutMs: 120_000,
-})
+    //console.log('Installing base dependencies...')
+//const install = await sandbox.commands.run('npm install', {
+  //cwd: '/home/user/app',
+  //timeoutMs: 120_000,
+//})
 
     return NextResponse.json({ sandboxId: sandbox.sandboxId, isNew: true })
   } catch (err) {
