@@ -1,3 +1,4 @@
+// app/api/e2b/start/route.ts
 import { Sandbox } from 'e2b'
 import { NextResponse } from 'next/server'
 
@@ -6,20 +7,21 @@ export async function POST(req: Request) {
     const { sandboxId } = await req.json()
     const sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
 
+    // Kill any existing dev server
     await sandbox.commands.run('pkill -f vite || true', { cwd: '/home/user/app' })
 
-    // Chạy install + dev background, không chờ
-    sandbox.commands.run(
-      'npm install && npm run dev', 
-      { cwd: '/home/user/app', background: true, }
-    )
+    // Start vite in background
+    await sandbox.commands.run('nohup npm run dev > /tmp/vite.log 2>&1 &', {
+      cwd: '/home/user/app',
+    })
 
-    // Wait 20s cho install + vite start
-    await new Promise(r => setTimeout(r, 20000))
+    // Wait for vite to be ready (~3s)
+    await new Promise(r => setTimeout(r, 3500))
 
-    const host = sandbox.getHost(3000)
-    return NextResponse.json({ previewUrl: `https://${host}` })
+    const host = sandbox.getHost(5173)
+    const previewUrl = `https://${host}`
 
+    return NextResponse.json({ previewUrl })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: msg }, { status: 500 })
