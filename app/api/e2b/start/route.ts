@@ -9,9 +9,9 @@ export async function POST(req: Request) {
     await sandbox.commands.run('pkill -f vite || true', { cwd: '/home/user/app' })
 
     // Chạy install + dev background, không chờ
-    await sandbox.commands.run(
-      'nohup sh -c "npm install && npm run dev" > /tmp/app.log 2>&1 &',
-      { cwd: '/home/user/app' }
+    sandbox.commands.run(
+      'npm install && npm run dev', 
+      { cwd: '/home/user/app', background: true, }
     )
 
     // Wait 20s cho install + vite start
