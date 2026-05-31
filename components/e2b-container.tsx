@@ -93,7 +93,7 @@ const previewUrl = await new Promise<string>((resolve, reject) => {
       body: JSON.stringify({ sandboxId }),
     })
     const data = await res.json()
-    console.log('check data:', JSON.stringify(data))
+    //console.log('check data:', JSON.stringify(data))
     if (data.ready) resolve(data.previewUrl)
     else setTimeout(check, 3000)
   }
