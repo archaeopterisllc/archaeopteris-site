@@ -11,8 +11,6 @@ export async function POST(req: Request) {
 
     for (const [path, content] of Object.entries(files as Record<string, string>)) {
       const fullPath = `/home/user/app/${path}`
-      const dir = fullPath.split('/').slice(0, -1).join('/')
-      await sandbox.commands.run(`mkdir -p "${dir}"`)
       await sandbox.files.write(fullPath, content as string)
     }
 
@@ -22,6 +20,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
+
 
 
 // ─────────────────────────────────────────────────────────
