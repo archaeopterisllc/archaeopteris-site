@@ -70,40 +70,41 @@ const E2BContainer = forwardRef<E2BContainerHandle, E2BContainerProps>(
         if (!writeRes.ok) throw new Error(`Write files failed: ${writeRes.status}`)
         addLog(`Written ${Object.keys(files).length} files ✓`)
 
-        // Step 3: Install dependencies if package.json present
-        if (files['package.json']) {
-          setStatus('installing')
-          addLog('Installing dependencies...')
-          const installRes = await fetch('/api/e2b/exec', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sandboxId, cmd: 'npm install' }),
-          })
-          if (!installRes.ok) throw new Error('npm install failed')
-          const { stdout, stderr } = await installRes.json()
-          if (stdout) stdout.split('\n').filter(Boolean).slice(-5).forEach((l: string) => addLog(l))
-          if (stderr) stderr.split('\n').filter(Boolean).slice(-3).forEach((l: string) => addLog(l))
-          addLog('Dependencies installed ✓')
-        }
 
-        // Step 4: Start dev server
-        setStatus('starting')
-        addLog('Starting dev server...')
-        const startRes = await fetch('/api/e2b/start', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sandboxId }),
-        })
-        if (!startRes.ok) throw new Error('Start server failed')
-        const { previewUrl } = await startRes.json()
+        // Step 3: Fire & forget install + start
+setStatus('installing')
+addLog('Installing dependencies...')
+await fetch('/api/e2b/start', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ sandboxId }),
+})
 
-        addLog(`Server ready at ${previewUrl} ✓`)
-        setUrl(previewUrl)
-        setStatus('ready')
+// Step 4: Poll until ready
+setStatus('starting')
+addLog('Waiting for dev server...')
+const previewUrl = await new Promise<string>((resolve, reject) => {
+  let attempts = 0
+  const check = async () => {
+    if (attempts++ > 20) return reject(new Error('Timeout'))
+    const res = await fetch('/api/e2b/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sandboxId }),
+    })
+    const data = await res.json()
+    console.log('check data:', JSON.stringify(data))
+    if (data.ready) resolve(data.previewUrl)
+    else setTimeout(check, 3000)
+  }
+  check()
+})
 
-        if (iframeRef.current) {
-          iframeRef.current.src = previewUrl
-        }
+addLog(`Server ready at ${previewUrl} ✓`)
+setUrl(previewUrl)
+setStatus('ready')
+if (iframeRef.current) iframeRef.current.src = previewUrl
+
 
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Unknown error'
