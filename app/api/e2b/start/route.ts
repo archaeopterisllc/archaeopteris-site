@@ -11,18 +11,20 @@ export async function POST(req: Request) {
     await sandbox.commands.run('pkill -f vite || true', { cwd: '/home/user/app' })
 
     // npm install first
-    const install = await sandbox.commands.run('npm install', { cwd: '/home/user/app', timeoutMs: 3000_000 })
-    console.log(install.stdout)
-    console.log(install.stderr)
+    sandbox.commands.run('npm install', { cwd: '/home/user/app', timeoutMs: 3000_000 })
 
     // Start vite in background
-    const log =await sandbox.commands.run('cat /tmp/vite.log', {
+    sandbox.commands.run('nohup npm run dev > /tmp/vite.log 2>&1 &', {
       cwd: '/home/user/app'
-    })
+    }).catch(() => {})
 
     // Wait for vite to be ready (~3s)
-    await new Promise(r => setTimeout(r, 3500))
+    await new Promise(r => setTimeout(r, 4000))
 
+    // Optional: check log
+    const log = await sandbox.commands.run('cat /tmp/vite.log', { cwd: '/home/user/app' })
+    console.log(log.stdout)
+    
     const host = sandbox.getHost(5173)
     const previewUrl = `https://${host}`
 
