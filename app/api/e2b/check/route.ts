@@ -26,10 +26,14 @@ export async function POST(req: Request) {
     //const host = sandbox.getHost(5173)
 //const previewUrl = `https://${host}`
 // check/route.ts - không dùng getHost()
-const previewUrl = `https://${sandboxId}.e2b.app:5173`
+//onst previewUrl = `https://${sandboxId}.e2b.app:5173`
 
 // Hoặc format đúng của E2B:
 //const previewUrl = `https://${sandboxId}-5173.e2b.app`
+
+console.log('sandboxId:', sandboxId)
+const previewUrl = `https://${sandboxId}-5173.e2b.app`
+console.log('previewUrl:', previewUrl)
 
 return NextResponse.json({ ready: true, previewUrl })
 
