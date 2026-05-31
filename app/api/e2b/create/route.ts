@@ -13,7 +13,7 @@ export async function POST(req: Request) {
         const sandbox = await Sandbox.connect(sandboxId, {
           apiKey: process.env.E2B_API_KEY,
         })
-        await sandbox.keepAlive(5 * 60 * 1000) // extend 5 min
+        //await sandbox.keepAlive(5 * 60 * 1000) // extend 5 min
         return NextResponse.json({ sandboxId, isNew: false })
       } catch {
         // Sandbox expired, create new one
@@ -74,6 +74,13 @@ export async function POST(req: Request) {
     await sandbox.files.write('/home/user/app/src/main.jsx',
       `import React from 'react'\nimport ReactDOM from 'react-dom/client'\nimport './index.css'\nimport App from './App'\nReactDOM.createRoot(document.getElementById('root')).render(<App/>)`
     )
+
+    // Sau khi write tất cả base files xong, thêm:
+    console.log('Installing base dependencies...')
+const install = await sandbox.commands.run('npm install', {
+  cwd: '/home/user/app',
+  timeoutMs: 120_000,
+})
 
     return NextResponse.json({ sandboxId: sandbox.sandboxId, isNew: true })
   } catch (err) {

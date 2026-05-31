@@ -11,10 +11,10 @@ export async function POST(req: Request) {
     await sandbox.commands.run('pkill -f vite || true', { cwd: '/home/user/app' })
 
     // npm install first
-    await sandbox.commands.run('npm install', {
-      cwd: '/home/user/app',
-      timeoutMs: 120_000,
-    })
+    //await sandbox.commands.run('npm install', {
+      //cwd: '/home/user/app',
+      //timeoutMs: 120_000,
+    //})
 
     // Start vite background
     await sandbox.commands.run('nohup npm run dev > /tmp/vite.log 2>&1 &', {
