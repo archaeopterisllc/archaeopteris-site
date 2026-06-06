@@ -15,6 +15,10 @@ export async function POST(req: Request) {
         { cwd: '/home/user/app', timeoutMs: 5000 }
       )
       const isReady = result.stdout.trim() === '200'
+      const vitelog = await sandbox.commands.run('cat /tmp/vite.log', { cwd: '/home/user/app' })
+console.log('curl:', result.stdout.trim())
+console.log('vite log:', vitelog.stdout.slice(-300))
+
       return NextResponse.json({
         ready: isReady,
         previewUrl: isReady ? `https://${sandboxId}-5173.e2b.app` : null
