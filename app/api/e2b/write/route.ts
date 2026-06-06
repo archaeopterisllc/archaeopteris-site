@@ -19,6 +19,8 @@ function flattenFiles(tree: any, prefix = ''): Record<string, string> {
 export async function POST(req: Request) {
   try {
     const { sandboxId, files } = await req.json()
+    console.log('raw files received:', JSON.stringify(files).slice(0, 200))
+
     const sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
 
     const flatFiles = flattenFiles(files)
