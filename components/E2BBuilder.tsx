@@ -173,6 +173,11 @@ export default function ArchaeopterisBuilderE2B() {
       //const generated = await generateProject(p, s)
 const flatted = flattenFiles(generated) // ← thêm dòng này
 setFiles(flatted)
+console.log('flatted keys:', JSON.stringify(Object.keys(flatted)))
+
+//console.log('files state:', JSON.stringify(Object.keys(files)))
+//await e2bRef.current?.mountFiles(files)
+
 await e2bRef.current?.mountFiles(flatted) // ← dùng flatted
 
       addLog(`Generated ${Object.keys(generated).length} files ✓`);
