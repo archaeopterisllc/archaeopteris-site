@@ -95,10 +95,13 @@ const E2BContainer = forwardRef<E2BContainerHandle, E2BContainerProps>(
         addLog('Writing files...')
         console.log('flat keys:', Object.keys(flat))
 console.log('flat first value:', JSON.stringify(flat).slice(0, 100))
+console.log('sending files count:', Object.keys(flat).length)
 
-        const writeRes = await fetch('/api/e2b/write', {
+        
+const writeRes = await fetch('/api/e2b/write', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          
           body: JSON.stringify({ sandboxId, files: flat }),
         })
         if (!writeRes.ok) throw new Error(`Write files failed: ${writeRes.status}`)

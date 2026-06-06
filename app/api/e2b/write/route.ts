@@ -25,10 +25,15 @@ export async function POST(req: Request) {
 
     const flatFiles = flattenFiles(files)
     console.log('flat files:', Object.keys(flatFiles))
-    for (const [path, content] of Object.entries(flatFiles)) {
-      if (!path || !content || typeof content !== 'string') continue
-      await sandbox.files.write(`/home/user/app/${path}`, content)
-    }
+    // Thay for loop (lines 28-31) bằng:
+await Promise.all(
+  Object.entries(flatFiles)
+    .filter(([path, content]) => path && content && typeof content === 'string')
+    .map(([path, content]) => 
+      sandbox.files.write(`/home/user/app/${path}`, content)
+    )
+)
+
 
     return NextResponse.json({ ok: true })
   } catch (err) {
