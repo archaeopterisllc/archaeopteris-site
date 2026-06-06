@@ -122,8 +122,14 @@ export default function ArchaeopterisBuilderE2B() {
   const [generating, setGenerating] = useState(false);
   const [selectedStack, setSelectedStack] = useState<Stack>("react");
   const [logs, setLogs] = useState<string[]>(["E2B ready ✓", "Claude API connected ✓"]);
-  const [files, setFiles] = useState<Record<string, string>>({});
-  const [activeFile, setActiveFile] = useState<string>("");
+  //const [files, setFiles] = useState<Record<string, string>>({});
+  //const [files, setFiles] = useState({ 'src/App.jsx': STARTER })
+  const [files, setFiles] = useState<Record<string, string>>({ 'src/App.jsx': '' })
+
+
+  //const [activeFile, setActiveFile] = useState<string>("");
+  const [activeFile, setActiveFile] = useState('src/App.jsx')
+
   const [showTemplates, setShowTemplates] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
