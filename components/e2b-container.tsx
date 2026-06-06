@@ -125,7 +125,7 @@ addLog('Waiting for dev server...')
 const previewUrl = await new Promise<string>((resolve, reject) => {
   let attempts = 0
   const check = async () => {
-    if (attempts++ > 40) return reject(new Error('Timeout'))
+    if (attempts++ > 60) return reject(new Error('Timeout'))
     const res = await fetch('/api/e2b/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -138,7 +138,7 @@ const previewUrl = await new Promise<string>((resolve, reject) => {
     if (data.ready && data.previewUrl) {
   resolve(data.previewUrl)
 } else {
-  setTimeout(check, 3000)
+  setTimeout(check, 5000)
 }
 
   }
