@@ -23,13 +23,15 @@ console.log('vite log:', vitelog.stdout.slice(-300))
         ready: isReady,
         previewUrl: isReady ? `https://${sandboxId}-5173.e2b.app` : null
       })
-    } catch {
+    } catch (e) {
       // sandbox exists but command failed
+      console.log('inner catch:', e instanceof Error ? e.message : String(e))
       return NextResponse.json({ ready: false })
     }
 
   } catch (err) {
     // sandbox expired or connect failed
+    console.log('outer catch:', err instanceof Error ? err.message : String(err))
     return NextResponse.json({ ready: false, expired: true })
   }
 }
