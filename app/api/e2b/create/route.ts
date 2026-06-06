@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     const sandbox = await Sandbox.create({
       apiKey: process.env.E2B_API_KEY,
-      timeoutMs: 5 * 60 * 1000, // 5 min
+      timeoutMs: 10 * 60 * 1000, // 5 min
     })
 
     // Setup base project files
