@@ -10,6 +10,16 @@ export async function POST(req: Request) {
     cwd: '/home/user/app',
     timeoutMs: 300_000
   }).catch(() => {})
+  // Start vite
+sandbox.commands.run(
+  'nohup npm run dev > /tmp/vite.log 2>&1 &',
+  { cwd: '/home/user/app' }
+).catch(() => {})
+
+await new Promise(r => setTimeout(r, 4000))
+
+const vitelog = await sandbox.commands.run('cat /tmp/vite.log', { cwd: '/home/user/app' })
+console.log('vite log after start:', vitelog.stdout.slice(-300))
 
   return NextResponse.json({ ok: true })
 }
