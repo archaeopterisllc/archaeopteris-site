@@ -105,7 +105,9 @@ const writeRes = await fetch('/api/e2b/write', {
           body: JSON.stringify({ sandboxId, files: flat }),
         })
         if (!writeRes.ok) throw new Error(`Write files failed: ${writeRes.status}`)
-        addLog(`Written ${Object.keys(files).length} files ✓`)
+        //addLog(`Written ${Object.keys(files).length} files ✓`)
+      addLog(`Written ${Object.keys(flat).length} files ✓`)
+
 
 
         // Step 3: Fire & forget install + start
@@ -123,7 +125,7 @@ addLog('Waiting for dev server...')
 const previewUrl = await new Promise<string>((resolve, reject) => {
   let attempts = 0
   const check = async () => {
-    if (attempts++ > 20) return reject(new Error('Timeout'))
+    if (attempts++ > 40) return reject(new Error('Timeout'))
     const res = await fetch('/api/e2b/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
