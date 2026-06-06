@@ -54,9 +54,23 @@ const E2BContainer = forwardRef<E2BContainerHandle, E2BContainerProps>(
   useImperativeHandle(ref, () => ({
     //async mountFiles(files: Record<string, string>) {
       async mountFiles(files: any) {
-  const flat = typeof Object.values(files)[0] === 'string' 
-    ? files 
-    : flattenTree(files)
+  // Detect nếu files là JSON string chứa project
+  let resolved = files
+  
+  if (typeof files === 'object') {
+    const firstValue = Object.values(files)[0] as string
+    if (firstValue?.trim().startsWith('{')) {
+      try {
+        const inner = JSON.parse(firstValue)
+        if (inner.files) resolved = inner.files
+      } catch {}
+    }
+  }
+
+  const flat = typeof Object.values(resolved)[0] === 'string'
+    ? resolved
+    : flattenTree(resolved)
+
   // thay tất cả `files` bên dưới bằng `flat`
 
       try {
