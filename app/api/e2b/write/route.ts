@@ -19,14 +19,22 @@ function flattenFiles(tree: any, prefix = ''): Record<string, string> {
 export async function POST(req: Request) {
   try {
     const { sandboxId, files } = await req.json()
+    console.log('raw files received:', JSON.stringify(files).slice(0, 200))
+
     const sandbox = await Sandbox.connect(sandboxId, { apiKey: process.env.E2B_API_KEY })
 
     const flatFiles = flattenFiles(files)
     console.log('flat files:', Object.keys(flatFiles))
-    for (const [path, content] of Object.entries(flatFiles)) {
-      if (!path || !content || typeof content !== 'string') continue
-      await sandbox.files.write(`/home/user/app/${path}`, content)
-    }
+    // Thay for loop (lines 28-31) bằng:
+await Promise.all(
+  Object.entries(flatFiles)
+    .filter(([path, content]) => path && content && typeof content === 'string')
+    .map(([path, content]) => 
+      sandbox.files.write(`/home/user/app/${path}`, content)
+    )
+)
+
+console.log('wrote files count:', Object.keys(flatFiles).length)
 
     return NextResponse.json({ ok: true })
   } catch (err) {

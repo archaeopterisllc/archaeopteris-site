@@ -108,6 +108,14 @@ async function generateProject(prompt: string, stack: Stack): Promise<Record<str
   const raw = data.code as string;
   const clean = raw.replace(/^```json\n?/m, '').replace(/\n?```\s*$/m, '').trim();
   const parsed = JSON.parse(clean);
+// Unwrap nếu AI nhét toàn bộ project vào src/App.jsx
+const appValue = parsed.files?.['src/App.jsx']
+if (typeof appValue === 'string' && appValue.trim().startsWith('{')) {
+  try {
+    const inner = JSON.parse(appValue)
+    if (inner.files) return flattenFiles(inner.files)
+  } catch {}
+}
 
   // Support both flat files object and FileSystemTree format
   if (parsed.files && typeof Object.values(parsed.files)[0] === 'string') {
@@ -122,8 +130,14 @@ export default function ArchaeopterisBuilderE2B() {
   const [generating, setGenerating] = useState(false);
   const [selectedStack, setSelectedStack] = useState<Stack>("react");
   const [logs, setLogs] = useState<string[]>(["E2B ready ✓", "Claude API connected ✓"]);
-  const [files, setFiles] = useState<Record<string, string>>({});
-  const [activeFile, setActiveFile] = useState<string>("");
+  //const [files, setFiles] = useState<Record<string, string>>({});
+  //const [files, setFiles] = useState({ 'src/App.jsx': STARTER })
+  const [files, setFiles] = useState<Record<string, string>>({ 'src/App.jsx': '' })
+
+
+  //const [activeFile, setActiveFile] = useState<string>("");
+  const [activeFile, setActiveFile] = useState('src/App.jsx')
+
   const [showTemplates, setShowTemplates] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -167,6 +181,11 @@ export default function ArchaeopterisBuilderE2B() {
       //const generated = await generateProject(p, s)
 const flatted = flattenFiles(generated) // ← thêm dòng này
 setFiles(flatted)
+console.log('flatted keys:', JSON.stringify(Object.keys(flatted)))
+
+//console.log('files state:', JSON.stringify(Object.keys(files)))
+//await e2bRef.current?.mountFiles(files)
+
 await e2bRef.current?.mountFiles(flatted) // ← dùng flatted
 
       addLog(`Generated ${Object.keys(generated).length} files ✓`);

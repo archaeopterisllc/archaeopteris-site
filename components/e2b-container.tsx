@@ -22,6 +22,17 @@ export interface E2BContainerHandle {
   mountFiles: (files: Record<string, string>) => Promise<void>
 }
 
+function flattenTree(tree: any, prefix = ''): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [key, value] of Object.entries(tree)) {
+    const path = prefix ? `${prefix}/${key}` : key
+    if ((value as any).file) result[path] = (value as any).file.contents
+    else if ((value as any).directory) Object.assign(result, flattenTree((value as any).directory, path))
+    else if (typeof value === 'string') result[path] = value
+  }
+  return result
+}
+
 const E2BContainer = forwardRef<E2BContainerHandle, E2BContainerProps>(
   function E2BContainer({ className = '', style }, ref) {
 
@@ -41,7 +52,27 @@ const E2BContainer = forwardRef<E2BContainerHandle, E2BContainerProps>(
   }, [logs])
 
   useImperativeHandle(ref, () => ({
-    async mountFiles(files: Record<string, string>) {
+    //async mountFiles(files: Record<string, string>) {
+      async mountFiles(files: any) {
+  // Detect nếu files là JSON string chứa project
+  let resolved = files
+  
+  if (typeof files === 'object') {
+    const firstValue = Object.values(files)[0] as string
+    if (firstValue?.trim().startsWith('{')) {
+      try {
+        const inner = JSON.parse(firstValue)
+        if (inner.files) resolved = inner.files
+      } catch {}
+    }
+  }
+
+  const flat = typeof Object.values(resolved)[0] === 'string'
+    ? resolved
+    : flattenTree(resolved)
+
+  // thay tất cả `files` bên dưới bằng `flat`
+
       try {
         setStatus('creating')
         setError(null)
@@ -62,16 +93,22 @@ const E2BContainer = forwardRef<E2BContainerHandle, E2BContainerProps>(
 
         // Step 2: Write files
         addLog('Writing files...')
-        const writeRes = await fetch('/api/e2b/write', {
+        console.log('flat keys:', Object.keys(flat))
+console.log('flat first value:', JSON.stringify(flat).slice(0, 100))
+console.log('sending files count:', Object.keys(flat).length)
+
+        
+const writeRes = await fetch('/api/e2b/write', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sandboxId, files }),
+          
+          body: JSON.stringify({ sandboxId, files: flat }),
         })
         if (!writeRes.ok) throw new Error(`Write files failed: ${writeRes.status}`)
-        addLog(`Written ${Object.keys(files).length} files ✓`)
+        //addLog(`Written ${Object.keys(files).length} files ✓`)
+      addLog(`Written ${Object.keys(flat).length} files ✓`)
 
-
-        // Step 3: Fire & forget install + start
+// Step 3: Start
 setStatus('installing')
 addLog('Installing dependencies...')
 await fetch('/api/e2b/start', {
@@ -86,7 +123,7 @@ addLog('Waiting for dev server...')
 const previewUrl = await new Promise<string>((resolve, reject) => {
   let attempts = 0
   const check = async () => {
-    if (attempts++ > 20) return reject(new Error('Timeout'))
+    if (attempts++ > 80) return reject(new Error('Timeout'))
     const res = await fetch('/api/e2b/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -94,8 +131,14 @@ const previewUrl = await new Promise<string>((resolve, reject) => {
     })
     const data = await res.json()
     //console.log('check data:', JSON.stringify(data))
-    if (data.ready) resolve(data.previewUrl)
-    else setTimeout(check, 3000)
+    //if (data.ready) resolve(data.previewUrl)
+    //else setTimeout(check, 3000)
+    if (data.ready && data.previewUrl) {
+  resolve(data.previewUrl)
+} else {
+  setTimeout(check, 5000)
+}
+
   }
   check()
 })
