@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     const sandbox = await Sandbox.create({
       apiKey: process.env.E2B_API_KEY,
-      timeoutMs: 10 * 60 * 1000, // 5 min
+      timeoutMs: 5 * 60 * 1000, // 5 min
     })
 
     // Setup base project files
@@ -56,20 +56,8 @@ export async function POST(req: Request) {
 </html>`)
 
     await sandbox.files.write('/home/user/app/vite.config.js',
-  `import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    strictPort: true,
-    hmr: false,
-    allowedHosts: ['.e2b.app', '.e2b.dev'],
-  }
-})`
-)
-
+      `import { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\nexport default defineConfig({ plugins: [react()] })`
+    )
 
     await sandbox.files.write('/home/user/app/postcss.config.js',
       `export default { plugins: { tailwindcss: {}, autoprefixer: {} } }`

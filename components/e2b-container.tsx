@@ -108,6 +108,14 @@ const writeRes = await fetch('/api/e2b/write', {
         //addLog(`Written ${Object.keys(files).length} files ✓`)
       addLog(`Written ${Object.keys(flat).length} files ✓`)
 
+// Step 3: Start
+setStatus('installing')
+addLog('Installing dependencies...')
+await fetch('/api/e2b/start', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ sandboxId }),
+})
 
 // Step 4: Poll until ready
 setStatus('starting')
