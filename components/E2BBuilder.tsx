@@ -108,6 +108,14 @@ async function generateProject(prompt: string, stack: Stack): Promise<Record<str
   const raw = data.code as string;
   const clean = raw.replace(/^```json\n?/m, '').replace(/\n?```\s*$/m, '').trim();
   const parsed = JSON.parse(clean);
+// Unwrap nếu AI nhét toàn bộ project vào src/App.jsx
+const appValue = parsed.files?.['src/App.jsx']
+if (typeof appValue === 'string' && appValue.trim().startsWith('{')) {
+  try {
+    const inner = JSON.parse(appValue)
+    if (inner.files) return flattenFiles(inner.files)
+  } catch {}
+}
 
   // Support both flat files object and FileSystemTree format
   if (parsed.files && typeof Object.values(parsed.files)[0] === 'string') {
