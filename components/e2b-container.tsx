@@ -94,8 +94,14 @@ const previewUrl = await new Promise<string>((resolve, reject) => {
     })
     const data = await res.json()
     //console.log('check data:', JSON.stringify(data))
-    if (data.ready) resolve(data.previewUrl)
-    else setTimeout(check, 3000)
+    //if (data.ready) resolve(data.previewUrl)
+    //else setTimeout(check, 3000)
+    if (data.ready && data.previewUrl) {
+  resolve(data.previewUrl)
+} else {
+  setTimeout(check, 3000)
+}
+
   }
   check()
 })
