@@ -79,6 +79,9 @@ const E2BContainer = forwardRef<E2BContainerHandle, E2BContainerProps>(
 
         // Step 2: Write files
         addLog('Writing files...')
+        console.log('flat keys:', Object.keys(flat))
+console.log('flat first value:', JSON.stringify(flat).slice(0, 100))
+
         const writeRes = await fetch('/api/e2b/write', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
