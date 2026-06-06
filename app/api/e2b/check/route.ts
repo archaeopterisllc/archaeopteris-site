@@ -8,10 +8,11 @@ export async function POST(req: Request) {
 
     try {
       // Stage 1: Check npm install xong chưa
-      const nm = await sandbox.commands.run(
-        'test -d /home/user/app/node_modules && echo "ok" || echo "no"',
-        { cwd: '/home/user/app', timeoutMs: 5000 }
-      )
+      
+const nm = await sandbox.commands.run(
+  'ls /home/user/app/node_modules > /dev/null 2>&1 && echo "ok" || echo "no"',
+  { cwd: '/home/user/app', timeoutMs: 5000 }
+)
 
       if (nm.stdout.trim() !== 'ok') {
         // Trigger install nếu chưa chạy
