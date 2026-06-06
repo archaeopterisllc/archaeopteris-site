@@ -34,6 +34,7 @@ await Promise.all(
     )
 )
 
+console.log('wrote files count:', Object.keys(flatFiles).length)
 
     return NextResponse.json({ ok: true })
   } catch (err) {
