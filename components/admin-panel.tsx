@@ -121,6 +121,12 @@ export default function AdminPanel() {
   >
     ✨ E2BBuilder
   </a>
+  <a
+    href="/admin/vbuilder"
+    className="px-4 py-2 text-sm font-medium text-emerald-500 hover:text-emerald-400 transition-colors ml-auto"
+  >
+    ✨ VercelBuilder
+  </a>
 </div>
 
 
