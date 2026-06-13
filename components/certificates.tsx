@@ -49,7 +49,9 @@ export function Certificates() {
             >
               <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-muted">
                 <Image
-                  src={cert.image}
+                  //src={cert.image}
+                  src={`/api/image?url=${encodeURIComponent(cert.image)}`}
+
                   alt={`${cert.firm} ${cert.type}`}
                   fill
                   className="object-contain"

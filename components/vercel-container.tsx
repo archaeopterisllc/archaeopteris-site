@@ -103,7 +103,7 @@ const VercelContainer = forwardRef<VercelContainerHandle, VercelContainerProps>(
               body: JSON.stringify({ deploymentId }),
             })
             const data = await statusRes.json()
-            //addLog(`raw: ${JSON.stringify(data)}`)
+            addLog(`raw: ${JSON.stringify(data)}`)
             addLog(`Status: ${data.status}`)
 
             if (data.ready) resolve(data.previewUrl)
