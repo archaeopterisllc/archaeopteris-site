@@ -3,7 +3,7 @@
 import { useRef, useState, useImperativeHandle, forwardRef, useEffect } from 'react'
 
 export interface VercelContainerHandle {
-  mountFiles: (files: Record<string, string>) => Promise<void>
+  mountFiles: (files: Record<string, any>) => Promise<void>
 }
 
 interface VercelContainerProps {
@@ -19,6 +19,18 @@ const STATUS_MESSAGES: Record<Status, string> = {
   building: '🔨 Building...',
   ready: '✅ Ready',
   error: '❌ Error',
+}
+
+function flattenTree(tree: any, prefix = ''): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [key, value] of Object.entries(tree)) {
+    const path = prefix ? `${prefix}/${key}` : key
+    if ((value as any).file) result[path] = (value as any).file.contents
+    else if ((value as any).directory) Object.assign(result, flattenTree((value as any).directory, path))
+    else if (typeof value === 'string') result[path] = value
+    else if (Array.isArray(value)) result[path] = (value as string[]).join('\n')
+  }
+  return result
 }
 
 const VercelContainer = forwardRef<VercelContainerHandle, VercelContainerProps>(
@@ -38,9 +50,28 @@ const VercelContainer = forwardRef<VercelContainerHandle, VercelContainerProps>(
   }, [logs])
 
   useImperativeHandle(ref, () => ({
-    async mountFiles(files: Record<string, string>) {
-      try {
-        setStatus('deploying')
+    async mountFiles(files: Record<string, any>) {
+  // Normalize
+  const firstValue = Object.values(files)[0]
+  let flat: Record<string, string> = {}
+
+  if (typeof firstValue === 'string') {
+    for (const [key, value] of Object.entries(files)) {
+      if (typeof value === 'string' && value.trim().startsWith('{')) {
+        try {
+          const inner = JSON.parse(value)
+          if (inner.files) { Object.assign(flat, flattenTree(inner.files)); continue }
+        } catch {}
+      }
+      flat[key] = Array.isArray(value) ? (value as string[]).join('\n') : value
+    }
+  } else {
+    flat = flattenTree(files)
+  }
+
+  try {
+    setStatus('deploying')
+
         setError(null)
         setUrl(null)
         setLogs([])
@@ -50,7 +81,7 @@ const VercelContainer = forwardRef<VercelContainerHandle, VercelContainerProps>(
         const deployRes = await fetch('/api/vercel/deploy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ files }),
+          body: JSON.stringify({ files: flat }),
         })
 
         if (!deployRes.ok) throw new Error(`Deploy failed: ${deployRes.status}`)

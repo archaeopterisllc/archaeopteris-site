@@ -25,7 +25,7 @@ const STATUS_MESSAGES: Record<Status, string> = {
 
 export interface WebContainerHandle {
   restartDev: (code: string) => Promise<void>
-  mountFiles: (files: Record<string, string>) => Promise<void>
+  mountFiles: (files: Record<string, any>) => Promise<void>
 }
 
 const WebContainerComponent = forwardRef<WebContainerHandle, WebContainerProps>(
