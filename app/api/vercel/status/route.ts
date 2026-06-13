@@ -16,14 +16,17 @@ export async function POST(req: Request) {
     const data = await res.json()
 
     const ready = data.readyState === 'READY'
-    const error = data.readyState === 'ERROR'
+const error = ['ERROR', 'CANCELED'].includes(data.readyState)
 
-    return NextResponse.json({
-      ready,
-      error,
-      status: data.readyState,
-      previewUrl: ready ? `https://${data.url}` : null,
-    })
+if (error) {
+  return NextResponse.json({
+    ready: false,
+    error: true,
+    status: data.readyState,
+    errorMessage: data.errorMessage || 'Build failed',
+  })
+}
+
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: msg }, { status: 500 })
