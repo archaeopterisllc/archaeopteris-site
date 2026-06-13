@@ -1,5 +1,6 @@
 // app/api/vercel/deploy/route.ts
 import { NextResponse } from 'next/server'
+import { createHash } from 'crypto'
 
 function flattenFiles(tree: any, prefix = ''): Record<string, string> {
   const result: Record<string, string> = {}
@@ -18,57 +19,31 @@ function flattenFiles(tree: any, prefix = ''): Record<string, string> {
   return result
 }
 
-const KNOWN_PACKAGES: Record<string, string> = {
-  'react-router-dom': '^6.0.0',
-  'framer-motion': '^11.0.0',
-  'recharts': '^2.0.0',
-  'axios': '^1.0.0',
-  'date-fns': '^3.0.0',
-  'zustand': '^4.0.0',
-  '@tanstack/react-query': '^5.0.0',
-  'react-query': '^3.0.0',
-  'react-hook-form': '^7.0.0',
-  'zod': '^3.0.0',
-  'chart.js': '^4.0.0',
-  'react-chartjs-2': '^5.0.0',
-  'lodash': '^4.0.0',
-  'dayjs': '^1.0.0',
-  '@radix-ui/react-dialog': 'latest',
-  '@radix-ui/react-dropdown-menu': 'latest',
-  '@radix-ui/react-tabs': 'latest',
-  '@radix-ui/react-select': 'latest',
-  '@radix-ui/react-switch': 'latest',
-  '@radix-ui/react-avatar': 'latest',
-  '@radix-ui/react-progress': 'latest',
-  '@radix-ui/react-tooltip': 'latest',
-  '@radix-ui/themes': '^3.1.6',
-  'class-variance-authority': 'latest',
-  'cmdk': 'latest',
-  'sonner': 'latest',
-  'vaul': 'latest',
-}
-
-function extractDependencies(files: Record<string, string>): Record<string, string> {
-  const deps: Record<string, string> = {}
-  for (const content of Object.values(files)) {
-    const matches = content.matchAll(/from ['"]([^'"]+)['"]/g)
-    for (const match of matches) {
-      const pkg = match[1]
-      // Skip relative imports and built-ins
-      if (pkg.startsWith('.') || pkg.startsWith('/') || pkg.startsWith('node:')) continue
-      // Get package name (handle scoped packages)
-      const pkgName = pkg.startsWith('@') 
-        ? pkg.split('/').slice(0, 2).join('/') 
-        : pkg.split('/')[0]
-      if (KNOWN_PACKAGES[pkgName]) {
-        deps[pkgName] = KNOWN_PACKAGES[pkgName]
-      }
-    }
-  }
-  return deps
-}
-
 const BASE_FILES: Record<string, string> = {
+  'package.json': JSON.stringify({
+    name: 'archaeopteris-app',
+    private: true,
+    version: '0.0.0',
+    type: 'module',
+    scripts: { dev: 'vite', build: 'vite build', preview: 'vite preview' },
+    dependencies: {
+      react: '^18.3.1',
+      'react-dom': '^18.3.1',
+      clsx: 'latest',
+      'tailwind-merge': 'latest',
+      'lucide-react': 'latest',
+    },
+    devDependencies: {
+      '@types/react': '^18.3.5',
+      '@types/react-dom': '^18.3.0',
+      '@vitejs/plugin-react': '^4.3.1',
+      autoprefixer: '^10.4.20',
+      postcss: '^8.4.47',
+      tailwindcss: '^3.4.13',
+      vite: '^5.4.8',
+    },
+  }, null, 2),
+
   'vite.config.js': `import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 export default defineConfig({
@@ -115,17 +90,21 @@ html, body, #root {
   margin: 0;
 }`,
 
-  'vercel.json': JSON.stringify({
-    headers: [
-      {
-        source: '/(.*)',
-        headers: [
-          { key: 'X-Frame-Options', value: 'ALLOWALL' },
-          { key: 'Content-Security-Policy', value: 'frame-ancestors *' }
-        ]
-      }
-    ]
-  }, null, 2),
+'vercel.json': JSON.stringify({
+  buildCommand: 'vite build',
+  outputDirectory: 'dist',
+  headers: [
+    {
+      source: '/(.*)',
+      headers: [
+        { key: 'X-Frame-Options', value: 'ALLOWALL' },
+        { key: 'Content-Security-Policy', value: 'frame-ancestors *' }
+      ]
+    }
+  ]
+}, null, 2),
+
+
 }
 
 export async function POST(req: Request) {
@@ -142,43 +121,10 @@ export async function POST(req: Request) {
       files = rawFiles || {}
     }
 
-    // Auto-detect extra dependencies from generated code
-    const extraDeps = extractDependencies(files)
+    // Merge base files (user files override base)
+    const allFiles = { ...BASE_FILES, ...files }
 
-    // Build package.json with auto-detected deps
-    const packageJson = JSON.stringify({
-      name: 'archaeopteris-app',
-      private: true,
-      version: '0.0.0',
-      type: 'module',
-      scripts: { dev: 'vite', build: 'vite build', preview: 'vite preview' },
-      dependencies: {
-        react: '^18.3.1',
-        'react-dom': '^18.3.1',
-        clsx: 'latest',
-        'tailwind-merge': 'latest',
-        'lucide-react': 'latest',
-        ...extraDeps,
-      },
-      devDependencies: {
-        '@types/react': '^18.3.5',
-        '@types/react-dom': '^18.3.0',
-        '@vitejs/plugin-react': '^4.3.1',
-        autoprefixer: '^10.4.20',
-        postcss: '^8.4.47',
-        tailwindcss: '^3.4.13',
-        vite: '^5.4.8',
-      },
-    }, null, 2)
-
-    // Merge base files (user files override base, package.json auto-generated)
-    const allFiles = { 
-      ...BASE_FILES, 
-      'package.json': packageJson,
-      ...files,
-    }
-
-    // Build Vercel files array
+    // Build Vercel files array (inline format)
     const vercelFiles = Object.entries(allFiles).map(([file, data]) => ({
       file,
       data: typeof data === 'string' ? data : JSON.stringify(data),
