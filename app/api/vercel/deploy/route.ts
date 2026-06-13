@@ -299,13 +299,16 @@ export async function POST(req: Request) {
   ...files,
 }
 
-    if (allFiles['src/App.jsx']) {
-  allFiles['src/App.jsx'] = allFiles['src/App.jsx']
-    .replace(
+    // Fix tất cả files, không chỉ App.jsx
+for (const [key, value] of Object.entries(allFiles)) {
+  if (key.endsWith('.jsx') || key.endsWith('.tsx') || key.endsWith('.js')) {
+    allFiles[key] = (value as string).replace(
       /from ['"]@\/components\/ui['"]/g,
       "from '@/components/ui/button'"
     )
+  }
 }
+
 
     // Build Vercel files array
     const vercelFiles = Object.entries(allFiles).map(([file, data]) => ({
