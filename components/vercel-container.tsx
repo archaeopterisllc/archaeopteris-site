@@ -175,7 +175,9 @@ const VercelContainer = forwardRef<VercelContainerHandle, VercelContainerProps>(
             {error && <span style={{ color: '#f87171', fontSize: 11, maxWidth: 300, textAlign: 'center' }}>{error}</span>}
           </div>
         )}
-        <iframe ref={iframeRef} title="Vercel Preview" style={{
+        <iframe ref={iframeRef} title="Vercel Preview"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        style={{
           width: '100%', height: '100%', border: 'none', display: 'block',
           opacity: status === 'ready' ? 1 : 0,
           transition: 'opacity 0.3s ease',
