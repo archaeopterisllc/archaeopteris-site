@@ -300,14 +300,46 @@ export async function POST(req: Request) {
 }
 
     // Fix tất cả files, không chỉ App.jsx
-for (const [key, value] of Object.entries(allFiles)) {
-  if (key.endsWith('.jsx') || key.endsWith('.tsx') || key.endsWith('.js')) {
-    allFiles[key] = (value as string).replace(
-      /from ['"]@\/components\/ui['"]/g,
-      "from '@/components/ui/button'"
-    )
-  }
+const UI_COMPONENT_MAP: Record<string, string> = {
+  'Button': 'button', 'Card': 'card', 'CardHeader': 'card', 'CardContent': 'card',
+  'CardTitle': 'card', 'CardFooter': 'card', 'Badge': 'badge', 'Input': 'input',
+  'Select': 'select', 'SelectItem': 'select', 'Switch': 'switch', 'Progress': 'progress',
+  'Table': 'table', 'TableHeader': 'table', 'TableBody': 'table', 'TableRow': 'table',
+  'TableHead': 'table', 'TableCell': 'table', 'Avatar': 'avatar', 'AvatarImage': 'avatar',
+  'AvatarFallback': 'avatar', 'Tabs': 'tabs', 'TabsList': 'tabs', 'TabsTrigger': 'tabs',
+  'TabsContent': 'tabs', 'Dialog': 'dialog', 'DialogContent': 'dialog', 'DialogHeader': 'dialog',
+  'DialogTitle': 'dialog', 'DialogFooter': 'dialog', 'Tooltip': 'tooltip',
+  'Separator': 'separator', 'ScrollArea': 'scroll-area', 'Toaster': 'toast', 'toast': 'toast',
+  'DropdownMenu': 'dropdown-menu', 'DropdownMenuTrigger': 'dropdown-menu',
+  'DropdownMenuContent': 'dropdown-menu', 'DropdownMenuItem': 'dropdown-menu',
+  'DropdownMenuSeparator': 'dropdown-menu',
 }
+
+for (const [key, value] of Object.entries(allFiles)) {
+  if (!key.endsWith('.jsx') && !key.endsWith('.tsx') && !key.endsWith('.js')) continue
+  
+  let content = value as string
+  
+  // Fix: import { Table, Badge } from '@/components/ui' → split thành từng dòng đúng file
+  content = content.replace(
+    /import\s*\{([^}]+)\}\s*from\s*['"]@\/components\/ui['"]/g,
+    (_, imports) => {
+      const names = imports.split(',').map((s: string) => s.trim()).filter(Boolean)
+      const grouped: Record<string, string[]> = {}
+      for (const name of names) {
+        const file = UI_COMPONENT_MAP[name] || 'button'
+        if (!grouped[file]) grouped[file] = []
+        grouped[file].push(name)
+      }
+      return Object.entries(grouped)
+        .map(([file, comps]) => `import { ${comps.join(', ')} } from '@/components/ui/${file}'`)
+        .join('\n')
+    }
+  )
+  
+  allFiles[key] = content
+}
+
 
 
     // Build Vercel files array
