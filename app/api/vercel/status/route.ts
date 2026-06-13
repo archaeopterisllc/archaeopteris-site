@@ -1,4 +1,3 @@
-// app/api/vercel/status/route.ts
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
@@ -12,23 +11,24 @@ export async function POST(req: Request) {
       { headers: { Authorization: `Bearer ${token}` } }
     )
 
-    if (!res.ok) throw new Error(`Status check failed: ${res.status}`)
+    if (!res.ok) {
+      return NextResponse.json({ error: true, status: 'ERROR', errorMessage: `API failed: ${res.status}` })
+    }
+    
     const data = await res.json()
-
     const ready = data.readyState === 'READY'
-const error = ['ERROR', 'CANCELED'].includes(data.readyState)
+    const error = ['ERROR', 'CANCELED'].includes(data.readyState)
 
-if (error) {
-  return NextResponse.json({
-    ready: false,
-    error: true,
-    status: data.readyState,
-    errorMessage: data.errorMessage || 'Build failed',
-  })
-}
+    return NextResponse.json({
+      ready,
+      error,
+      status: data.readyState,
+      previewUrl: ready ? `https://${data.url}` : null,
+      errorMessage: error ? (data.errorMessage || 'Build failed') : null,
+    })
 
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    return NextResponse.json({ error: true, status: 'ERROR', errorMessage: msg }, { status: 500 })
   }
 }
