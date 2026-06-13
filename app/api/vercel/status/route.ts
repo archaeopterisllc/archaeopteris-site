@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const data = await res.json()
     // Sau khi get status, lấy build events
 const eventsRes = await fetch(
-  `https://api.vercel.com/v2/deployments/${deploymentId}/events?teamId=${teamId}&limit=50`,
+  `https://api.vercel.com/v2/deployments/${deploymentId}/events?teamId=${teamId}&limit=100`,
   { headers: { Authorization: `Bearer ${token}` } }
 )
 const events = await eventsRes.json()
