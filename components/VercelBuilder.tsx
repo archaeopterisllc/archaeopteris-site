@@ -124,6 +124,17 @@ if (typeof appValue === 'string' && appValue.trim().startsWith('{')) {
   return flattenFiles(parsed.files);
 }
 
+const STARTER = `export default function App() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-emerald-950 to-gray-950 flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="text-6xl font-bold text-emerald-400">Archaeopteris</div>
+        <div className="text-gray-400 text-lg">Where Trading Meets Technology</div>
+      </div>
+    </div>
+  )
+}`
+
 export default function ArchaeopterisBuilderE2B() {
   const [activeTab, setActiveTab] = useState<Tab>("Preview");
   const [prompt, setPrompt] = useState("");
@@ -132,7 +143,7 @@ export default function ArchaeopterisBuilderE2B() {
   const [logs, setLogs] = useState<string[]>(["E2B ready ✓", "Claude API connected ✓"]);
   //const [files, setFiles] = useState<Record<string, string>>({});
   //const [files, setFiles] = useState({ 'src/App.jsx': STARTER })
-  const [files, setFiles] = useState<Record<string, string>>({ 'src/App.jsx': '' })
+  const [files, setFiles] = useState<Record<string, string>>({ 'src/App.jsx': STARTER })
 
 
   //const [activeFile, setActiveFile] = useState<string>("");
