@@ -89,6 +89,14 @@ html, body, #root {
   min-height: 100vh;
   margin: 0;
 }`,
+
+'vercel.json': JSON.stringify({
+  buildCommand: 'vite build',
+  outputDirectory: 'dist',
+  installCommand: 'npm install',
+  framework: null
+}, null, 2),
+
 }
 
 export async function POST(req: Request) {
