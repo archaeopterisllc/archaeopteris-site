@@ -336,7 +336,16 @@ for (const [key, value] of Object.entries(allFiles)) {
         .join('\n')
     }
   )
-  
+  content = content
+  .replace(/<Table\.Head>/g, '<TableHeader>')
+  .replace(/<\/Table\.Head>/g, '</TableHeader>')
+  .replace(/<Table\.Body>/g, '<TableBody>')
+  .replace(/<\/Table\.Body>/g, '</TableBody>')
+  .replace(/<Table\.Row>/g, '<TableRow>')
+  .replace(/<\/Table\.Row>/g, '</TableRow>')
+  .replace(/<Table\.Cell>/g, '<TableCell>')
+  .replace(/<\/Table\.Cell>/g, '</TableCell>')
+
   allFiles[key] = content
 }
 
