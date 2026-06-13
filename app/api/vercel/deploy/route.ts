@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const vercelFiles = Object.entries(files as Record<string, string>).map(([file, data]) => ({
       file,
       data,
-      encoding: 'utf8',
+      encoding: 'utf-8',
     }))
 
     // Add package.json if not present
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
             tailwindcss: '3.4.1', autoprefixer: '10.4.17', postcss: '8.4.35',
           },
         }),
-        encoding: 'utf8',
+        encoding: 'utf-8',
       })
     }
 
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       vercelFiles.push({
         file: 'index.html',
         data: `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${name || 'App'}</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>`,
-        encoding: 'utf8',
+        encoding: 'utf-8',
       })
     }
 
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       vercelFiles.push({
         file: 'vite.config.js',
         data: `import { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\nexport default defineConfig({ plugins: [react()] })`,
-        encoding: 'utf8',
+        encoding: 'utf-8',
       })
     }
 
@@ -58,14 +58,14 @@ export async function POST(req: Request) {
       vercelFiles.push({
         file: 'postcss.config.js',
         data: `export default { plugins: { tailwindcss: {}, autoprefixer: {} } }`,
-        encoding: 'utf8',
+        encoding: 'utf-8',
       })
     }
     if (!files['tailwind.config.js']) {
       vercelFiles.push({
         file: 'tailwind.config.js',
         data: `export default { content: ['./src/**/*.{js,jsx,ts,tsx}', './index.html'], theme: { extend: {} }, plugins: [] }`,
-        encoding: 'utf8',
+        encoding: 'utf-8',
       })
     }
 
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       vercelFiles.push({
         file: 'src/main.jsx',
         data: `import React from 'react'\nimport ReactDOM from 'react-dom/client'\nimport './index.css'\nimport App from './App'\nReactDOM.createRoot(document.getElementById('root')).render(<App/>)`,
-        encoding: 'utf8',
+        encoding: 'utf-8',
       })
     }
 
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
       vercelFiles.push({
         file: 'src/index.css',
         data: `@tailwind base;\n@tailwind components;\n@tailwind utilities;\nhtml,body,#root{background:#080c10;min-height:100vh;margin:0}`,
-        encoding: 'utf8',
+        encoding: 'utf-8',
       })
     }
 
