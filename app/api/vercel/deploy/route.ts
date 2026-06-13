@@ -93,9 +93,17 @@ html, body, #root {
 'vercel.json': JSON.stringify({
   buildCommand: 'vite build',
   outputDirectory: 'dist',
-  installCommand: 'npm install',
-  framework: null
+  headers: [
+    {
+      source: '/(.*)',
+      headers: [
+        { key: 'X-Frame-Options', value: 'ALLOWALL' },
+        { key: 'Content-Security-Policy', value: 'frame-ancestors *' }
+      ]
+    }
+  ]
 }, null, 2),
+
 
 }
 
