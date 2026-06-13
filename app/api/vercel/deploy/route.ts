@@ -291,11 +291,21 @@ export async function POST(req: Request) {
     }, null, 2)
 
     // Merge base files (user files override base, package.json auto-generated)
-    const allFiles = { 
-      ...BASE_FILES, 
-      'package.json': packageJson,
-      ...files,
-    }
+    
+
+    const allFiles: Record<string, string> = {
+  ...BASE_FILES,
+  'package.json': packageJson,
+  ...files,
+}
+
+    if (allFiles['src/App.jsx']) {
+  allFiles['src/App.jsx'] = allFiles['src/App.jsx']
+    .replace(
+      /from ['"]@\/components\/ui['"]/g,
+      "from '@/components/ui/button'"
+    )
+}
 
     // Build Vercel files array
     const vercelFiles = Object.entries(allFiles).map(([file, data]) => ({
