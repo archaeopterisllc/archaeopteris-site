@@ -19,7 +19,7 @@ const BASE_FILES = [
       devDependencies: {
         vite: 'latest', '@vitejs/plugin-react': 'latest',
         tailwindcss: 'latest', autoprefixer: 'latest', 
-        //postcss: 'latest',
+        postcss: 'latest',
         //'@tailwindcss/postcss': 'latest',
       },
     }, null, 2),
@@ -49,10 +49,10 @@ export default defineConfig({
 <script type="module" src="/src/main.jsx"></script>
 </body></html>`,
   },
-  //{
-   // path: 'postcss.config.js',
-   // content: `export default { plugins: { tailwindcss: {}, autoprefixer: {} } }`,
- // },
+  {
+    path: 'postcss.config.js',
+    content: `export default { plugins: { tailwindcss: {}, autoprefixer: {} } }`,
+  },
   {
     path: 'tailwind.config.js',
     content: `export default {
