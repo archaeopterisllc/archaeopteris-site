@@ -6,7 +6,9 @@ import { NextResponse } from 'next/server'
 export async function POST(req: Request) {
   try {
     const { sandboxId } = await req.json()
-    const sandbox = await Sandbox.get({ name: sandboxId, token: process.env.VERCEL_TOKEN! })
+    const sandbox = await Sandbox.get({ name: sandboxId, token: process.env.VERCEL_TOKEN!,
+        teamId: process.env.VERCEL_TEAM_ID!, projectId: process.env.VERCEL_PROJECT_ID!
+     })
 
     // npm install (blocking - but fire from client as fire & forget)
     const result = await sandbox.runCommand('bash', ['-c', 'cd /vercel/sandbox && npm install'])

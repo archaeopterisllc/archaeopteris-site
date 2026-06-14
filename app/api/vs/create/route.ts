@@ -242,7 +242,9 @@ export async function POST(req: Request) {
     // Try reuse existing sandbox
     if (sandboxId) {
       try {
-        const sandbox = await Sandbox.get({ name: sandboxId, token: process.env.VERCEL_TOKEN! })
+        const sandbox = await Sandbox.get({ name: sandboxId, 
+            token: process.env.VERCEL_TOKEN! ,
+            teamId: process.env.VERCEL_TEAM_ID!, projectId: process.env.VERCEL_PROJECT_ID! })
         return NextResponse.json({ sandboxId: sandbox.name, isNew: false })
       } catch {
         // Sandbox expired, create new one
