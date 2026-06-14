@@ -10,7 +10,7 @@ export async function POST(req: Request) {
         teamId: process.env.VERCEL_TEAM_ID!, projectId: process.env.VERCEL_PROJECT_ID!
      })
 
-        // Check node_modules exists
+            // Check node_modules
     let nmExists = false
     try {
       const result = await sandbox.runCommand('bash', ['-c', 'test -d /vercel/sandbox/node_modules && echo ok || echo no'])
@@ -18,37 +18,24 @@ export async function POST(req: Request) {
     } catch {}
 
     if (!nmExists) {
-      const installing = await sandbox.runCommand('bash', ['-c', 'test -f /tmp/installing && echo yes || echo no'])
-      const isInstalling = (await installing.stdout()).toString().trim() === 'yes'
-      if (!isInstalling) {
-        sandbox.runCommand('bash', ['-c',
-          'touch /tmp/installing && cd /vercel/sandbox && npm install && rm /tmp/installing'
-        ]).catch(() => {})
-      }
+      sandbox.runCommand('bash', ['-c', 'cd /vercel/sandbox && npm install']).catch(() => {})
       return NextResponse.json({ ready: false, stage: 'installing' })
     }
 
-    // Check vite running
     let viteReady = false
     try {
-      const r = await sandbox.runCommand('bash', ['-c', 'curl -s -o /dev/null -w "%{http_code}" http://localhost:5173'])
-      viteReady = (await r.stdout()).toString().trim() === '200'
+      const r = await sandbox.runCommand('bash', ['-c', 'nc -z localhost 5173 && echo ok || echo no'])
+      viteReady = (await r.stdout()).toString().trim() === 'ok'
     } catch {}
 
     if (!viteReady) {
-      const starting = await sandbox.runCommand('bash', ['-c', 'test -f /tmp/starting && echo yes || echo no'])
-      const isStarting = (await starting.stdout()).toString().trim() === 'yes'
-      if (!isStarting) {
-        sandbox.runCommand('bash', ['-c',
-          'touch /tmp/starting && cd /vercel/sandbox && npm run dev'
-        ]).catch(() => {})
-      }
+      sandbox.runCommand('bash', ['-c', 'cd /vercel/sandbox && npm run dev &']).catch(() => {})
       return NextResponse.json({ ready: false, stage: 'starting' })
     }
 
-    sandbox.runCommand('bash', ['-c', 'rm -f /tmp/starting']).catch(() => {})
     const previewUrl = sandbox.domain(5173)
     return NextResponse.json({ ready: true, previewUrl })
+
 
 
   } catch (err) {
