@@ -253,7 +253,8 @@ export async function POST(req: Request) {
     const sandbox = await Sandbox.create({
       token: process.env.VERCEL_TOKEN!,
       teamId: process.env.VERCEL_TEAM_ID!,
-      runtime: 'node22',
+      projectId: process.env.VERCEL_PROJECT_ID!,
+      runtime: 'node24',
       ports: [5173],
       timeout: 30 * 60 * 1000, // 30 minutes
     })
