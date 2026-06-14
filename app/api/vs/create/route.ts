@@ -18,9 +18,10 @@ const BASE_FILES = [
       },
       devDependencies: {
         vite: 'latest', '@vitejs/plugin-react': 'latest',
-        tailwindcss: 'latest', autoprefixer: 'latest', 
+        tailwindcss: 'latest', 
+        //autoprefixer: 'latest', 
         postcss: 'latest',
-        //'@tailwindcss/postcss': 'latest',
+        '@tailwindcss/vite': 'latest',
       },
     }, null, 2),
   },
@@ -28,14 +29,15 @@ const BASE_FILES = [
     path: 'vite.config.js',
     content: `import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
   server: {
     host: '0.0.0.0',
     port: 5173,
-    strictPort: true,
+    strictPort: true
     hmr: false,
     allowedHosts: true,
   }
@@ -49,17 +51,7 @@ export default defineConfig({
 <script type="module" src="/src/main.jsx"></script>
 </body></html>`,
   },
-  {
-    path: 'postcss.config.js',
-    content: `export default { plugins: { tailwindcss: {}, autoprefixer: {} } }`,
-  },
-  {
-    path: 'tailwind.config.js',
-    content: `export default {
-  content: ['./src/**/*.{js,jsx}', './index.html'],
-  theme: { extend: {} }, plugins: []
-}`,
-  },
+  
   {
     path: 'src/main.jsx',
     content: `import React from 'react'
@@ -70,7 +62,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />)`,
   },
   {
     path: 'src/index.css',
-    content: `@tailwind base;\n@tailwind components;\n@tailwind utilities;\nhtml,body,#root{background:#080c10;min-height:100vh;margin:0}`,
+    content: `@import 'tailwindcss';\nhtml,body,#root{background:#080c10;min-height:100vh;margin:0}`,
   },
   {
     path: 'src/App.jsx',
