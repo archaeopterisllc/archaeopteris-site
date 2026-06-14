@@ -74,7 +74,9 @@ function flattenTree(tree: any, prefix = ''): Record<string, string> {
 export async function POST(req: Request) {
   try {
     const { sandboxId, files: rawFiles } = await req.json()
-    const sandbox = await Sandbox.get({ name: sandboxId, token: process.env.VERCEL_TOKEN! })
+    const sandbox = await Sandbox.get({ name: sandboxId, token: process.env.VERCEL_TOKEN!,
+        teamId: process.env.VERCEL_TEAM_ID!, projectId: process.env.VERCEL_PROJECT_ID! })
+     
 
     // Normalize files
     let files: Record<string, string> = {}
