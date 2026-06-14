@@ -17,8 +17,8 @@ const BASE_FILES = [
         'lucide-react': 'latest', clsx: 'latest', 'tailwind-merge': 'latest',
       },
       devDependencies: {
-        vite: '6.3.5', '@vitejs/plugin-react': '4.5.2',
-        tailwindcss: '3.4.1', autoprefixer: '10.4.17', postcss: '8.4.35',
+        vite: 'latest', '@vitejs/plugin-react': 'latest',
+        tailwindcss: 'latest', autoprefixer: 'latest', postcss: 'latest',
       },
     }, null, 2),
   },
