@@ -1,5 +1,5 @@
-## components/vs-container.tsx
-```typescript
+//## components/vs-container.tsx
+
 'use client'
 
 import { useRef, useState, useImperativeHandle, forwardRef } from 'react'
@@ -147,4 +147,3 @@ const VsContainer = forwardRef<VsContainerHandle, VsContainerProps>(
 )
 
 export default VsContainer
-```
