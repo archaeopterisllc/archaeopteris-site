@@ -19,6 +19,7 @@ const BASE_FILES = [
       devDependencies: {
         vite: 'latest', '@vitejs/plugin-react': 'latest',
         tailwindcss: 'latest', autoprefixer: 'latest', postcss: 'latest',
+        '@tailwindcss/postcss': 'latest',
       },
     }, null, 2),
   },
